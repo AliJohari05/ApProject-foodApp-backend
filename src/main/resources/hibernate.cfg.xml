@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+
+        <!-- Database connection settings -->
+        <property name="connection.driver_class">org.postgresql.Driver</property>
+        <property name="connection.url">jdbc:postgresql://localhost:5432/food4u</property>
+        <property name="connection.username">your_username</property>
+        <property name="connection.password">your_password</property>
+
+        <!-- JDBC dialect for PostgreSQL -->
+        <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+
+        <!-- Show SQL in console -->
+        <property name="show_sql">true</property>
+        <property name="format_sql">true</property>
+
+        <!-- Automatically update schema (use with caution) -->
+        <property name="hbm2ddl.auto">update</property>
+
+        <!-- Register your annotated classes -->
+        <mapping class="com.foodApp.model.User"/>
+        <mapping class="com.foodApp.model.Restaurant"/>
+        <mapping class="com.foodApp.model.MenuItem"/>
+        <mapping class="com.foodApp.model.Order"/>
+        <mapping class="com.foodApp.model.OrderItem"/>
+        <mapping class="com.foodApp.model.Category"/>
+        <mapping class="com.foodApp.model.Delivery"/>
+
+    </session-factory>
+</hibernate-configuration>
