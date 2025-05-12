@@ -20,7 +20,7 @@ public class Delivery {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;
+    private DeliveryStatus status;
 
     @Column(name = "assigned_at")
     private LocalDateTime assignedAt;
