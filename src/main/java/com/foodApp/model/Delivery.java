@@ -18,6 +18,7 @@ public class Delivery {
     @JoinColumn(name = "delivery_person_id",nullable = false)
     private User deliveryPerson;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private String status;
 
