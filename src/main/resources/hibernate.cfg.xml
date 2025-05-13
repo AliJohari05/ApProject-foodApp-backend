@@ -8,9 +8,9 @@
 
         <!-- Database connection settings -->
         <property name="connection.driver_class">org.postgresql.Driver</property>
-        <property name="connection.url">jdbc:postgresql://localhost:5432/food4u</property>
-        <property name="connection.username">your_username</property>
-        <property name="connection.password">your_password</property>
+        <property name="connection.url">jdbc:postgresql://localhost:5432/foodApp</property>
+        <property name="connection.username">postgres</property>
+        <property name="connection.password">ali1234@</property>
 
         <!-- JDBC dialect for PostgreSQL -->
         <property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
