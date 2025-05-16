@@ -1,39 +1,30 @@
 package com.foodApp;
 
-import com.foodApp.model.Role;
-import com.foodApp.model.User;
+import com.foodApp.httpHandler.user.loginHandler;
+import com.foodApp.httpHandler.user.signUpHandler;
 import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpExchange;//Representing a request and response
-import com.sun.net.httpserver.HttpHandler;//Interface for creating route handlers
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;//Specifying the server address and port
-
-import com.foodApp.util.HibernateUtil;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
+import java.net.InetSocketAddress;
 
 public class Server {
-    public static void main(String[] args) throws IOException {
 
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        Transaction tx = session.beginTransaction();
+    public static void main(String[] args) {
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
-        User user = new User();
-        user.setName("Ali Johari");
-        user.setPhone("09121234988");
-        user.setEmail("ali@example.com");
-        user.setPassword("123456");
-        user.setRole(Role.CUSTOMER);
-        user.setAddress("Tehran-khiaban dolat-bolvar kave");
+            server.createContext("/api/signup", new signUpHandler());
+            server.createContext("/api/login", new loginHandler());
 
-        session.persist(user);
-        tx.commit();
-        session.close();
+            server.setExecutor(null);
+            server.start();
 
-        System.out.println("User saved successfully!");
+            System.out.println("🚀 Server started on http://localhost:8080");
+
+        } catch (IOException e) {
+            System.err.println("Failed to start server: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
-
-
 }
+
