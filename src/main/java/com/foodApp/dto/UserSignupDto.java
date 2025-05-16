@@ -1,5 +1,7 @@
 package com.foodApp.dto;
 
+import com.foodApp.model.Role;
+
 public class UserSignupDto {
     private String name;
     private String phone;
