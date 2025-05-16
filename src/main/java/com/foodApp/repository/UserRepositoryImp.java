@@ -41,6 +41,15 @@ public class UserRepositoryImp  implements UserRepository {
     }
 
     @Override
+    public User findByRole(String role) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<User> query = session.createQuery("from User where role = :role", User.class);
+            query.setParameter("role", role);
+            return query.uniqueResult();
+        }
+    }
+
+    @Override
     public List<User> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<User> query = session.createQuery("from User", User.class);
