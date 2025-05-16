@@ -40,11 +40,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> findAllByRole(Role role) {
-
+        return userRepo.findByRole(role);
     }
 
     @Override
     public void delete(int id) {
+        userRepo.deleteById(id);
 
     }
 }

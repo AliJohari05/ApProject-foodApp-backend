@@ -1,5 +1,6 @@
 package com.foodApp.repository;
 
+import com.foodApp.model.Role;
 import com.foodApp.model.User;
 import com.foodApp.util.HibernateUtil;
 import org.hibernate.Session;
@@ -41,13 +42,15 @@ public class UserRepositoryImp  implements UserRepository {
     }
 
     @Override
-    public User findByRole(String role) {
+    public List<User> findByRole(Role role) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Query<User> query = session.createQuery("from User where role = :role", User.class);
+            Query<User> query = session.createQuery(
+                    "FROM User WHERE role = :role", User.class);
             query.setParameter("role", role);
-            return query.uniqueResult();
+            return query.list();
         }
     }
+
 
     @Override
     public List<User> findAll() {
