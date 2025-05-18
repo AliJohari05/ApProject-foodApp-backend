@@ -18,7 +18,7 @@ public class RegisterRestaurantHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         try{
             if(!exchange.getRequestMethod().equalsIgnoreCase("POST")){
-                sendResponse(exchange,405,"Not Allowed");
+                sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
             }
             InputStream body = exchange.getRequestBody();
             Restaurant restaurant = objectMapper.readValue(body, Restaurant.class);
