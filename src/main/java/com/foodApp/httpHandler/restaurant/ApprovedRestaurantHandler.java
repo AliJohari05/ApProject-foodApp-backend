@@ -29,7 +29,6 @@ public class ApprovedRestaurantHandler extends BaseHandler implements HttpHandle
         } catch (Exception e) {
             sendResponse(exchange, 500, "Error: " + e.getMessage());
         }
-
     }
 
 }

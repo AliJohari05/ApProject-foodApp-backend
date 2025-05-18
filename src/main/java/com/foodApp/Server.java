@@ -1,6 +1,8 @@
 package com.foodApp;
 
+import com.foodApp.httpHandler.restaurant.ApproveRestaurantByAdminHandler;
 import com.foodApp.httpHandler.restaurant.ApprovedRestaurantHandler;
+import com.foodApp.httpHandler.restaurant.GetRestaurantsByOwnerHandler;
 import com.foodApp.httpHandler.user.loginHandler;
 import com.foodApp.httpHandler.user.signUpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -18,6 +20,9 @@ public class Server {
             server.createContext("/Food4U/login", new loginHandler());
             server.createContext("/Food4U/restaurant", new loginHandler());
             server.createContext("/Food4U/restaurant/approved", new ApprovedRestaurantHandler());
+            server.createContext("/Food4U/restaurant/owner", new GetRestaurantsByOwnerHandler());
+            server.createContext("/Food4U/admin/restaurant/approved", new ApproveRestaurantByAdminHandler());
+
 
             server.setExecutor(null);
             server.start();
