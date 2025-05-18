@@ -15,6 +15,8 @@ public class Server {
 
             server.createContext("/Food4U/signup", new signUpHandler());
             server.createContext("/Food4U/login", new loginHandler());
+            server.createContext("/Food4U/restaurant", new loginHandler());
+            server.createContext("/Food4U/restaurant/approved", new ApprovedRestaurantHandler());
 
             server.setExecutor(null);
             server.start();
