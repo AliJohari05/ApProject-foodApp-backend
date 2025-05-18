@@ -11,7 +11,6 @@ import com.foodApp.exception.DatabaseException;
 import java.util.List;
 
 public class UserRepositoryImp  implements UserRepository {
-
     @Override
     public void save(User user) {
         Transaction tx = null;
@@ -24,14 +23,12 @@ public class UserRepositoryImp  implements UserRepository {
             throw new DatabaseException("Error saving user", e);
         }
     }
-
     @Override
     public User findById(int id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.get(User.class, id);
         }
     }
-
     @Override
     public User findByPhone(String phone) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -40,7 +37,6 @@ public class UserRepositoryImp  implements UserRepository {
             return query.uniqueResult();
         }
     }
-
     @Override
     public List<User> findByRole(Role role) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -50,8 +46,6 @@ public class UserRepositoryImp  implements UserRepository {
             return query.list();
         }
     }
-
-
     @Override
     public List<User> findAll() {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
@@ -59,7 +53,6 @@ public class UserRepositoryImp  implements UserRepository {
             return query.list();
         }
     }
-
     @Override
     public void deleteById(int id) {
         Transaction tx = null;

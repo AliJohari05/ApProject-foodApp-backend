@@ -7,7 +7,6 @@ import com.foodApp.model.Role;
 import com.foodApp.model.User;
 import com.foodApp.repository.UserRepository;
 import com.foodApp.repository.UserRepositoryImp;
-
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
@@ -20,12 +19,10 @@ public class UserServiceImpl implements UserService {
         }
         userRepo.save(user);
     }
-
     @Override
     public User findById(int id) {
         return userRepo.findById(id);
     }
-
     @Override
     public User login(String phone, String password) {
         User user = userRepo.findByPhone(phone);
@@ -37,7 +34,6 @@ public class UserServiceImpl implements UserService {
         }
         return user;
     }
-
     @Override
     public void updateUser(User user) {
         User existingUser = userRepo.findById(user.getId());
@@ -47,12 +43,10 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found");
         }
     }
-
     @Override
     public List<User> findAllByRole(Role role) {
         return userRepo.findByRole(role);
     }
-
     @Override
     public void delete(int id) {
         userRepo.deleteById(id);
