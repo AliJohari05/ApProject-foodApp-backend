@@ -39,6 +39,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updateUser(User user) {
+        User existingUser = userRepo.findById(user.getId());
+        if(existingUser != null) {
+            userRepo.save(existingUser);
+        }else{
+            throw new UserNotFoundException("User not found");
+        }
+    }
+
+    @Override
     public List<User> findAllByRole(Role role) {
         return userRepo.findByRole(role);
     }

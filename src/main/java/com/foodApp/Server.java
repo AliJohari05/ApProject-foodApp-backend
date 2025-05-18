@@ -1,5 +1,6 @@
 package com.foodApp;
 
+import com.foodApp.httpHandler.restaurant.ApprovedRestaurantHandler;
 import com.foodApp.httpHandler.user.loginHandler;
 import com.foodApp.httpHandler.user.signUpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -13,8 +14,10 @@ public class Server {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
-            server.createContext("/api/signup", new signUpHandler());
-            server.createContext("/api/login", new loginHandler());
+            server.createContext("/Food4U/signup", new signUpHandler());
+            server.createContext("/Food4U/login", new loginHandler());
+            server.createContext("/Food4U/restaurant", new loginHandler());
+            server.createContext("/Food4U/restaurant/approved", new ApprovedRestaurantHandler());
 
             server.setExecutor(null);
             server.start();

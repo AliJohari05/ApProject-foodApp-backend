@@ -9,6 +9,7 @@ public interface UserService {
     void registerUser(User user);
     User findById(int id);
     User login(String phone, String password);
+    void updateUser(User user);
     List<User> findAllByRole(Role role);
     void delete(int id);
     
