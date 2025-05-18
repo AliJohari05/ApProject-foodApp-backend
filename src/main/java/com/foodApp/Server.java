@@ -13,8 +13,8 @@ public class Server {
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
-            server.createContext("/api/signup", new signUpHandler());
-            server.createContext("/api/login", new loginHandler());
+            server.createContext("/Food4U/signup", new signUpHandler());
+            server.createContext("/Food4U/login", new loginHandler());
 
             server.setExecutor(null);
             server.start();
