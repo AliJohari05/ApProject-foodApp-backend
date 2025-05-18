@@ -1,5 +1,6 @@
 package com.foodApp.httpHandler.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.User;
 import com.foodApp.dto.UserSignupDto;
 import com.foodApp.service.UserService;
