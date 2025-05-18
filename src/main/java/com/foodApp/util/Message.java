@@ -1,6 +1,6 @@
 package com.foodApp.util;
 
-public enum ApiMessage {
+public enum Message {
     METHOD_NOT_ALLOWED("Method Not Allowed"),
     MISSING_FIELDS("Missing required fields"),
     SERVER_ERROR("Internal Server Error"),
@@ -10,7 +10,7 @@ public enum ApiMessage {
 
     private final String message;
 
-    ApiMessage(String message) {
+    Message(String message) {
         this.message = message;
     }
 

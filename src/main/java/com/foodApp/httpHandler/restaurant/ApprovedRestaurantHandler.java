@@ -1,4 +1,5 @@
 package com.foodApp.httpHandler.restaurant;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Restaurant;
@@ -9,30 +10,26 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-public class RegisterRestaurantHandler extends BaseHandler implements HttpHandler {
+import java.util.List;
+
+public class ApprovedRestaurantHandler extends BaseHandler implements HttpHandler {
     private final RestaurantService restaurantService = new RestaurantServiceImpl();
     private final ObjectMapper objectMapper = new ObjectMapper();
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        try{
-            if(!exchange.getRequestMethod().equalsIgnoreCase("POST")){
+        try {
+            if(!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
                 sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
             }
-            InputStream body = exchange.getRequestBody();
-            Restaurant restaurant = objectMapper.readValue(body, Restaurant.class);
-            if(restaurant.getOwner() == null || restaurant.getName() == null || restaurant.getAddress() == null){
-                sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
-            }
-            restaurantService.registerRestaurant(restaurant);
-            sendResponse(exchange, 200, Message.RESTAURANT_REGISTERED.get());
+            List<Restaurant> allRestaurantApproved = restaurantService.getAllApprovedRestaurants();
+            String responseJson = objectMapper.writeValueAsString(allRestaurantApproved);
+            sendResponse(exchange,200, responseJson);
 
-
-        }catch (Exception e){
+        } catch (Exception e) {
             sendResponse(exchange, 500, "Error: " + e.getMessage());
         }
+
     }
 
 }

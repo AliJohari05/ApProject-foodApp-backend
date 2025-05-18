@@ -1,5 +1,6 @@
 package com.foodApp;
 
+import com.foodApp.httpHandler.restaurant.ApprovedRestaurantHandler;
 import com.foodApp.httpHandler.user.loginHandler;
 import com.foodApp.httpHandler.user.signUpHandler;
 import com.sun.net.httpserver.HttpServer;
