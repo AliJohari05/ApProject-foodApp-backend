@@ -26,7 +26,7 @@ public class RegisterRestaurantHandler implements HttpHandler {
                 sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
             }
             restaurantService.registerRestaurant(restaurant);
-            sendResponse(exchange, 200, "Restaurant registered successfully (pending approval)");
+            sendResponse(exchange, 200, Message.RESTAURANT_REGISTERED.get());
 
 
         }catch (Exception e){
