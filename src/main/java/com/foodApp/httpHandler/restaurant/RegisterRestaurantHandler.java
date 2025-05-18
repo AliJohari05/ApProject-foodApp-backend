@@ -23,7 +23,7 @@ public class RegisterRestaurantHandler implements HttpHandler {
             InputStream body = exchange.getRequestBody();
             Restaurant restaurant = objectMapper.readValue(body, Restaurant.class);
             if(restaurant.getOwner() == null || restaurant.getName() == null || restaurant.getAddress() == null){
-                sendResponse(exchange, 400, "Missing required fields (name or owner or address)");
+                sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
             }
             restaurantService.registerRestaurant(restaurant);
             sendResponse(exchange, 200, "Restaurant registered successfully (pending approval)");
