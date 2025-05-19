@@ -2,15 +2,18 @@ package com.foodApp.httpHandler.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.UserSignupDto;
+import com.foodApp.util.Message;
 import com.foodApp.httpHandler.BaseHandler;
-import com.foodApp.model.User;
 import com.foodApp.model.Role;
+import com.foodApp.model.User;
 import com.foodApp.service.UserService;
 import com.foodApp.service.UserServiceImpl;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class signUpHandler extends BaseHandler implements HttpHandler {
 
@@ -21,7 +24,7 @@ public class signUpHandler extends BaseHandler implements HttpHandler {
     public void handle(HttpExchange exchange) {
         try {
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                sendResponse(exchange, 405, "{\"error\":\"Method Not Allowed\"}");
+                sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
                 return;
             }
 
@@ -29,9 +32,10 @@ public class signUpHandler extends BaseHandler implements HttpHandler {
             UserSignupDto dto = objectMapper.readValue(is, UserSignupDto.class);
 
             if (dto.getPhone() == null || dto.getPassword() == null || dto.getFullName() == null) {
-                sendResponse(exchange, 400, "{\"error\":\"Missing required fields\"}");
+                sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
                 return;
             }
+
             User user = new User();
             user.setName(dto.getFullName());
             user.setPhone(dto.getPhone());
@@ -40,25 +44,35 @@ public class signUpHandler extends BaseHandler implements HttpHandler {
             user.setAddress(dto.getAddress());
             user.setRole(Role.valueOf(dto.getRole().toUpperCase()));
 
+            if (dto.getBankInfo() != null) {
+                user.setBankName(dto.getBankInfo().getBankName());
+                user.setAccountNumber(dto.getBankInfo().getAccountNumber());
+            }
+
             userService.registerUser(user);
 
             String response = """
                 {
-                  "message": "User registered successfully",
+                  "message": "%s",
                   "user": {
                     "name": "%s",
                     "phone": "%s",
                     "role": "%s"
                   }
                 }
-                """.formatted(user.getName(), user.getPhone(), user.getRole());
+                """.formatted(
+                    Message.SIGNUP_SUCCESS.get(),
+                    user.getName(),
+                    user.getPhone(),
+                    user.getRole()
+            );
 
             sendResponse(exchange, 200, response);
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, "{\"error\": \"Internal Server Error\"}");
+            sendResponse(exchange, 500, Message.RESTAURANT_REGISTERED.get());
         }
     }
-}
 
+}
