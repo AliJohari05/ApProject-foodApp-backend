@@ -25,6 +25,12 @@ public class User {
     private Role role;
 
     private String address;
+    @Column(name = "bank_name")
+    private String bankName;
+
+    @Column(name = "account_number")
+    private String accountNumber;
+
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
