@@ -20,6 +20,7 @@ public class UserSignupDto {
         public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
     }
 
+    // Getters and Setters
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
