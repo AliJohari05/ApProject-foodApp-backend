@@ -8,6 +8,8 @@ CREATE TABLE users (
                        password VARCHAR(100) NOT NULL,
                        role VARCHAR(20) NOT NULL,  -- CUSTOMER, SELLER, DELIVERY, ADMIN
                        address TEXT,
+                       bank_name VARCHAR(100),
+                       account_number VARCHAR(50),
                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
