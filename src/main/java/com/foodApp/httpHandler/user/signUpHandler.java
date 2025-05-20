@@ -2,6 +2,7 @@ package com.foodApp.httpHandler.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.UserSignupDto;
+import com.foodApp.security.TokenService;
 import com.foodApp.util.Message;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Role;
@@ -51,27 +52,13 @@ public class signUpHandler extends BaseHandler implements HttpHandler {
 
             userService.registerUser(user);
 
-            String response = """
-                {
-                  "message": "%s",
-                  "user": {
-                    "name": "%s",
-                    "phone": "%s",
-                    "role": "%s"
-                  }
-                }
-                """.formatted(
-                    Message.SIGNUP_SUCCESS.get(),
-                    user.getName(),
-                    user.getPhone(),
-                    user.getRole()
-            );
+            String token= TokenService.generateToken(user.getUserId(),user.getRole().toString());
 
-            sendResponse(exchange, 200, response);
+            sendJson(exchange, 200, response);
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.RESTAURANT_REGISTERED.get());
+            sendJson(exchange, 500, Message.RESTAURANT_REGISTERED.get());
         }
     }
 
