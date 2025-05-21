@@ -6,9 +6,11 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 import java.util.Date;
+import com.foodApp.util.EnvUtil;
+
 
 public class TokenService {
-private static final String SECRET = System.getenv("JWT_SECRET");
+    private static final String SECRET = EnvUtil.get("JWT_SECRET");
 private static  final  Algorithm algo = Algorithm.HMAC256(SECRET);
 
 private static final long EXPIRATION_MS = 24 * 60 * 60 * 1000;

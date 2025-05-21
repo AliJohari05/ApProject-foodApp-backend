@@ -2,21 +2,21 @@ package com.foodApp.httpHandler.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.UserSignupDto;
-import com.foodApp.security.TokenService;
-import com.foodApp.util.Message;
-import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Role;
 import com.foodApp.model.User;
+import com.foodApp.security.TokenService;
 import com.foodApp.service.UserService;
 import com.foodApp.service.UserServiceImpl;
+import com.foodApp.util.Message;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.foodApp.httpHandler.BaseHandler;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class signUpHandler extends BaseHandler implements HttpHandler {
+public class SignUpHandler extends BaseHandler implements HttpHandler {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private final UserService userService = new UserServiceImpl();
@@ -32,8 +32,15 @@ public class signUpHandler extends BaseHandler implements HttpHandler {
             InputStream is = exchange.getRequestBody();
             UserSignupDto dto = objectMapper.readValue(is, UserSignupDto.class);
 
-            if (dto.getPhone() == null || dto.getPassword() == null || dto.getFullName() == null) {
+            if (dto.getPhone() == null || dto.getPassword() == null || dto.getFullName() == null
+                    || dto.getRole() == null || dto.getAddress() == null || dto.getPhone().length() != 11) {
                 sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
+                return;
+            }
+
+            // Check if user with phone already exists
+            if (userService.findByPhone(dto.getPhone()) != null) {
+                sendResponse(exchange, 409, Message.PHONE_ALREADY_EXIST.get());
                 return;
             }
 
@@ -52,14 +59,25 @@ public class signUpHandler extends BaseHandler implements HttpHandler {
 
             userService.registerUser(user);
 
-            String token= TokenService.generateToken(user.getUserId(),user.getRole().toString());
+            String token = TokenService.generateToken(
+                    String.valueOf(user.getUserId()), user.getRole().name());
 
-            sendJson(exchange, 200, response);
+            String response = """
+                {
+                  "message": "%s",
+                  "userId": "%s",
+                  "token": "%s"
+                }
+                """.formatted(
+                    Message.SIGNUP_SUCCESS.get(),
+                    String.valueOf(user.getUserId()),
+                    token
+            );
+
+            sendResponse(exchange, 200, response);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            sendJson(exchange, 500, Message.RESTAURANT_REGISTERED.get());
+            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
         }
     }
-
 }

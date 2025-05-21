@@ -5,8 +5,11 @@ public enum Message {
     MISSING_FIELDS("Missing required fields"),
     SERVER_ERROR("Internal Server Error"),
     SIGNUP_SUCCESS("User registered successfully"),
-    LOGIN_FAILED("Login failed"),
-    RESTAURANT_REGISTERED("Restaurant registered successfully (pending approval)");
+    LOGIN_FAILED("Invalid phone or password"),
+    LOGIN_SUCCESS("User logged in successfully"),
+    RESTAURANT_REGISTERED("Restaurant registered successfully (pending approval)"),
+    PHONE_ALREADY_EXIST("Phone number already exists");
+
 
     private final String message;
 

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public class User {
     @Id // This annotation specifies which field of your class is the identifier PRIMARY KEY of the table in the database.
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String userId;
+    private int userId;
 
     @Column(nullable = false,length = 100)
     private String name; // It includes the first name and last name.
@@ -40,11 +40,11 @@ public class User {
 
     // === Getters and Setters ===
 
-    public String getUserId() {
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 

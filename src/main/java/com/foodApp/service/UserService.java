@@ -8,6 +8,7 @@ import java.util.List;
 public interface UserService {
     void registerUser(User user);
     User findById(int id);
+    User findByPhone(String phone);
     User login(String phone, String password);
     void updateUser(User user);
     List<User> findAllByRole(Role role);

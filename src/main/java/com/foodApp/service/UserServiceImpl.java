@@ -23,6 +23,12 @@ public class UserServiceImpl implements UserService {
     public User findById(int id) {
         return userRepo.findById(id);
     }
+
+    @Override
+    public User findByPhone(String phone) {
+        return userRepo.findByPhone(phone);
+    }
+
     @Override
     public User login(String phone, String password) {
         User user = userRepo.findByPhone(phone);
@@ -36,7 +42,7 @@ public class UserServiceImpl implements UserService {
     }
     @Override
     public void updateUser(User user) {
-        User existingUser = userRepo.findById(user.getId());
+        User existingUser = userRepo.findById(user.getUserId());
         if(existingUser != null) {
             userRepo.save(existingUser);
         }else{
