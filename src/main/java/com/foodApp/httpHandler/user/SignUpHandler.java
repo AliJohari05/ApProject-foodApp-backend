@@ -34,7 +34,7 @@ public class SignUpHandler extends BaseHandler implements HttpHandler {
 
             if (dto.getPhone() == null || dto.getPassword() == null || dto.getFullName() == null
                     || dto.getRole() == null || dto.getAddress() == null || dto.getPhone().length() != 11) {
-                sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
+                sendResponse(exchange, 400, Message.INVALID_INPUT.get());
                 return;
             }
 
