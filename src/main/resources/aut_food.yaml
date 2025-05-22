@@ -3,24 +3,21 @@ info:
   title: Online Food Ordering API
   version: 1.0.0
   description: RESTful API for food ordering system (buyers, sellers, couriers, and admin).
-
 servers:
   - url: https://api.food-ordering.com/v1
-
 tags:
   - name: auth
     description: Authentication and user profile APIs
   - name: restaurant
     description: APIs related to restaurant management
-  - name: courier
-    description: APIs for couriers to manage deliveries
   - name: buyer
     description: APIs for buyers to browse, order, and review
+  - name: courier
+    description: APIs for couriers to manage deliveries
   - name: order
     description: APIs for order tracking and payment processing
   - name: admin
     description: Administrative APIs for user, order, and finance management
-
 paths:
   /auth/register:
     post:
@@ -34,13 +31,13 @@ paths:
             schema:
               type: object
               required:
-                - fullName
+                - full_name
                 - phone
                 - password
                 - role
                 - address
               properties:
-                fullName:
+                full_name:
                   type: string
                 phone:
                   type: string
@@ -51,18 +48,23 @@ paths:
                   type: string
                 role:
                   type: string
-                  enum: [buyer, seller, courier]
+                  enum:
+                    - buyer
+                    - seller
+                    - courier
                 address:
                   type: string
                 profileImageBase64:
                   type: string
-                bankInfo:
+                bank_info:
                   type: object
-                  required: [bankName, accountNumber]
+                  required:
+                    - bankName
+                    - accountNumber
                   properties:
-                    bankName:
+                    bank_name:
                       type: string
-                    accountNumber:
+                    account_number:
                       type: string
       responses:
         '200':
@@ -74,15 +76,27 @@ paths:
                 properties:
                   message:
                     type: string
-                  userId:
+                  user_id:
                     type: string
                   token:
                     type: string
         '400':
-          description: Invalid input data
+          $ref: '#/components/responses/invalid_input'
         '409':
           description: Phone number already exists
-
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                Phone number already exists:
+                  value: |-
+                    {
+                    "error":"Phone number already exists"
+                    }
   /auth/login:
     post:
       tags:
@@ -94,7 +108,9 @@ paths:
           application/json:
             schema:
               type: object
-              required: [phone, password]
+              required:
+                - phone
+                - password
               properties:
                 phone:
                   type: string
@@ -113,17 +129,9 @@ paths:
                   token:
                     type: string
                   user:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      fullName:
-                        type: string
-                      role:
-                        type: string
+                    $ref: "#/components/schemas/user"
         '401':
-          description: Invalid phone or password
-
+          $ref: '#/components/responses/unauthorized'
   /auth/profile:
     get:
       tags:
@@ -137,32 +145,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                  fullName:
-                    type: string
-                  phone:
-                    type: string
-                  email:
-                    type: string
-                  role:
-                    type: string
-                  address:
-                    type: string
-                  profileImageUrl:
-                    type: string
-                  bankInfo:
-                    type: object
-                    properties:
-                      bankName:
-                        type: string
-                      accountNumber:
-                        type: string
+                $ref: "#/components/schemas/user"
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
     put:
       tags:
         - auth
@@ -174,36 +159,18 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                fullName:
-                  type: string
-                address:
-                  type: string
-                profileImageBase64:
-                  type: string
-                bankInfo:
-                  type: object
-                  properties:
-                    bankName:
-                      type: string
-                    accountNumber:
-                      type: string
+              $ref: "#/components/schemas/user"
       responses:
         '200':
           description: Profile updated successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: "#/components/schemas/message"
         '400':
-          description: Invalid profile data
+          $ref: '#/components/responses/invalid_input'
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /auth/logout:
     post:
       tags:
@@ -217,12 +184,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: "#/components/schemas/message"
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
 
   /restaurants:
     post:
@@ -236,25 +200,18 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [name, address, phone]
-              properties:
-                name:
-                  type: string
-                address:
-                  type: string
-                phone:
-                  type: string
-                logoBase64:
-                  type: string
+              $ref: "#/components/schemas/restaurant"
       responses:
         '201':
           description: Restaurant created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/restaurant"
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/invalid_input'
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /restaurants/mine:
     get:
       tags:
@@ -265,9 +222,12 @@ paths:
       responses:
         '200':
           description: List of restaurants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/restaurants_list"
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /restaurants/{id}:
     put:
       tags:
@@ -280,7 +240,7 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
       requestBody:
         required: true
         content:
@@ -299,54 +259,107 @@ paths:
       responses:
         '200':
           description: Restaurant updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/restaurant"
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/invalid_input'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
         '404':
           description: Restaurant not found
-
-  /deliveries/available:
-    get:
-      tags:
-        - courier
-      summary: Get available delivery requests
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: List of available deliveries
-        '401':
-          description: Unauthorized
-
-  /deliveries/{id}/accept:
+  /restaurants/{id}/item:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
     post:
       tags:
-        - courier
-      summary: Accept a delivery request
+        - restaurant
+      summary: Add food item to restaurant with a specific id
       security:
         - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/food_item"
       responses:
         '200':
-          description: Delivery accepted successfully
+          description: "Food item created and added to restaurant successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/food_item"
         '400':
-          description: Invalid delivery ID
+          $ref: "#/components/responses/invalid_input"
         '401':
-          description: Unauthorized
-        '409':
-          description: Delivery already assigned
+          $ref: "#/components/responses/unauthorized"
+  /restaurants/{id}/item/{item_id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      tags:
+        - restaurant
+      summary: Edit food item of a restaurant with a specific id
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/food_item"
+      responses:
+        '200':
+          description: "Food item edited successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/food_item"
+        '400':
+          $ref: "#/components/responses/invalid_input"
+        '401':
+          $ref: "#/components/responses/unauthorized"
 
-  /deliveries/{id}/reject:
+    delete:
+      tags:
+        - restaurant
+      summary: Delete item
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Food item removed successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
+        '400':
+          $ref: "#/components/responses/invalid_input"
+        '401':
+          $ref: "#/components/responses/unauthorized"
+
+
+
+  /restaurants/{id}/menu:
     post:
       tags:
-        - courier
-      summary: Reject a delivery request
+        - restaurant
+      summary: Add restaurant menu to system for specific restaurant id
       security:
         - bearerAuth: []
       parameters:
@@ -354,152 +367,233 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-      responses:
-        '200':
-          description: Delivery rejected successfully
-        '400':
-          description: Invalid delivery ID
-        '401':
-          description: Unauthorized
-
-  /deliveries/{id}/status:
-    patch:
-      tags:
-        - courier
-      summary: Update delivery status (received, delivered)
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
+            type: integer
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [status]
               properties:
-                status:
+                title:
                   type: string
-                  enum: [received, delivered]
       responses:
         '200':
-          description: Status updated
+          description: "Food menu created and added to restaurant successfully"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  title:
+                    type: string
         '400':
-          description: Invalid status or ID
+          $ref: "#/components/responses/invalid_input"
         '401':
-          description: Unauthorized
-
-  /deliveries/history:
-    get:
+          $ref: "#/components/responses/unauthorized"
+  /restaurants/{id}/menu/{title}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: title
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
       tags:
-        - courier
-      summary: Get delivery history
+        - restaurant
+      summary: Delete restaurant menu from system for specific restaurant id
       security:
         - bearerAuth: []
       responses:
         '200':
-          description: List of completed and active deliveries
+          description: "Food menu removed from restaurant successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
+        '400':
+          $ref: "#/components/responses/invalid_input"
         '401':
-          description: Unauthorized
-  
-  /vendors:
+          $ref: "#/components/responses/unauthorized"
+    put:
+      tags:
+        - restaurant
+      summary: Add restaurant menu to system for specific restaurant id
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                item_id:
+                  type: integer
+      responses:
+        '200':
+          description: "Food item created and added to restaurant successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
+
+  /restaurants/{id}/menu/{title}/{item_id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: title
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: item_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    delete:
+      tags:
+        - restaurant
+      summary: Delete item from restaurant menu
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Item removed from restaurant menu successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
+
+        '400':
+          $ref: "#/components/responses/invalid_input"
+        '401':
+          $ref: "#/components/responses/unauthorized"
+
+  /restaurants/{id}/orders:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
     get:
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: user
+          in: query
+          schema:
+            type: string
+        - name: courier
+          in: query
+          schema:
+            type: string
+      tags:
+        - restaurant
+      summary: Get list of orders for a specific restaurant
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/order"
+        '401':
+          $ref: "#/components/responses/unauthorized"
+
+  /restaurants/orders/{order_id}:
+    parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: integer
+    patch:
+      tags:
+        - restaurant
+      summary: Change status of an order for a restaurant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - accepted
+                    - rejected
+                    - served
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: "Order status changed successfully"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
+        '400':
+          $ref: "#/components/responses/invalid_input"
+        '401':
+          $ref: "#/components/responses/unauthorized"
+  /vendors:
+    post:
       tags:
         - buyer
       summary: List vendors with optional filters
       security:
         - bearerAuth: []
-      parameters:
-        - name: category
-          in: query
-          schema:
-            type: string
-        - name: rating
-          in: query
-          schema:
-            type: number
-        - name: search
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: List of vendors
-        '401':
-          description: Unauthorized
-
-  /vendors/{id}/menu:
-    get:
-      tags:
-        - buyer
-      summary: View menu for a vendor
-      security:
-        - bearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Vendor menu
-        '401':
-          description: Unauthorized
-        '404':
-          description: Vendor not found
-
-  /cart/items:
-    post:
-      tags:
-        - buyer
-      summary: Add item to cart
-      security:
-        - bearerAuth: []
       requestBody:
-        required: true
         content:
           application/json:
             schema:
               type: object
-              required: [itemId, quantity]
               properties:
-                itemId:
+                search:
                   type: string
-                quantity:
-                  type: integer
+                categories:
+                  type: array
+                  items:
+                    type: string
       responses:
         '200':
-          description: Item added to cart
-        '400':
-          description: Invalid item or quantity
-        '401':
-          description: Unauthorized
+          description: List of vendors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/restaurant'
 
-  /cart:
+        '401':
+          $ref: '#/components/responses/unauthorized'
+  /vendors/{id}/items:
     get:
       tags:
         - buyer
-      summary: Get current cart
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: Current cart contents
-        '401':
-          description: Unauthorized
-
-  /cart/items/{id}:
-    delete:
-      tags:
-        - buyer
-      summary: Remove item from cart
+      summary: View menu items for a vendor
       security:
         - bearerAuth: []
       parameters:
@@ -510,12 +604,57 @@ paths:
             type: string
       responses:
         '200':
-          description: Item removed from cart
+          description: Vendor menu items. There's an array of menu titles of this vendor with key "menu_titles". For each items in "menu_titles", there's a key which contains all items inside that title.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  menu_titles:
+                    type: array
+                    items:
+                      type: string
+                  menu_title:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/food_item"
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
         '404':
-          description: Item not found
+          description: Vendor not found
+  /items:
+    post:
+      tags:
+        - buyer
+      summary: List items with optional filters
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                search:
+                  type: string
+                price:
+                  type: string
+                categories:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: List of items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/food_item'
 
+        '401':
+          $ref: '#/components/responses/unauthorized'
   /orders:
     post:
       tags:
@@ -529,31 +668,66 @@ paths:
           application/json:
             schema:
               type: object
-              required: [deliveryAddress]
+              required:
+                - delivery_address
+                - items
+                - vendor_id
               properties:
-                deliveryAddress:
+                delivery_address:
                   type: string
+                vendor_id:
+                  type: integer
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - item_id
+                      - quantity
+                    properties:
+                      item_id:
+                        type: integer
+                      quantity:
+                        type: integer
       responses:
         '200':
           description: Order submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/order'
         '400':
           description: Invalid order
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
 
   /orders/history:
     get:
       tags:
         - buyer
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: vendor
+          in: query
+          schema:
+            type: string
       summary: Get order history
       security:
         - bearerAuth: []
       responses:
         '200':
           description: List of past orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/order"
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /favorites:
     get:
       tags:
@@ -564,27 +738,51 @@ paths:
       responses:
         '200':
           description: List of favorite restaurants
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/restaurants_list"
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /favorites/{restaurantId}:
-    post:
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+        schema:
+          type: string
+    put:
       tags:
         - buyer
       summary: Add a restaurant to favorites
       security:
         - bearerAuth: []
-      parameters:
-        - name: restaurantId
-          in: path
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: Added to favorites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
+        '404':
+          description: Restaurant not found
+    delete:
+      tags:
+        - buyer
+      summary: Remove a restaurant from favorites
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Removed from favorites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/message"
+        '401':
+          $ref: '#/components/responses/unauthorized'
         '404':
           description: Restaurant not found
 
@@ -601,7 +799,10 @@ paths:
           application/json:
             schema:
               type: object
-              required: [orderId, rating, comment]
+              required:
+                - orderId
+                - rating
+                - comment
               properties:
                 orderId:
                   type: string
@@ -617,32 +818,111 @@ paths:
         '200':
           description: Rating submitted
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/invalid_input'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
         '404':
           description: Order not found
 
-  /orders/track/{orderId}:
+  /deliveries/available:
     get:
       tags:
-        - order
-      summary: Track order status live
+        - courier
+      summary: Get available delivery requests
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of available deliveries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref : '#/components/schemas/order'
+        '401':
+          $ref: '#/components/responses/unauthorized'
+  /deliveries/{order_id}:
+    patch:
+      tags:
+        - courier
+      summary: Change status of a delivery request
       security:
         - bearerAuth: []
       parameters:
-        - name: orderId
+        - name: order_id
           in: path
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - accepted
+                    - received
+                    - delivered
       responses:
         '200':
-          description: Current status of the order
-        '401':
-          description: Unauthorized
+          description: Changed status successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  order:
+                    $ref: '#/components/schemas/order'
         '404':
           description: Order not found
+        '403':
+          description: Order status change is not valid
+        '500':
+          description: Internal server error
+        '400':
+          description: Invalid delivery ID
+        '401':
+          $ref: '#/components/responses/unauthorized'
+        '409':
+          description: Delivery already assigned
+  /deliveries/history:
+    get:
+      tags:
+        - courier
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: vendor
+          in: query
+          schema:
+            type: string
+        - name: user
+          in: query
+          schema:
+            type: string
+      summary: Get delivery history
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of completed and active deliveries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/order'
+        '401':
+          $ref: '#/components/responses/unauthorized'
 
   /transactions:
     get:
@@ -655,8 +935,7 @@ paths:
         '200':
           description: List of transactions
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /wallet/top-up:
     post:
       tags:
@@ -670,21 +949,24 @@ paths:
           application/json:
             schema:
               type: object
-              required: [method, amount]
+              required:
+                - method
+                - amount
               properties:
                 method:
                   type: string
-                  enum: [online, card]
+                  enum:
+                    - online
+                    - card
                 amount:
                   type: number
       responses:
         '200':
           description: Wallet topped up successfully
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/invalid_input'
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /payment/online:
     post:
       tags:
@@ -698,25 +980,45 @@ paths:
           application/json:
             schema:
               type: object
-              required: [orderId, method, amount]
+              required:
+                - orderId
+                - method
               properties:
                 orderId:
                   type: string
                 method:
                   type: string
-                  enum: [wallet, card]
-                amount:
-                  type: number
+                  enum:
+                    - wallet
+                    - paywall
       responses:
         '200':
           description: Payment successful
         '400':
           description: Invalid input or insufficient balance
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                Invalid Field:
+                  value: |-
+                    {
+                    "error":"Invalid `field name`"
+                    }
+
+                Insufficient Balance:
+                  value: |-
+                    {
+                    "error":"Insufficient balance"
+                    }
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
         '404':
           description: Order not found
-          
   /admin/users:
     get:
       tags:
@@ -727,9 +1029,14 @@ paths:
       responses:
         '200':
           description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/user"
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /admin/users/{id}/status:
     patch:
       tags:
@@ -749,23 +1056,46 @@ paths:
           application/json:
             schema:
               type: object
-              required: [status]
+              required:
+                - status
               properties:
                 status:
                   type: string
-                  enum: [approved, rejected]
+                  enum:
+                    - approved
+                    - rejected
       responses:
         '200':
           description: Status updated
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/invalid_input'
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
         '404':
           description: User not found
-
   /admin/orders:
     get:
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: vendor
+          in: query
+          schema:
+            type: string
+        - name: courier
+          in: query
+          schema:
+            type: string
+        - name: customer
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
       tags:
         - admin
       summary: View all orders
@@ -774,22 +1104,14 @@ paths:
       responses:
         '200':
           description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/order"
         '401':
-          description: Unauthorized
-
-  /admin/deliveries:
-    get:
-      tags:
-        - admin
-      summary: View all deliveries
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: List of deliveries
-        '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /admin/transactions:
     get:
       tags:
@@ -801,8 +1123,7 @@ paths:
         '200':
           description: List of financial transactions
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /admin/discounts:
     post:
       tags:
@@ -816,11 +1137,18 @@ paths:
           application/json:
             schema:
               type: object
-              required: [type, value, scope, startDate, endDate]
+              required:
+                - type
+                - value
+                - scope
+                - startDate
+                - endDate
               properties:
                 type:
                   type: string
-                  enum: [fixed, percent]
+                  enum:
+                    - fixed
+                    - percent
                 value:
                   type: number
                 scope:
@@ -835,10 +1163,9 @@ paths:
         '201':
           description: Discount created
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/invalid_input'
         '401':
-          description: Unauthorized
-
+          $ref: '#/components/responses/unauthorized'
   /admin/discounts/{id}:
     delete:
       tags:
@@ -856,10 +1183,9 @@ paths:
         '200':
           description: Discount deleted
         '401':
-          description: Unauthorized
+          $ref: '#/components/responses/unauthorized'
         '404':
           description: Discount not found
-
   /admin/reports:
     get:
       tags:
@@ -871,12 +1197,162 @@ paths:
         '200':
           description: System performance and sales analytics
         '401':
-          description: Unauthorized
-
-
+          $ref: '#/components/responses/unauthorized'
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    message:
+      type: object
+      required: ['message']
+      properties:
+        message:
+          type: string
+    user:
+      type: object
+      required: ["id", "full_name", "phone", "email", "role", "address"]
+      properties:
+        id:
+          type: string
+        full_name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        address:
+          type: string
+        profileImageBase64:
+          type: string
+        bank_info:
+          type: object
+          required: ["bank_name", "account_number"]
+          properties:
+            bank_name:
+              type: string
+            account_number:
+              type: string
+    restaurant:
+      type: object
+      required:
+        - name
+        - address
+        - phone
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        phone:
+          type: string
+        logoBase64:
+          type: string
+
+    restaurants_list:
+      type: array
+      items:
+        $ref: "#/components/schemas/restaurant"
+
+    food_item:
+      type: object
+      required: [name, description, price, supply, categories, vendor_id]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        imageBase64:
+          type: string
+        description:
+          type: string
+        vendor_id:
+          type: integer
+        price:
+          type: integer
+        supply:
+          type: integer
+        categories:
+          type: array
+          minItems: 1
+          items:
+            type: string
+    order:
+      type: object
+      required:
+        [id, delivery_address, user_id, items, vendor_id, raw_price, tax_fee, courier_fee, pay_price, status, courier_id]
+      properties:
+        id:
+          type: integer
+        delivery_address:
+          type: string
+        customer_id:
+          type: integer
+        vendor_id:
+          type: integer
+        item_ids:
+          type: array
+          items:
+            type: integer
+        raw_price:
+          type: integer
+        tax_fee:
+          type: integer
+        courier_fee:
+          type: integer
+        pay_price:
+          type: integer
+        courier_id:
+          type: integer
+        status:
+          type: string
+          enum:
+            - "submitted"
+            - "unpaid and cancelled"
+            - "waiting vendor"
+            - "cancelled"
+            - "finding courier"
+            - "on the way"
+            - "completed"
+        created_at:
+          type: string
+        updated_at:
+          type: string
+  responses:
+    unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            Unauthorized:
+              value: |-
+                {
+                "error":"Unauthorized request"
+                }
+    invalid_input:
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+          examples:
+            Invalid Field:
+              value: |-
+                {
+                "error":"Invalid `field name`"
+                }
+    
