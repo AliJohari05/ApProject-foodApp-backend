@@ -8,7 +8,9 @@ public enum Message {
     LOGIN_FAILED("Invalid phone or password"),
     LOGIN_SUCCESS("User logged in successfully"),
     RESTAURANT_REGISTERED("Restaurant registered successfully (pending approval)"),
-    PHONE_ALREADY_EXIST("Phone number already exists");
+    PHONE_ALREADY_EXIST("Phone number already exists"),
+    INVALID_INPUT("Invalid input");
+
 
 
     private final String message;

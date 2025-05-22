@@ -4,7 +4,7 @@ import com.foodApp.httpHandler.restaurant.ApproveRestaurantByAdminHandler;
 import com.foodApp.httpHandler.restaurant.ApprovedRestaurantHandler;
 import com.foodApp.httpHandler.restaurant.GetRestaurantsByOwnerHandler;
 import com.foodApp.httpHandler.restaurant.RegisterRestaurantHandler;
-import com.foodApp.httpHandler.user.LoginHandler;
+import com.foodApp.httpHandler.user.GetProfileHandler;
 import com.foodApp.httpHandler.user.LoginHandler;
 import com.foodApp.httpHandler.user.SignUpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -19,6 +19,7 @@ public class Server {
 
             server.createContext("/auth/register", new SignUpHandler());
             server.createContext("/auth/login", new LoginHandler());
+            server.createContext("/auth/profile", new GetProfileHandler());
             server.createContext("/Food4U/restaurant", new RegisterRestaurantHandler());
             server.createContext("/Food4U/restaurant/approved", new ApprovedRestaurantHandler());
             server.createContext("/Food4U/restaurant/owner", new GetRestaurantsByOwnerHandler());

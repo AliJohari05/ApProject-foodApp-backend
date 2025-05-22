@@ -1,4 +1,6 @@
 package com.foodApp.model;
+import com.foodApp.dto.BankInfoDto;
+import com.foodApp.dto.UserProfileDto;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 @Entity
@@ -37,6 +39,9 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 
     // === Getters and Setters ===
 
@@ -128,4 +133,25 @@ public class User {
     public void setAccountNumber(String accountNumber) {
         this.accountNumber = accountNumber;
     }
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+    public UserProfileDto toDto() {
+        UserProfileDto dto = new UserProfileDto();
+        dto.setId(String.valueOf(this.userId));
+        dto.setFullName(this.name);
+        dto.setPhone(this.phone);
+        dto.setEmail(this.email);
+        dto.setAddress(this.address);
+        dto.setRole(this.role.name());
+        dto.setProfileImageUrl(this.profileImageUrl);
+        if (this.bankName != null && this.accountNumber != null) {
+            dto.setBankInfo(new BankInfoDto(this.bankName, this.accountNumber));
+        }
+        return dto;
+    }
+
 }
