@@ -25,11 +25,18 @@ public class Category {
     private List<MenuItem> menuItems = new ArrayList<>();
 
     // === Getters & Setters ===
-    public int getId() {
+
+    public Integer getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
     }
     public String getTitle() {
         return title;

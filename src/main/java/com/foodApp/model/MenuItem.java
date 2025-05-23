@@ -7,49 +7,36 @@ import java.util.ArrayList;
 @Entity
 @Table(name = "menu_items")
 public class MenuItem {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
     @ManyToOne
     @JoinColumn(name = "restaurant_id",nullable = false)
     private Restaurant restaurant;
-
     @ManyToMany
-    @JoinTable(name = "menu_item_category",
-    joinColumns = @JoinColumn(name = "menu_item_id"),
-    inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
+    @JoinTable(name = "menu_item_category", joinColumns = @JoinColumn(name = "menu_item_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private List<Category> category = new ArrayList<>();
-
     @Column(nullable = false,length = 100)
     private String name;
-
     private String description;
-
     @Column(nullable = false)
     private BigDecimal price;
-
     @Column(name = "image_url",nullable = false,length = 255)
     private String image;
-
     private int stock;
-
     private String keywords;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // === Getters & Setters ===
 
-    public int getId() {
+
+    public Integer getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

@@ -3,11 +3,12 @@ package com.foodApp.repository;
 import com.foodApp.model.MenuItem;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MenuItemRepository {
-    void save(MenuItem menuItem);
-    MenuItem findById(String id);
-    List<MenuItem> findAllByRestaurant(int restaurantId);
-    List<MenuItem> findAllByCategory(int categoryId);
-    void delete(int id);
+    MenuItem save(MenuItem menuItem);
+    Optional<MenuItem> findById(Integer id);
+    List<MenuItem> findByRestaurantId(Integer restaurantId);
+    List<MenuItem> findAllByCategory(Integer categoryId);
+    void delete(MenuItem item);
 }
