@@ -6,9 +6,11 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 public class User {
-    @Id // This annotation specifies which field of your class is the identifier PRIMARY KEY of the table in the database.
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userId")
     private int userId;
+
 
     @Column(nullable = false,length = 100)
     private String name; // It includes the first name and last name.
@@ -138,20 +140,6 @@ public class User {
     }
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
-    }
-    public UserProfileDto toDto() {
-        UserProfileDto dto = new UserProfileDto();
-        dto.setId(String.valueOf(this.userId));
-        dto.setFullName(this.name);
-        dto.setPhone(this.phone);
-        dto.setEmail(this.email);
-        dto.setAddress(this.address);
-        dto.setRole(this.role.name());
-        dto.setProfileImageUrl(this.profileImageUrl);
-        if (this.bankName != null && this.accountNumber != null) {
-            dto.setBankInfo(new BankInfoDto(this.bankName, this.accountNumber));
-        }
-        return dto;
     }
 
 }

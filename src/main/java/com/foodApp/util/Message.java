@@ -9,7 +9,11 @@ public enum Message {
     LOGIN_SUCCESS("User logged in successfully"),
     RESTAURANT_REGISTERED("Restaurant registered successfully (pending approval)"),
     PHONE_ALREADY_EXIST("Phone number already exists"),
-    INVALID_INPUT("Invalid input");
+    INVALID_INPUT("Invalid input"),
+    UNAUTHORIZED("Unauthorized request"),
+    USER_NOT_FOUND("User Not Found"),
+    PROFILE_UPDATED("Profile updated successfully"),
+    UNSUPPORTED_MEDIA_TYPE("Unsupported media type"), FORBIDDEN("Forbidden request");
 
 
 

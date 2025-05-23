@@ -40,7 +40,6 @@ public class UserServiceImpl implements UserService {
         }
         return user;
     }
-    @Override
     public void updateUser(User user) {
         User existingUser = userRepo.findById(user.getUserId());
         if(existingUser != null) {
@@ -52,7 +51,7 @@ public class UserServiceImpl implements UserService {
             existingUser.setAccountNumber(user.getAccountNumber());
 
             userRepo.save(existingUser);
-        }else{
+        } else {
             throw new UserNotFoundException("User not found");
         }
     }

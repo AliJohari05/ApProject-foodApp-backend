@@ -13,5 +13,6 @@ public interface UserService {
     void updateUser(User user);
     List<User> findAllByRole(Role role);
     void delete(int id);
-    
+
+    boolean phoneExists(String phone);
 }

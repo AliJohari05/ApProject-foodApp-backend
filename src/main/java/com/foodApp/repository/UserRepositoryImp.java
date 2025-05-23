@@ -16,13 +16,16 @@ public class UserRepositoryImp  implements UserRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.persist(user);
+            session.merge(user);
             tx.commit();
-        }catch (Exception e) {
-            if (tx != null) tx.rollback();
-            throw new DatabaseException("Error saving user", e);
+        } catch (Exception e) {
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
+            throw e;
         }
     }
+
     @Override
     public User findById(int id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {

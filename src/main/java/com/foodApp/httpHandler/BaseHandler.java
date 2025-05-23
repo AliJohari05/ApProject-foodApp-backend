@@ -16,4 +16,11 @@ public class BaseHandler {
             e.printStackTrace();
         }
     }
+    protected String extractToken(HttpExchange exchange) {
+        String authHeader = exchange.getRequestHeaders().getFirst("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return null;
+    }
 }

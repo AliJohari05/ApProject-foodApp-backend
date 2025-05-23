@@ -1,26 +1,26 @@
 package com.foodApp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.regex.Pattern;
+
 public class UserSignupDto {
+
+    @JsonProperty("full_name")
     private String fullName;
+
     private String phone;
     private String email;
     private String password;
     private String role;
     private String address;
+
+    @JsonProperty("profileImageBase64")
     private String profileImageBase64;
-    private BankInfo bankInfo;
 
-    public static class BankInfo {
-        private String bankName;
-        private String accountNumber;
-        public String getBankName() { return bankName; }
-        public void setBankName(String bankName) { this.bankName = bankName; }
+    @JsonProperty("bank_info")
+    private BankInfoDto bankInfo;
 
-        public String getAccountNumber() { return accountNumber; }
-        public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
-    }
-
-    // Getters and Setters
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
@@ -42,6 +42,42 @@ public class UserSignupDto {
     public String getProfileImageBase64() { return profileImageBase64; }
     public void setProfileImageBase64(String profileImageBase64) { this.profileImageBase64 = profileImageBase64; }
 
-    public BankInfo getBankInfo() { return bankInfo; }
-    public void setBankInfo(BankInfo bankInfo) { this.bankInfo = bankInfo; }
+    public BankInfoDto getBankInfo() { return bankInfo; }
+    public void setBankInfo(BankInfoDto bankInfo) { this.bankInfo = bankInfo; }
+
+    public static com.foodApp.model.User toUser(UserSignupDto dto) {
+        com.foodApp.model.User user = new com.foodApp.model.User();
+        user.setName(dto.fullName);
+        user.setPhone(dto.phone);
+        user.setEmail(dto.email);
+        user.setPassword(dto.password);
+        user.setAddress(dto.address);
+        user.setProfileImageUrl(dto.profileImageBase64);
+        user.setRole(com.foodApp.model.Role.valueOf(dto.role.toUpperCase()));
+        if (dto.bankInfo != null) {
+            user.setBankName(dto.bankInfo.getBankName());
+            user.setAccountNumber(dto.bankInfo.getAccountNumber());
+        }
+        return user;
+    }
+    public boolean isValid() {
+        return fullName != null && !fullName.isBlank()
+                && phone != null && !phone.isBlank()
+                && password != null && !password.isBlank()
+                && role != null && !role.isBlank()
+                && address != null && !address.isBlank();
+    }
+
+    public String validateFields() {
+        if (phone != null && !Pattern.matches("\\d{11}", phone)) {
+            return "invalid phone";
+        }
+        if (email != null && !email.isBlank()) {
+            String emailRegex = "^[\\w-\\.+]+@[\\w-]+\\.[a-z]{2,4}$";
+            if (!Pattern.matches(emailRegex, email.toLowerCase())) {
+                return "invalid email";
+            }
+        }
+        return null;
+    }
 }

@@ -1,7 +1,13 @@
 package com.foodApp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class BankInfoDto {
+
+    @JsonProperty("bank_name")
     private String bankName;
+
+    @JsonProperty("account_number")
     private String accountNumber;
 
     public BankInfoDto() {}
