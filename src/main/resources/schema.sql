@@ -60,6 +60,15 @@ CREATE TABLE menu_items (
                                 ON DELETE SET NULL ON UPDATE CASCADE
 );
 
+CREATE TABLE menu_item_category(
+    menu_item_id INT NOT NULL
+    REFERENCES menu_items(id)
+    ON DELETE CASCADE,
+    category_id INT NOT NULL
+    REFERENCES categories(id)
+    ON DELETE CASCADE,
+    PRIMARY KEY (menu_item_id,category_id)
+);
 -- === Orders Table ===
 CREATE TABLE orders (
                         id SERIAL PRIMARY KEY,

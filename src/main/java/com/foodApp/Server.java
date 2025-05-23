@@ -10,7 +10,7 @@ import com.foodApp.httpHandler.user.LogoutHandler;
 import com.foodApp.httpHandler.user.ProfileHandler;
 import com.foodApp.httpHandler.user.SignUpHandler;
 import com.sun.net.httpserver.HttpServer;
-
+import com.foodApp.httpHandler.restaurant.menuItemHandler;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 

@@ -1,12 +1,15 @@
 package com.foodApp.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "categories")
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     @Column(nullable = false,length = 100)
     private String title;
     private String description;
@@ -18,6 +21,9 @@ public class Category {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    @ManyToMany(mappedBy = "categorys")
+    private List<MenuItem> menuItems = new ArrayList<>();
+
     // === Getters & Setters ===
     public int getId() {
         return id;
@@ -54,5 +60,11 @@ public class Category {
     }
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    public List<MenuItem> getMenuItems() {
+        return menuItems;
+    }
+    public void setMenuItems(List<MenuItem> menuItems) {
+        this.menuItems = menuItems;
     }
 }
