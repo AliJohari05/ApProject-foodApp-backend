@@ -58,4 +58,12 @@ public class UserServiceImpl implements UserService {
         userRepo.deleteById(id);
 
     }
+
+    @Override
+    public boolean phoneExists(String phone) {
+        User user = userRepo.findByPhone(phone);
+        if(user == null) return false;
+        return true;
+
+    }
 }
