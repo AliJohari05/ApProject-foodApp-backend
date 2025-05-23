@@ -59,6 +59,12 @@ public class UserServiceImpl implements UserService {
     public List<User> findAllByRole(Role role) {
         return userRepo.findByRole(role);
     }
+
+    @Override
+    public List<User> findAllUsers() {
+        return userRepo.findAll();
+    }
+
     @Override
     public void delete(int id) {
         userRepo.deleteById(id);

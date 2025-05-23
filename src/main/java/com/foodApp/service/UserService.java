@@ -12,7 +12,7 @@ public interface UserService {
     User login(String phone, String password);
     void updateUser(User user);
     List<User> findAllByRole(Role role);
+    List<User> findAllUsers();
     void delete(int id);
-
     boolean phoneExists(String phone);
 }

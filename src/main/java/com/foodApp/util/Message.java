@@ -13,7 +13,8 @@ public enum Message {
     UNAUTHORIZED("Unauthorized request"),
     USER_NOT_FOUND("User Not Found"),
     PROFILE_UPDATED("Profile updated successfully"),
-    UNSUPPORTED_MEDIA_TYPE("Unsupported media type"), FORBIDDEN("Forbidden request"),
+    UNSUPPORTED_MEDIA_TYPE("Unsupported media type"),
+    FORBIDDEN("Forbidden request"),
     LOGOUT_SUCCESS("User logged out successfully"),;
 
 
