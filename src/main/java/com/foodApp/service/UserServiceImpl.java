@@ -44,6 +44,13 @@ public class UserServiceImpl implements UserService {
     public void updateUser(User user) {
         User existingUser = userRepo.findById(user.getUserId());
         if(existingUser != null) {
+            existingUser.setName(user.getName());
+            existingUser.setEmail(user.getEmail());
+            existingUser.setAddress(user.getAddress());
+            existingUser.setProfileImageUrl(user.getProfileImageUrl());
+            existingUser.setBankName(user.getBankName());
+            existingUser.setAccountNumber(user.getAccountNumber());
+
             userRepo.save(existingUser);
         }else{
             throw new UserNotFoundException("User not found");
