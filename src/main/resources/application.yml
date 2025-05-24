@@ -1,0 +1,5 @@
+springdoc:
+  api-docs:
+    path: /openapi.yaml        # آدرس fetch spec
+  swagger-ui:
+    url: /openapi.yaml         # URL که Swagger UI از آن spec را می‌خواند
