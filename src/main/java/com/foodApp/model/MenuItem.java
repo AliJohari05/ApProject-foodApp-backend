@@ -14,7 +14,8 @@ public class MenuItem {
     @JoinColumn(name = "restaurant_id",nullable = false)
     private Restaurant restaurant;
     @ManyToMany
-    @JoinTable(name = "menu_item_category", joinColumns = @JoinColumn(name = "menu_item_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @JoinTable(name = "menu_item_category", joinColumns = @JoinColumn(name = "menu_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
     private List<Category> category = new ArrayList<>();
     @Column(nullable = false,length = 100)
     private String name;

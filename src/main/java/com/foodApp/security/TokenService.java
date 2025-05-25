@@ -10,9 +10,8 @@ import com.foodApp.util.EnvUtil;
 
 
 public class TokenService {
-    private static final String SECRET = EnvUtil.get("JWT_SECRET");
+private static final String SECRET = EnvUtil.get("JWT_SECRET");
 private static  final  Algorithm algo = Algorithm.HMAC256(SECRET);
-
 private static final long EXPIRATION_MS = 24 * 60 * 60 * 1000;
 
 public static String generateToken(String userId,String role){

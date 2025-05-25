@@ -21,7 +21,7 @@ public class Category {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    @ManyToMany(mappedBy = "categorys")
+    @ManyToMany(mappedBy = "category")
     private List<MenuItem> menuItems = new ArrayList<>();
 
     // === Getters & Setters ===

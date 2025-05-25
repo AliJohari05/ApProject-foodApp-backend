@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(nullable = false , length = 100)
     private String name;
@@ -21,7 +21,7 @@ public class Restaurant {
     private String workingHours;
 
     @Column(name = "logo_url", nullable = false)
-    private String logoUrl;
+    private String logobase64;
 
     private boolean approved;
 
@@ -37,19 +37,17 @@ public class Restaurant {
 
     // === Getters and Setters ===
 
-    public int getId() {
+
+    public Integer getId() {
         return id;
     }
-
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
-
 
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -57,7 +55,6 @@ public class Restaurant {
     public String getAddress() {
         return address;
     }
-
     public void setAddress(String address) {
         this.address = address;
     }
@@ -65,7 +62,6 @@ public class Restaurant {
     public String getPhone() {
         return phone;
     }
-
     public void setPhone(String phone) {
         this.phone = phone;
     }
@@ -73,23 +69,20 @@ public class Restaurant {
     public String getWorkingHours() {
         return workingHours;
     }
-
     public void setWorkingHours(String workingHours) {
         this.workingHours = workingHours;
     }
 
-    public String getLogoUrl() {
-        return logoUrl;
+    public String getLogobase64() {
+        return logobase64;
     }
-
-    public void setLogoUrl(String logoUrl) {
-        this.logoUrl = logoUrl;
+    public void setLogobase64(String logobase64) {
+        this.logobase64 = logobase64;
     }
 
     public boolean isApproved() {
         return approved;
     }
-
     public void setApproved(boolean approved) {
         this.approved = approved;
     }
@@ -97,7 +90,6 @@ public class Restaurant {
     public User getOwner() {
         return owner;
     }
-
     public void setOwner(User owner) {
         this.owner = owner;
     }
@@ -105,7 +97,6 @@ public class Restaurant {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
@@ -113,7 +104,6 @@ public class Restaurant {
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
-
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }

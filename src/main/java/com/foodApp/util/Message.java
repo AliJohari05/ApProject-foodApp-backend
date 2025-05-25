@@ -7,7 +7,7 @@ public enum Message {
     SIGNUP_SUCCESS("User registered successfully"),
     LOGIN_FAILED("Invalid phone or password"),
     LOGIN_SUCCESS("User logged in successfully"),
-    RESTAURANT_REGISTERED("Restaurant registered successfully (pending approval)"),
+    RESTAURANT_REGISTERED("Restaurant created successfully"),
     PHONE_ALREADY_EXIST("Phone number already exists"),
     INVALID_INPUT("Invalid input"),
     UNAUTHORIZED("Unauthorized request"),

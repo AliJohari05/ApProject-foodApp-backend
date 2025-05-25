@@ -6,8 +6,8 @@ import java.util.List;
 
 public interface CategoryRepository {
     void save(Category category);
-    Category findById(String id);
+    Category findById(Integer id);
     List<Category> findAll();
-    void delete(String id);
+    void delete(Integer id);
 
 }

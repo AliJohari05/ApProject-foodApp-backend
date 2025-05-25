@@ -24,10 +24,11 @@ public class Server {
             server.createContext("/auth/profile", new ProfileHandler());
             server.createContext("/auth/logout", new LogoutHandler());
             server.createContext("/admin/users", new AdminUserListHandler());
-            server.createContext("/Food4U/restaurant", new RegisterRestaurantHandler());
-            server.createContext("/Food4U/restaurant/approved", new ApprovedRestaurantHandler());
-            server.createContext("/Food4U/restaurant/owner", new GetRestaurantsByOwnerHandler());
-            server.createContext("/Food4U/admin/restaurant/approved", new ApproveRestaurantByAdminHandler());
+            server.createContext("/restaurants", new RegisterRestaurantHandler());
+            server.createContext("/restaurants/mine", new RegisterRestaurantHandler());
+            //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
+            //server.createContext("/restaurant/owner", new GetRestaurantsByOwnerHandler());
+            //server.createContext("/admin/restaurant/approved", new ApproveRestaurantByAdminHandler());
 
 
             server.setExecutor(null);

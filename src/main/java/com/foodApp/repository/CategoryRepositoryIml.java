@@ -23,7 +23,7 @@ public class CategoryRepositoryIml implements CategoryRepository {
     }
 
     @Override
-    public Category findById(String id) {
+    public Category findById(Integer id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.get(Category.class, id);
         }
@@ -39,7 +39,7 @@ public class CategoryRepositoryIml implements CategoryRepository {
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(Integer id) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
