@@ -15,7 +15,8 @@ public enum Message {
     PROFILE_UPDATED("Profile updated successfully"),
     UNSUPPORTED_MEDIA_TYPE("Unsupported media type"),
     FORBIDDEN("Forbidden request"),
-    LOGOUT_SUCCESS("User logged out successfully"),;
+    LOGOUT_SUCCESS("User logged out successfully"),
+    ERROR_404("Resource not found"), STATUS_UPDATED("Status updated");
 
 
 

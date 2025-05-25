@@ -1,6 +1,6 @@
 package com.foodApp;
 
-import com.foodApp.httpHandler.admin.AdminUserListHandler;
+import com.foodApp.httpHandler.admin.AdminUserHandler;
 import com.foodApp.httpHandler.restaurant.ApproveRestaurantByAdminHandler;
 import com.foodApp.httpHandler.restaurant.ApprovedRestaurantHandler;
 import com.foodApp.httpHandler.restaurant.GetRestaurantsByOwnerHandler;
@@ -23,7 +23,8 @@ public class Server {
             server.createContext("/auth/login", new LoginHandler());
             server.createContext("/auth/profile", new ProfileHandler());
             server.createContext("/auth/logout", new LogoutHandler());
-            server.createContext("/admin/users", new AdminUserListHandler());
+            server.createContext("/admin/users", new AdminUserHandler());
+            server.createContext("/admin/users/", new AdminUserHandler());
             server.createContext("/Food4U/restaurant", new RegisterRestaurantHandler());
             server.createContext("/Food4U/restaurant/approved", new ApprovedRestaurantHandler());
             server.createContext("/Food4U/restaurant/owner", new GetRestaurantsByOwnerHandler());
