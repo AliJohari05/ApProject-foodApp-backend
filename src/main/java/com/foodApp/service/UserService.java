@@ -6,7 +6,7 @@ import com.foodApp.model.Role;
 import java.util.List;
 
 public interface UserService {
-    void registerUser(User user);
+    User registerUser(User user);
     User findById(int id);
     User findByPhone(String phone);
     User login(String phone, String password);

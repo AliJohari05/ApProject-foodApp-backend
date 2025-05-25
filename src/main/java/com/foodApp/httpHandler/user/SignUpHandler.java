@@ -59,13 +59,14 @@ public class SignUpHandler extends BaseHandler implements HttpHandler {
             }
 
             User user = UserSignupDto.toUser(dto);
-            userService.registerUser(user);
+            User savedUser = userService.registerUser(user);
 
-            String token = TokenService.generateToken(String.valueOf(user.getUserId()), user.getRole().name());
+
+            String token = TokenService.generateToken(String.valueOf(savedUser.getUserId()), savedUser.getRole().name());
 
             Map<String, Object> result = new HashMap<>();
             result.put("message", Message.SIGNUP_SUCCESS.get());
-            result.put("user_id", user.getUserId());
+            result.put("user_id", savedUser.getUserId());
             result.put("token", token);
 
             String responseJson = objectMapper.writeValueAsString(result);
