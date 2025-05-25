@@ -7,18 +7,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Restaurant;
 import com.foodApp.model.Role;
+import com.foodApp.model.User;
 import com.foodApp.service.RestaurantService;
 import com.foodApp.service.RestaurantServiceImpl;
 import com.foodApp.util.Message;
 import com.foodApp.security.TokenService;
+import com.foodApp.dto.RestaurantDto;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
+//import java.io.OutputStream;
+//import java.nio.charset.StandardCharsets;
 
 public class RegisterRestaurantHandler extends BaseHandler implements HttpHandler {
     private final RestaurantService restaurantService = new RestaurantServiceImpl();
