@@ -4,6 +4,7 @@ import com.foodApp.exception.DuplicatePhoneException;
 import com.foodApp.exception.InvalidPasswordException;
 import com.foodApp.exception.UserNotFoundException;
 import com.foodApp.model.Role;
+import com.foodApp.model.Status;
 import com.foodApp.model.User;
 import com.foodApp.repository.UserRepository;
 import com.foodApp.repository.UserRepositoryImp;
@@ -82,11 +83,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean updateUserStatus(int userId, String status) {
         User user = userRepo.findById(userId);
-        if (user == null) {
+        if (user == null || !Status.isValid(status)) {
             return false;
         }
-        user.setStatus(status);
+        user.setStatus(Status.valueOf(status.toUpperCase()));
         userRepo.save(user);
         return true;
     }
+
 }

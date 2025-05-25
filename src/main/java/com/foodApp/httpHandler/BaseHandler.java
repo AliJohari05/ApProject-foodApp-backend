@@ -1,4 +1,5 @@
 package com.foodApp.httpHandler;
+import com.foodApp.service.UserService;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.OutputStream;

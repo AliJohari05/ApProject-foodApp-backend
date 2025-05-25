@@ -44,7 +44,9 @@ public class User {
 
     @Column(name = "profile_image_url")
     private String profileImageUrl;
-
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private Status status;
     // === Getters and Setters ===
 
     public int getUserId() {
@@ -142,4 +144,11 @@ public class User {
         this.profileImageUrl = profileImageUrl;
     }
 
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
 }

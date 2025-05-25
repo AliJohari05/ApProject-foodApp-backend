@@ -15,4 +15,6 @@ public interface UserService {
     List<User> findAllUsers();
     void delete(int id);
     boolean phoneExists(String phone);
+
+    boolean updateUserStatus(int userId, String status);
 }
