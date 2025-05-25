@@ -78,4 +78,15 @@ public class UserServiceImpl implements UserService {
         return true;
 
     }
+
+    @Override
+    public boolean updateUserStatus(int userId, String status) {
+        User user = userRepo.findById(userId);
+        if (user == null) {
+            return false;
+        }
+        user.setStatus(status);
+        userRepo.save(user);
+        return true;
+    }
 }
