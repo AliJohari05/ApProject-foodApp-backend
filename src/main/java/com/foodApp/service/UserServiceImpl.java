@@ -13,13 +13,14 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepo = new UserRepositoryImp();
     @Override
-    public void registerUser(User user) {
+    public User registerUser(User user) {
         User checkPhoneUser = userRepo.findByPhone(user.getPhone());
         if (checkPhoneUser != null) {
             throw new DuplicatePhoneException("Phone number already in use");
         }
-        userRepo.save(user);
+        return userRepo.save(user);
     }
+
     @Override
     public User findById(int id) {
         return userRepo.findById(id);

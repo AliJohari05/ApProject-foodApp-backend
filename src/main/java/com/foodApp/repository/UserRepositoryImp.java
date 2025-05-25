@@ -12,12 +12,13 @@ import java.util.List;
 
 public class UserRepositoryImp  implements UserRepository {
     @Override
-    public void save(User user) {
+    public User save(User user) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.merge(user);
+            User savedUser = (User) session.merge(user);
             tx.commit();
+            return savedUser;
         } catch (Exception e) {
             if (tx != null && tx.isActive()) {
                 tx.rollback();
@@ -25,7 +26,6 @@ public class UserRepositoryImp  implements UserRepository {
             throw e;
         }
     }
-
     @Override
     public User findById(int id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
