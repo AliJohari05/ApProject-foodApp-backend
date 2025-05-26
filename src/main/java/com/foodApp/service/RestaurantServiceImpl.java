@@ -7,12 +7,15 @@ import com.foodApp.repository.RestaurantRepositoryImp;
 
 import java.util.List;
 
+import java.time.LocalDateTime;
+
 public class RestaurantServiceImpl implements RestaurantService {
     private final RestaurantRepository restaurantRepo = new RestaurantRepositoryImp();
     @Override
-    public void registerRestaurant(Restaurant restaurant) {
+    public Restaurant registerRestaurantAndReturn(Restaurant restaurant) {
         restaurant.setApproved(false);
-        restaurantRepo.save(restaurant);
+
+        return restaurantRepo.save(restaurant);
     }
 
     @Override
@@ -31,14 +34,34 @@ public class RestaurantServiceImpl implements RestaurantService {
     }
 
     @Override
-    public void updateRestaurant(Restaurant restaurant) {
-        Restaurant existing = restaurantRepo.findById(restaurant.getId());
-        if (existing != null) {
-            restaurantRepo.save(restaurant);
+    public Restaurant updateRestaurantAndReturn(Restaurant restaurantToUpdate) {
+        Restaurant existingRestaurant = restaurantRepo.findById(restaurantToUpdate.getId());
+        if (existingRestaurant != null) {
+            // کپی کردن فیلدهای قابل تغییر از restaurantToUpdate به existingRestaurant
+            // Handler مسئول بررسی این است که کدام فیلدها اجازه آپدیت دارند
+            if (restaurantToUpdate.getName() != null) {
+                existingRestaurant.setName(restaurantToUpdate.getName());
+            }
+            if (restaurantToUpdate.getAddress() != null) {
+                existingRestaurant.setAddress(restaurantToUpdate.getAddress());
+            }
+            if (restaurantToUpdate.getPhone() != null) {
+                existingRestaurant.setPhone(restaurantToUpdate.getPhone());
+            }
+            if (restaurantToUpdate.getLogobase64() != null) {
+                existingRestaurant.setLogobase64(restaurantToUpdate.getLogobase64());
+            }
+            if (restaurantToUpdate.getTaxFee() != null) {
+                existingRestaurant.setTaxFee(restaurantToUpdate.getTaxFee());
+            }
+            if (restaurantToUpdate.getAdditionalFee() != null) {
+                existingRestaurant.setAdditionalFee(restaurantToUpdate.getAdditionalFee());
+            }
+            existingRestaurant.setUpdatedAt(LocalDateTime.now());
+            return restaurantRepo.save(existingRestaurant);
         } else {
-            throw new RestaurantNotFoundException("Restaurant not found");
+            throw new RestaurantNotFoundException("Restaurant with ID " + restaurantToUpdate.getId() + " not found for update.");
         }
-
     }
 
     @Override

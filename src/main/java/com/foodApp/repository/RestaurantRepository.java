@@ -5,7 +5,7 @@ import com.foodApp.model.Restaurant;
 import java.util.List;
 
 public interface RestaurantRepository {
-    void save(Restaurant restaurant);
+    Restaurant save(Restaurant restaurant);
     Restaurant findById(int id);
     List<Restaurant> findAllApproved();
     List<Restaurant> findByOwnerId(int ownerId);

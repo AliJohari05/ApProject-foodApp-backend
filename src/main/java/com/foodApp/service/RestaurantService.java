@@ -5,10 +5,10 @@ import com.foodApp.model.Restaurant;
 import java.util.List;
 
 public interface RestaurantService {
-    void registerRestaurant(Restaurant restaurant);
+    Restaurant registerRestaurantAndReturn(Restaurant restaurant);
     void approveRestaurant(int  restaurantId);
     void deleteRestaurant(int  restaurantId);
-    void updateRestaurant(Restaurant restaurant);
+    Restaurant updateRestaurantAndReturn(Restaurant restaurant);
     List<Restaurant> getAllApprovedRestaurants();
     List<Restaurant> getRestaurantByOwnerId(int OwnerId);
 }

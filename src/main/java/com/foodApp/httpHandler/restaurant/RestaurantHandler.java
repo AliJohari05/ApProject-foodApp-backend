@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.httpHandler.BaseHandler;
 
 import com.foodApp.model.Role;
+import com.foodApp.model.Restaurant;
+import com.foodApp.model.User;
 
 import com.foodApp.service.RestaurantService;
 import com.foodApp.service.RestaurantServiceImpl;
@@ -24,7 +26,13 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+
+import java.util.Map;
+import java.util.HashMap;
 public class RestaurantHandler extends BaseHandler implements HttpHandler {
     private final RestaurantService restaurantService = new RestaurantServiceImpl();
     private final UserService userService = new UserServiceImpl();
@@ -80,10 +88,37 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 sendResponse(exchange, 403, Message.FORBIDDEN.get());
                 return;
             }
+            Restaurant restaurantModel = new Restaurant();
+            restaurantModel.setName(restaurantDto.getName());
+            restaurantModel.setAddress(restaurantDto.getAddress());
+            restaurantModel.setPhone(restaurantDto.getPhone());
+            restaurantModel.setLogobase64(restaurantDto.getLogoBase64());
+            restaurantModel.setTaxFee(restaurantDto.getTax_fee() != null ? restaurantDto.getTax_fee() : 0);
+            restaurantModel.setAdditionalFee(restaurantDto.getAdditional_fee() != null ? restaurantDto.getAdditional_fee() : 0);
 
-            restaurantService.registerRestaurant(restaurant);
+            int ownerId;
+            ownerId = Integer.parseInt(jwt.getSubject());
+
+            User owner = userService.findById(ownerId);
+            restaurantModel.setOwner(owner);
+            restaurantModel.setApproved(false);
+            restaurantModel.setCreatedAt(java.time.LocalDateTime.now());
+            restaurantModel.setUpdatedAt(java.time.LocalDateTime.now());
+
+
+            Restaurant savedRestaurant = restaurantService.registerRestaurantAndReturn(restaurantModel);
+
+
+            RestaurantDto responseDto = new RestaurantDto();
+            responseDto.setId(savedRestaurant.getId());
+            responseDto.setName(savedRestaurant.getName());
+            responseDto.setAddress(savedRestaurant.getAddress());
+            responseDto.setPhone(savedRestaurant.getPhone());
+            responseDto.setLogoBase64(savedRestaurant.getLogobase64());
+            responseDto.setTax_fee(savedRestaurant.getTaxFee());
+            responseDto.setAdditional_fee(savedRestaurant.getAdditionalFee());
+
             sendResponse(exchange, 201, Message.RESTAURANT_REGISTERED.get());
-
 
         }catch (Exception e){
             sendResponse(exchange, 500, "Error: " + e.getMessage());
