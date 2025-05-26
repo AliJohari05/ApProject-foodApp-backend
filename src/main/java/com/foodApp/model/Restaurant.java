@@ -17,11 +17,15 @@ public class Restaurant {
     @Column(nullable = false,length = 20,unique = true)
     private String phone;
 
-    @Column(name = "working_hours", nullable = false, length = 100)
-    private String workingHours;
 
     @Column(name = "logo_url", nullable = false)
     private String logobase64;
+
+    @Column(name = "tax_fee")
+    private Integer taxFee;
+
+    @Column(name = "additional_fee")
+    private Integer additionalFee;
 
     private boolean approved;
 
@@ -66,18 +70,25 @@ public class Restaurant {
         this.phone = phone;
     }
 
-    public String getWorkingHours() {
-        return workingHours;
-    }
-    public void setWorkingHours(String workingHours) {
-        this.workingHours = workingHours;
-    }
-
     public String getLogobase64() {
         return logobase64;
     }
     public void setLogobase64(String logobase64) {
         this.logobase64 = logobase64;
+    }
+
+    public Integer getTaxFee() {
+        return taxFee;
+    }
+    public void setTaxFee(Integer taxFee) {
+        this.taxFee = taxFee;
+    }
+
+    public Integer getAdditionalFee() {
+        return additionalFee;
+    }
+    public void setAdditionalFee(Integer additionalFee) {
+        this.additionalFee = additionalFee;
     }
 
     public boolean isApproved() {
