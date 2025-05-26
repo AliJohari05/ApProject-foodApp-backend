@@ -2,28 +2,27 @@ package com.foodApp.dto;
 
 import com.foodApp.model.TransactionModel;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class TransactionDto {
     private int id;
-    private double amount;
+    private BigDecimal amount;
     private String method;
     private String status;
-    private LocalDateTime createdAt;
 
     public TransactionDto(TransactionModel trx) {
         this.id = trx.getId();
         this.amount = trx.getAmount();
         this.method = trx.getMethod().name();
         this.status = trx.getStatus().name();
-        this.createdAt = trx.getCreatedAt();
     }
 
     public int getId() {
         return id;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
@@ -35,11 +34,4 @@ public class TransactionDto {
         return status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }

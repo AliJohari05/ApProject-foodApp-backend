@@ -2,18 +2,19 @@ package com.foodApp.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
-@Table(name="transactions")
+@Table(name = "transactions")
 public class TransactionModel {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    @Column(name = "user_id")
     private int userId;
-
+    @Column(name = "order_id")
     private Integer orderId;
 
     @Enumerated(EnumType.STRING)
@@ -22,14 +23,26 @@ public class TransactionModel {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
-    private double amount;
-
+    private BigDecimal amount;
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    // Default constructor
     public TransactionModel() {
         this.createdAt = LocalDateTime.now();
     }
-    //Getter and Setter
+
+    // Full constructor
+    public TransactionModel(int userId, int orderId, String method, String status, BigDecimal amount) {
+        this.userId = userId;
+        this.orderId = orderId;
+        this.method = PaymentMethod.valueOf(method.toUpperCase());
+        this.status = PaymentStatus.valueOf(status.toUpperCase());
+        this.amount = amount;
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Getters and Setters
 
     public int getId() {
         return id;
@@ -55,12 +68,12 @@ public class TransactionModel {
         this.orderId = orderId;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public PaymentMethod getMethod() {
+        return method;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setMethod(PaymentMethod method) {
+        this.method = method;
     }
 
     public PaymentStatus getStatus() {
@@ -71,19 +84,19 @@ public class TransactionModel {
         this.status = status;
     }
 
-    public PaymentMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(PaymentMethod method) {
-        this.method = method;
-    }
-
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

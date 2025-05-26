@@ -7,20 +7,25 @@ import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.TransactionModel;
 import com.foodApp.model.PaymentMethod;
 import com.foodApp.model.PaymentStatus;
+import com.foodApp.model.User;
 import com.foodApp.security.TokenService;
 import com.foodApp.service.TransactionService;
 import com.foodApp.service.TransactionServiceImpl;
+import com.foodApp.service.UserService;
+import com.foodApp.service.UserServiceImpl;
 import com.foodApp.util.Message;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class WalletTopUpHandler extends BaseHandler implements HttpHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final TransactionService transactionService = new TransactionServiceImpl();
+    private final UserService userService = new UserServiceImpl();
 
     @Override
     public void handle(HttpExchange exchange) {
@@ -56,11 +61,16 @@ public class WalletTopUpHandler extends BaseHandler implements HttpHandler {
             TransactionModel transaction = new TransactionModel();
             transaction.setUserId(userId);
             transaction.setAmount(dto.getAmount());
-            transaction.setMethod(PaymentMethod.valueOf(dto.getMethod().toUpperCase()));
+            transaction.setMethod(PaymentMethod.ONLINE);
             transaction.setStatus(PaymentStatus.SUCCESS);
-            transaction.setCreatedAt(new Date());
+            transaction.setCreatedAt(LocalDateTime.now());
 
             transactionService.save(transaction);
+
+            User user = userService.findById(userId);
+            user.setWalletBalance(user.getWalletBalance().add(dto.getAmount()));
+            userService.updateUser(user);
+
             sendResponse(exchange, 200, Message.WALLET_TOPPED_UP.get());
 
         } catch (Exception e) {

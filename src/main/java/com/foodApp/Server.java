@@ -1,10 +1,8 @@
 package com.foodApp;
 
 import com.foodApp.httpHandler.admin.AdminUserHandler;
+import com.foodApp.httpHandler.order.PaymentHandler;
 import com.foodApp.httpHandler.order.TransactionHistoryHandler;
-import com.foodApp.httpHandler.restaurant.ApproveRestaurantByAdminHandler;
-import com.foodApp.httpHandler.restaurant.ApprovedRestaurantHandler;
-import com.foodApp.httpHandler.restaurant.GetRestaurantsByOwnerHandler;
 import com.foodApp.httpHandler.restaurant.RegisterRestaurantHandler;
 import com.foodApp.httpHandler.user.LoginHandler;
 import com.foodApp.httpHandler.user.LogoutHandler;
@@ -31,7 +29,7 @@ public class Server {
             server.createContext("/restaurants/mine", new RegisterRestaurantHandler());
             server.createContext("/transactions", new TransactionHistoryHandler());
             server.createContext("/wallet/top-up", new WalletTopUpHandler());
-            //server.createContext("/payment/online", new ApprovedRestaurantHandler());
+            server.createContext("/payment/online", new PaymentHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());

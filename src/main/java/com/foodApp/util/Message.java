@@ -18,7 +18,8 @@ public enum Message {
     LOGOUT_SUCCESS("User logged out successfully"),
     ERROR_404("Resource not found"),
     STATUS_UPDATED("Status updated"),
-    WALLET_TOPPED_UP("Wallet topped up successfully");
+    WALLET_TOPPED_UP("Wallet topped up successfully"),
+    PAYMENT_SUCCESS("Payment successful");
 
 
 

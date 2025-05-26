@@ -2,6 +2,8 @@ package com.foodApp.model;
 import com.foodApp.dto.BankInfoDto;
 import com.foodApp.dto.UserProfileDto;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
@@ -44,10 +46,22 @@ public class User {
 
     @Column(name = "profile_image_url")
     private String profileImageUrl;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
+
+    @Column(name = "wallet_balance")
+    private BigDecimal walletBalance = BigDecimal.valueOf(0.0);
     // === Getters and Setters ===
+
+    public BigDecimal getWalletBalance() {
+        return walletBalance;
+    }
+
+    public void setWalletBalance(BigDecimal walletBalance) {
+        this.walletBalance = walletBalance;
+    }
 
     public int getUserId() {
         return userId;

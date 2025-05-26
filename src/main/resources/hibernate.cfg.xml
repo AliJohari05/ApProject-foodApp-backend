@@ -30,6 +30,8 @@
         <mapping class="com.foodApp.model.OrderItem"/>
         <mapping class="com.foodApp.model.Category"/>
         <mapping class="com.foodApp.model.Delivery"/>
+        <mapping class="com.foodApp.model.TransactionModel"/>
+
 
     </session-factory>
 </hibernate-configuration>
