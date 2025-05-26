@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class TransactionDto {
     private int id;
-    private int amount;
+    private double amount;
     private String method;
     private String status;
     private LocalDateTime createdAt;
@@ -23,7 +23,7 @@ public class TransactionDto {
         return id;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 

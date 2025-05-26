@@ -12,6 +12,7 @@ import com.foodApp.httpHandler.user.ProfileHandler;
 import com.foodApp.httpHandler.user.SignUpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.foodApp.httpHandler.restaurant.menuItemHandler;
+import com.foodApp.httpHandler.order.WalletTopUpHandler;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -29,7 +30,7 @@ public class Server {
             server.createContext("/restaurants", new RegisterRestaurantHandler());
             server.createContext("/restaurants/mine", new RegisterRestaurantHandler());
             server.createContext("/transactions", new TransactionHistoryHandler());
-            //server.createContext("/wallet/top-up", new ApprovedRestaurantHandler());
+            server.createContext("/wallet/top-up", new WalletTopUpHandler());
             //server.createContext("/payment/online", new ApprovedRestaurantHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());

@@ -3,6 +3,7 @@ package com.foodApp.model;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name="transactions")
@@ -21,7 +22,7 @@ public class TransactionModel {
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
 
-    private int amount;
+    private double amount;
 
     private LocalDateTime createdAt;
 
@@ -58,7 +59,7 @@ public class TransactionModel {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -78,11 +79,11 @@ public class TransactionModel {
         this.method = method;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 }

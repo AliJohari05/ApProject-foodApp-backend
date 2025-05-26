@@ -16,7 +16,9 @@ public enum Message {
     UNSUPPORTED_MEDIA_TYPE("Unsupported media type"),
     FORBIDDEN("Forbidden request"),
     LOGOUT_SUCCESS("User logged out successfully"),
-    ERROR_404("Resource not found"), STATUS_UPDATED("Status updated");
+    ERROR_404("Resource not found"),
+    STATUS_UPDATED("Status updated"),
+    WALLET_TOPPED_UP("Wallet topped up successfully");
 
 
 
