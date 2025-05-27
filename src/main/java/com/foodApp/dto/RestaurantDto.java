@@ -79,9 +79,11 @@ public class RestaurantDto {
     }
 
     public boolean hasRequiredFields() {
-        return name != null && !name.isBlank() &&
+        return  name != null && !name.isBlank() &&
                 address != null && !address.isBlank() &&
-                phone != null && !phone.isBlank();
+                phone != null && !phone.isBlank() &&
+                logoBase64 != null && !logoBase64.isBlank() &&
+                tax_fee != null && additional_fee != null;
     }
 
     public String validateFields() {
@@ -91,10 +93,10 @@ public class RestaurantDto {
         if (phone != null && !Pattern.matches("^\\d{11}$", phone)) {
             return "invalid phone: must be 11 digits.";
         }
-        if (tax_fee < 0) {
+        if (tax_fee != null && tax_fee < 0) {
             return "invalid tax_fee: cannot be negative.";
         }
-        if (additional_fee < 0) {
+        if (additional_fee != null && additional_fee < 0) {
             return "invalid additional_fee: cannot be negative.";
         }
         return null;
