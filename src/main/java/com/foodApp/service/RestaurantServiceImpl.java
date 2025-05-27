@@ -37,8 +37,6 @@ public class RestaurantServiceImpl implements RestaurantService {
     public Restaurant updateRestaurantAndReturn(Restaurant restaurantToUpdate) {
         Restaurant existingRestaurant = restaurantRepo.findById(restaurantToUpdate.getId());
         if (existingRestaurant != null) {
-            // کپی کردن فیلدهای قابل تغییر از restaurantToUpdate به existingRestaurant
-            // Handler مسئول بررسی این است که کدام فیلدها اجازه آپدیت دارند
             if (restaurantToUpdate.getName() != null) {
                 existingRestaurant.setName(restaurantToUpdate.getName());
             }
