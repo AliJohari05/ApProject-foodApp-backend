@@ -21,7 +21,8 @@ public class UserProfileDto {
         this.address = user.getAddress();
         this.role = user.getRole().name();
         this.profileImageUrl = user.getProfileImageUrl();
-
+        this.walletBalance = user.getWalletBalance();
+        
         if (user.getBankName() != null && user.getAccountNumber() != null) {
             this.bankInfo = new BankInfoDto(user.getBankName(), user.getAccountNumber());
         }
