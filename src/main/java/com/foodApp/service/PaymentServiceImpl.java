@@ -37,7 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
             userRepo.save(user);
         }
 
-        order.setStatus("completed");
+        order.setStatus(OrderStatus.DELIVERED_TO_CUSTOMER);
         orderRepo.save(order);
 
         TransactionModel transaction = new TransactionModel(
