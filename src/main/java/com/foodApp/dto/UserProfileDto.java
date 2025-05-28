@@ -52,4 +52,12 @@ public class UserProfileDto {
 
     public BankInfoDto getBankInfo() { return bankInfo; }
     public void setBankInfo(BankInfoDto bankInfo) { this.bankInfo = bankInfo; }
+
+    public BigDecimal getWalletBalance() {
+        return walletBalance;
+    }
+
+    public void setWalletBalance(BigDecimal walletBalance) {
+        this.walletBalance = walletBalance;
+    }
 }
