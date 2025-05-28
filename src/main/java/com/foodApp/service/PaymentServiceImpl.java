@@ -2,6 +2,7 @@ package com.foodApp.service;
 
 import com.foodApp.exception.InsufficientBalanceException;
 import com.foodApp.model.Order;
+import com.foodApp.model.OrderStatus;
 import com.foodApp.model.TransactionModel;
 import com.foodApp.model.User;
 import com.foodApp.repository.OrderRepository;

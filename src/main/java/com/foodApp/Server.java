@@ -1,6 +1,9 @@
 package com.foodApp;
 
 import com.foodApp.httpHandler.admin.AdminUserHandler;
+import com.foodApp.httpHandler.courier.AvailableDeliveriesHandler;
+import com.foodApp.httpHandler.courier.DeliveryHistoryHandler;
+import com.foodApp.httpHandler.courier.DeliveryStatusUpdateHandler;
 import com.foodApp.httpHandler.order.PaymentHandler;
 import com.foodApp.httpHandler.order.TransactionHistoryHandler;
 import com.foodApp.httpHandler.restaurant.RegisterRestaurantHandler;
@@ -30,7 +33,10 @@ public class Server {
             server.createContext("/transactions", new TransactionHistoryHandler());
             server.createContext("/wallet/top-up", new WalletTopUpHandler());
             server.createContext("/payment/online", new PaymentHandler());
-            //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
+            server.createContext("/deliveries/available", new AvailableDeliveriesHandler());
+            server.createContext("/deliveries", new DeliveryStatusUpdateHandler());
+            server.createContext("/deliveries/history", new DeliveryHistoryHandler());
+
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
