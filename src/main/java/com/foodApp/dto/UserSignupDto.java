@@ -1,6 +1,9 @@
 package com.foodApp.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.foodApp.model.Role;
+import com.foodApp.model.Status;
+import com.foodApp.model.User;
 
 import java.util.regex.Pattern;
 
@@ -45,15 +48,22 @@ public class UserSignupDto {
     public BankInfoDto getBankInfo() { return bankInfo; }
     public void setBankInfo(BankInfoDto bankInfo) { this.bankInfo = bankInfo; }
 
-    public static com.foodApp.model.User toUser(UserSignupDto dto) {
-        com.foodApp.model.User user = new com.foodApp.model.User();
+    public static User toUser(UserSignupDto dto) {
+        User user = new User();
         user.setName(dto.fullName);
         user.setPhone(dto.phone);
         user.setEmail(dto.email);
         user.setPassword(dto.password);
         user.setAddress(dto.address);
         user.setProfileImageUrl(dto.profileImageBase64);
-        user.setRole(com.foodApp.model.Role.valueOf(dto.role.toUpperCase()));
+        Role userRole = Role.valueOf(dto.role.toUpperCase());
+        user.setRole(userRole);
+
+        if (userRole == Role.SELLER || userRole == Role.DELIVERY) {
+            user.setStatus(Status.PENDING_APPROVAL);
+        } else {
+            user.setStatus(Status.APPROVED);
+        }
         if (dto.bankInfo != null) {
             user.setBankName(dto.bankInfo.getBankName());
             user.setAccountNumber(dto.bankInfo.getAccountNumber());

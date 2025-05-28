@@ -3,6 +3,8 @@ package com.foodApp.httpHandler.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.UserLoginDto;
 import com.foodApp.dto.UserProfileDto;
+import com.foodApp.model.Role;
+import com.foodApp.model.Status;
 import com.foodApp.model.User;
 import com.foodApp.security.TokenService;
 import com.foodApp.service.UserService;
@@ -42,7 +44,13 @@ public class LoginHandler extends BaseHandler implements HttpHandler {
                 sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
                 return;
             }
-
+            // Check status for SELLER and DELIVERY roles
+            if (user.getRole() == Role.SELLER || user.getRole() == Role.DELIVERY) {
+                if (user.getStatus() != Status.APPROVED) {
+                    sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                    return;
+                }
+            }
             String token = TokenService.generateToken(String.valueOf(user.getUserId()), user.getRole().name());
             UserProfileDto userDto = new UserProfileDto(user);
 

@@ -1,15 +1,18 @@
 package com.foodApp.model;
 
+import com.foodApp.exception.InvalidStatusValueException;
+
 public enum Status {
     APPROVED,
-    REJECTED;
+    REJECTED,
+    PENDING_APPROVAL;
 
     public static boolean isValid(String value) {
         try {
             Status.valueOf(value.toUpperCase());
             return true;
-        } catch (IllegalArgumentException e) {
-            return false;
+        } catch (InvalidStatusValueException e) {
+            throw new InvalidStatusValueException(e.getMessage(),e);
         }
     }
 }
