@@ -2,6 +2,8 @@ package com.foodApp.dto;
 
 import com.foodApp.model.User;
 
+import java.math.BigDecimal;
+
 public class UserProfileDto {
     private String id;
     private String fullName;
@@ -11,6 +13,8 @@ public class UserProfileDto {
     private String role;
     private String profileImageUrl;
     private BankInfoDto bankInfo;
+    private BigDecimal walletBalance;
+    private String status;
     public UserProfileDto() {
     }
     public UserProfileDto(User user) {
@@ -22,7 +26,8 @@ public class UserProfileDto {
         this.role = user.getRole().name();
         this.profileImageUrl = user.getProfileImageUrl();
         this.walletBalance = user.getWalletBalance();
-        
+        this.status = user.getStatus().name();
+
         if (user.getBankName() != null && user.getAccountNumber() != null) {
             this.bankInfo = new BankInfoDto(user.getBankName(), user.getAccountNumber());
         }
@@ -59,5 +64,13 @@ public class UserProfileDto {
 
     public void setWalletBalance(BigDecimal walletBalance) {
         this.walletBalance = walletBalance;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
