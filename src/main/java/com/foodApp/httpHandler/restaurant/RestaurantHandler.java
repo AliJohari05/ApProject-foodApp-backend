@@ -50,6 +50,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
             sendResponse(exchange, 404, Message.ERROR_404.get());
         }
     }
+
     private void handlePostRestaurant(HttpExchange exchange) throws IOException {
         try{
             if(!exchange.getRequestMethod().equalsIgnoreCase("POST")){
@@ -92,7 +93,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 jwt =TokenService.verifyToken(token);
             }
             catch (Exception e){
-                sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+                sendResponse(exchange,401,Message.FORBIDDEN.get());
                 return;
             }
             String userRole = jwt.getClaim("role").asString();

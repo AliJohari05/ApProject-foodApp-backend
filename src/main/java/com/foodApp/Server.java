@@ -3,6 +3,7 @@ package com.foodApp;
 import com.foodApp.httpHandler.admin.AdminUserHandler;
 import com.foodApp.httpHandler.order.PaymentHandler;
 import com.foodApp.httpHandler.order.TransactionHistoryHandler;
+import com.foodApp.httpHandler.restaurant.RestaurantGetHandler;
 import com.foodApp.httpHandler.restaurant.RestaurantHandler;
 import com.foodApp.httpHandler.user.LoginHandler;
 import com.foodApp.httpHandler.user.LogoutHandler;
@@ -27,6 +28,7 @@ public class Server {
             server.createContext("/admin/users/", new AdminUserHandler());
             server.createContext("/restaurants", new RestaurantHandler());
             server.createContext("/restaurants/", new RestaurantHandler());
+            server.createContext("/restaurants/mine", new RestaurantGetHandler());
             server.createContext("/transactions", new TransactionHistoryHandler());
             server.createContext("/wallet/top-up", new WalletTopUpHandler());
             server.createContext("/payment/online", new PaymentHandler());
