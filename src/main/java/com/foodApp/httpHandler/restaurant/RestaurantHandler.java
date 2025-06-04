@@ -113,7 +113,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
 
             User owner = userService.findById(ownerId);
             restaurantModel.setOwner(owner);
-            restaurantModel.setApproved(false);
+            restaurantModel.setApproved(true);
             restaurantModel.setCreatedAt(java.time.LocalDateTime.now());
             restaurantModel.setUpdatedAt(java.time.LocalDateTime.now());
 

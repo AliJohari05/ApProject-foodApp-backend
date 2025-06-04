@@ -36,6 +36,9 @@ public class Server {
             server.createContext("/deliveries/available", new AvailableDeliveriesHandler());
             server.createContext("/deliveries", new DeliveryStatusUpdateHandler());
             server.createContext("/deliveries/history", new DeliveryHistoryHandler());
+            server.createContext("/vendors", new DeliveryHistoryHandler());
+            server.createContext("/vendors/", new DeliveryHistoryHandler());
+
 
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());

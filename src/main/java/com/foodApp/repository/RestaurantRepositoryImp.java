@@ -43,6 +43,55 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
     }
 
     @Override
+    public List<Restaurant> findApprovedByFilters(String search, List<String> keywords) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            StringBuilder hql = new StringBuilder("SELECT DISTINCT r FROM Restaurant r");
+
+            boolean hasSearch = search != null && !search.isBlank();
+            boolean hasKeywords = keywords != null && !keywords.isEmpty();
+
+            if (hasSearch || hasKeywords) {
+                hql.append(" WHERE ");
+            }
+
+            if (hasSearch) {
+                hql.append("(LOWER(r.name) LIKE :searchTerm OR LOWER(r.address) LIKE :searchTerm OR LOWER(r.phone) LIKE :searchTerm)");
+            }
+
+            if (hasKeywords) {
+                if (hasSearch) {
+                    hql.append(" AND ");
+                }
+                hql.append("r.id IN (SELECT mi.restaurant.id FROM MenuItem mi JOIN mi.category mc WHERE ");
+                for (int i = 0; i < keywords.size(); i++) {
+                    if (i > 0) {
+                        hql.append(" OR ");
+                    }
+                    hql.append("LOWER(mi.keywords) LIKE :keyword").append(i)
+                            .append(" OR LOWER(mc.title) LIKE :keyword").append(i);
+                }
+                hql.append(")");
+            }
+
+            Query<Restaurant> query = session.createQuery(hql.toString(), Restaurant.class);
+
+            if (hasSearch) {
+                query.setParameter("searchTerm", "%" + search.toLowerCase() + "%");
+            }
+
+            if (hasKeywords) {
+                for (int i = 0; i < keywords.size(); i++) {
+                    query.setParameter("keyword" + i, "%" + keywords.get(i).toLowerCase() + "%");
+                }
+            }
+
+            return query.list();
+        } catch (Exception e) {
+            throw new DatabaseException("Error finding approved restaurants by filters", e);
+        }
+    }
+
+    @Override
     public List<Restaurant> findByOwnerId(int ownerId) {
         try(Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query <Restaurant> query = session.createQuery("From Restaurant where owner = :ownerId", Restaurant.class);
