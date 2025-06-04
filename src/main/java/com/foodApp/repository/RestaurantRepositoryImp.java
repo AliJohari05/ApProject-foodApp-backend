@@ -14,12 +14,13 @@ import org.hibernate.query.Query;
 public class RestaurantRepositoryImp implements RestaurantRepository {
 
     @Override
-    public void save(Restaurant restaurant) {
+    public Restaurant save(Restaurant restaurant) {
         Transaction tx = null;
         try(Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             session.persist(restaurant);
             tx.commit();
+            return restaurant;
         }catch(Exception e) {
             if(tx != null) tx.rollback();
             throw new DatabaseException("Error saving restaurant", e);
