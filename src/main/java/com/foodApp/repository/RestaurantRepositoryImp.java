@@ -45,13 +45,13 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
     @Override
     public List<Restaurant> findApprovedByFilters(String search, List<String> keywords) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            StringBuilder hql = new StringBuilder("SELECT DISTINCT r FROM Restaurant r");
+            StringBuilder hql = new StringBuilder("SELECT DISTINCT r FROM Restaurant r WHERE r.approved = true"); // تغییر در اینجا
 
             boolean hasSearch = search != null && !search.isBlank();
             boolean hasKeywords = keywords != null && !keywords.isEmpty();
 
             if (hasSearch || hasKeywords) {
-                hql.append(" WHERE ");
+                hql.append(" AND ");
             }
 
             if (hasSearch) {

@@ -1,6 +1,7 @@
 package com.foodApp;
 
 import com.foodApp.httpHandler.admin.AdminUserHandler;
+import com.foodApp.httpHandler.buyer.ListOfVendorsHandler;
 import com.foodApp.httpHandler.courier.AvailableDeliveriesHandler;
 import com.foodApp.httpHandler.courier.DeliveryHistoryHandler;
 import com.foodApp.httpHandler.courier.DeliveryStatusUpdateHandler;
@@ -36,8 +37,8 @@ public class Server {
             server.createContext("/deliveries/available", new AvailableDeliveriesHandler());
             server.createContext("/deliveries", new DeliveryStatusUpdateHandler());
             server.createContext("/deliveries/history", new DeliveryHistoryHandler());
-            server.createContext("/vendors", new DeliveryHistoryHandler());
-            server.createContext("/vendors/", new DeliveryHistoryHandler());
+            server.createContext("/vendors", new ListOfVendorsHandler());
+            //server.createContext("/vendors/", new DeliveryHistoryHandler());
 
 
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
