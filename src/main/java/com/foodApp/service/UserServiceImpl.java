@@ -8,6 +8,7 @@ import com.foodApp.model.Status;
 import com.foodApp.model.User;
 import com.foodApp.repository.UserRepository;
 import com.foodApp.repository.UserRepositoryImp;
+import com.foodApp.util.PasswordHasher; // Import the PasswordHasher
 import java.util.List;
 
 public class UserServiceImpl implements UserService {
@@ -18,6 +19,10 @@ public class UserServiceImpl implements UserService {
         if (checkPhoneUser != null) {
             throw new DuplicatePhoneException("Phone number already in use");
         }
+        // Hash the password before saving
+        String hashedPassword = PasswordHasher.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+
         return userRepo.save(user);
     }
 
@@ -37,7 +42,8 @@ public class UserServiceImpl implements UserService {
         if(user == null) {
             throw new UserNotFoundException("User not found");
         }
-        if(!user.getPassword().equals(password)) {
+        // Check the plain-text password against the hashed password
+        if(!PasswordHasher.checkPassword(password, user.getPassword())) {
             throw new InvalidPasswordException("Invalid password");
         }
         return user;

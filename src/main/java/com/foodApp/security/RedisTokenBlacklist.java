@@ -1,6 +1,7 @@
 package com.foodApp.security;
 
 import com.foodApp.config.RedisClient;
+import redis.clients.jedis.Jedis;
 
 public class RedisTokenBlacklist {
 
@@ -10,7 +11,13 @@ public class RedisTokenBlacklist {
         RedisClient.getInstance().setex(token, expirationSeconds, "blacklisted");
     }
 
+
     public static boolean isBlacklisted(String token) {
-        return RedisClient.getInstance().exists(token);
+        try (Jedis jedis = new Jedis("localhost", 6379)) {
+            return jedis.exists(token);
+        } catch (Exception e) {
+            System.err.println("Redis connection failed: " + e.getMessage());
+            return false;
+        }
     }
 }

@@ -40,7 +40,10 @@ public class LoginHandler extends BaseHandler implements HttpHandler {
             UserLoginDto dto = objectMapper.readValue(is, UserLoginDto.class);
 
             User user = userService.login(dto.getPhone(), dto.getPassword());
+            System.out.println("✅ User returned: " + user);
+
             if (user == null) {
+                System.out.println("User not found or password incorrect");
                 sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
                 return;
             }
@@ -52,6 +55,8 @@ public class LoginHandler extends BaseHandler implements HttpHandler {
                 }
             }
             String token = TokenService.generateToken(String.valueOf(user.getUserId()), user.getRole().name());
+            System.out.println("✅ Token generation passed");
+
             UserProfileDto userDto = new UserProfileDto(user);
 
             Map<String, Object> result = new HashMap<>();
@@ -59,8 +64,11 @@ public class LoginHandler extends BaseHandler implements HttpHandler {
             result.put("token", token);
             result.put("user", userDto);
 
+            System.out.println("✅ Login successful. Sending response...");
+
             sendResponse(exchange, 200, objectMapper.writeValueAsString(result));
         } catch (Exception e) {
+            System.err.println("❌ EXCEPTION: " + e.getMessage());
             e.printStackTrace();
             sendResponse(exchange, 500, Message.SERVER_ERROR.get());
         }
