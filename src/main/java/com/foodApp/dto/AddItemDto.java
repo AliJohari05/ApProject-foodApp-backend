@@ -2,14 +2,14 @@ package com.foodApp.dto;
 
 import java.util.List;
 
-public class MenuItemDto {
+public class AddItemDto {
 private Integer id;
 private String name;
 private String imageBase64;
 private String description;
 private Integer price;
 private Integer supply;
-private List<String> categories;
+private List<String> keywords;
 
     public Integer getId() {
         return id;
@@ -53,10 +53,10 @@ private List<String> categories;
         this.supply = supply;
     }
 
-    public List<String> getCategories() {
-        return categories;
+    public List<String> getKeywords() {
+        return keywords;
     }
-    public void setCategories(List<String> categories) {
-        this.categories = categories;
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
     }
 }

@@ -5,6 +5,7 @@ import com.foodApp.httpHandler.order.PaymentHandler;
 import com.foodApp.httpHandler.order.TransactionHistoryHandler;
 import com.foodApp.httpHandler.restaurant.RestaurantGetHandler;
 import com.foodApp.httpHandler.restaurant.RestaurantHandler;
+import com.foodApp.httpHandler.restaurant.RestaurantAddItemHandler;
 import com.foodApp.httpHandler.user.LoginHandler;
 import com.foodApp.httpHandler.user.LogoutHandler;
 import com.foodApp.httpHandler.user.ProfileHandler;
@@ -29,6 +30,7 @@ public class Server {
             server.createContext("/restaurants", new RestaurantHandler());
             server.createContext("/restaurants/", new RestaurantHandler());
             server.createContext("/restaurants/mine", new RestaurantGetHandler());
+            server.createContext("/restaurants/{id}/item", new RestaurantAddItemHandler());
             server.createContext("/transactions", new TransactionHistoryHandler());
             server.createContext("/wallet/top-up", new WalletTopUpHandler());
             server.createContext("/payment/online", new PaymentHandler());

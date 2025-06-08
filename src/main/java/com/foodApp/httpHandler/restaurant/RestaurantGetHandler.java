@@ -24,7 +24,6 @@ import java.util.List;
 
 public class RestaurantGetHandler extends BaseHandler implements HttpHandler {
     private final ObjectMapper objectMapper= new ObjectMapper();
-    private final UserService userService= new UserServiceImpl();
     private final RestaurantService restaurantService = new RestaurantServiceImpl();
     @Override
     public void handle(HttpExchange exchange) throws IOException {
