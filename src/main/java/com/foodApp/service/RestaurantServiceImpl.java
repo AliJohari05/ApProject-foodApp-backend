@@ -109,4 +109,9 @@ public class RestaurantServiceImpl implements RestaurantService {
     public List<Restaurant> getRestaurantByOwnerId(int OwnerId) {
         return restaurantRepo.findByOwnerId(OwnerId);
     }
+
+    @Override
+    public List<Restaurant> findApprovedByFilters(String search, List<String> keywords) {
+        return restaurantRepo.findApprovedByFilters(search, keywords);
+    }
 }

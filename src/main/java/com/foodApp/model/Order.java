@@ -19,8 +19,10 @@ public class Order {
     @JoinColumn(name = "restaurant_id",nullable = false)
     private Restaurant restaurant;
 
-    @Column(name = "status",length = 20,nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", length = 50, nullable = false)
+    private OrderStatus status;
+
 
     @Column(name = "total_price",nullable = false)
     private BigDecimal totalPrice;
@@ -66,11 +68,11 @@ public class Order {
         this.restaurant = restaurant;
     }
 
-    public String getStatus() {
+    public OrderStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(OrderStatus status) {
         this.status = status;
     }
 

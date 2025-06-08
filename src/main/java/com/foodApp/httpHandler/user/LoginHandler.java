@@ -3,6 +3,8 @@ package com.foodApp.httpHandler.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.UserLoginDto;
 import com.foodApp.dto.UserProfileDto;
+import com.foodApp.model.Role;
+import com.foodApp.model.Status;
 import com.foodApp.model.User;
 import com.foodApp.security.TokenService;
 import com.foodApp.service.UserService;
@@ -38,12 +40,23 @@ public class LoginHandler extends BaseHandler implements HttpHandler {
             UserLoginDto dto = objectMapper.readValue(is, UserLoginDto.class);
 
             User user = userService.login(dto.getPhone(), dto.getPassword());
+            System.out.println("✅ User returned: " + user);
+
             if (user == null) {
+                System.out.println("User not found or password incorrect");
                 sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
                 return;
             }
-
+            // Check status for SELLER and DELIVERY roles
+            if (user.getRole() == Role.SELLER || user.getRole() == Role.DELIVERY) {
+                if (user.getStatus() != Status.APPROVED) {
+                    sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                    return;
+                }
+            }
             String token = TokenService.generateToken(String.valueOf(user.getUserId()), user.getRole().name());
+            System.out.println("✅ Token generation passed");
+
             UserProfileDto userDto = new UserProfileDto(user);
 
             Map<String, Object> result = new HashMap<>();
@@ -51,8 +64,11 @@ public class LoginHandler extends BaseHandler implements HttpHandler {
             result.put("token", token);
             result.put("user", userDto);
 
+            System.out.println("✅ Login successful. Sending response...");
+
             sendResponse(exchange, 200, objectMapper.writeValueAsString(result));
         } catch (Exception e) {
+            System.err.println("❌ EXCEPTION: " + e.getMessage());
             e.printStackTrace();
             sendResponse(exchange, 500, Message.SERVER_ERROR.get());
         }

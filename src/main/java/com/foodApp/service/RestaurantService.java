@@ -16,4 +16,5 @@ public interface RestaurantService {
     Restaurant updateRestaurantForPut(int restaurantId, RestaurantDto restaurantDto, int ownerId) throws RestaurantNotFoundException, UnauthorizedAccessException;
     List<Restaurant> getAllApprovedRestaurants();
     List<Restaurant> getRestaurantByOwnerId(int OwnerId);
+    List<Restaurant> findApprovedByFilters(String search, List<String> keywords);
 }

@@ -19,7 +19,9 @@ public enum Message {
     ERROR_404("Resource not found"),
     STATUS_UPDATED("Status updated"),
     WALLET_TOPPED_UP("Wallet topped up successfully"),
-    PAYMENT_SUCCESS("Payment successful");
+    PAYMENT_SUCCESS("Payment successful"),
+    Delivery_ALREDY_ASSIGNED("Delivery already assigned"),
+    CHANGED_STATUS_SUCCESS("Changed status successfully");
 
 
 
