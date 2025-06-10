@@ -10,7 +10,7 @@ import java.util.Date;
 public class TokenService {
     private static final String SECRET = EnvUtil.get("JWT_SECRET");
     static {
-        System.out.println("🔍 JWT_SECRET from EnvUtil: " + SECRET);
+        System.out.println("JWT_SECRET from EnvUtil: " + SECRET);
     }
     private static final Algorithm ALGORITHM = Algorithm.HMAC256(SECRET);
     private static final long EXPIRATION_MS = 24 * 60 * 60 * 1000; // 24 hours
@@ -29,7 +29,7 @@ public class TokenService {
                     .withExpiresAt(expiresAt)
                     .sign(ALGORITHM);
         } catch (Exception e) {
-            System.err.println("❌ Token generation failed: " + e.getMessage());
+            System.err.println("Token generation failed: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Token generation failed", e);
         }
