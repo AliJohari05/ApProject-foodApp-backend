@@ -3,6 +3,8 @@ package com.foodApp.service;
 import com.foodApp.model.Restaurant;
 
 import com.foodApp.dto.RestaurantDto;
+import com.foodApp.dto.AddItemDto;
+import com.foodApp.model.MenuItem;
 import com.foodApp.exception.RestaurantNotFoundException;
 import com.foodApp.exception.UnauthorizedAccessException;
 
@@ -17,4 +19,5 @@ public interface RestaurantService {
     List<Restaurant> getAllApprovedRestaurants();
     List<Restaurant> getRestaurantByOwnerId(int OwnerId);
     List<Restaurant> findApprovedByFilters(String search, List<String> keywords);
+    MenuItem addMenuItemToRestaurant(Integer restaurantId, AddItemDto addItemDto, String ownerPhone);
 }

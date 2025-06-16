@@ -1,18 +1,24 @@
 package com.foodApp.service;
 
 import com.foodApp.dto.RestaurantDto;
-import com.foodApp.exception.RestaurantNotFoundException;
-import com.foodApp.exception.UnauthorizedAccessException;
+import com.foodApp.exception.*;
 import com.foodApp.model.Restaurant;
-import com.foodApp.repository.RestaurantRepository;
+import com.foodApp.model.MenuItem;
+import com.foodApp.model.User;
+import com.foodApp.dto.AddItemDto;
+import com.foodApp.repository.*;
 import com.foodApp.repository.RestaurantRepositoryImp;
 import com.foodApp.util.Message;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 import java.time.LocalDateTime;
 
 public class RestaurantServiceImpl implements RestaurantService {
     private final RestaurantRepository restaurantRepo = new RestaurantRepositoryImp();
+    private final UserRepository userRepository = new UserRepositoryImp();
+    private final MenuItemRepository menuItemRepository = new MenuItemRepositoryImp();
     @Override
     public Restaurant registerRestaurantAndReturn(Restaurant restaurant) {
         restaurant.setApproved(false);
@@ -113,5 +119,34 @@ public class RestaurantServiceImpl implements RestaurantService {
     @Override
     public List<Restaurant> findApprovedByFilters(String search, List<String> keywords) {
         return restaurantRepo.findApprovedByFilters(search, keywords);
+    }
+    @Override
+    public MenuItem addMenuItemToRestaurant(Integer restaurantId, AddItemDto addItemDto, String ownerPhone) {
+
+        Restaurant restaurant = restaurantRepo.findById(restaurantId);
+        if(restaurant == null){
+                throw new RestaurantNotFoundException("Restaurant with ID " + restaurantId + " not found.");
+        }
+
+        User owner = userRepository.findByPhone(ownerPhone);
+
+        if (owner == null) {
+            throw new UserNotFoundException("User with phone " + ownerPhone + " not found.");
+        }
+
+
+        if (restaurant.getOwner().getUserId() != owner.getUserId()) {
+            throw new UnauthorizedAccessException("User " + ownerPhone + " is not the owner of restaurant " + restaurantId);
+        }
+
+
+        MenuItem menuItem = new MenuItem();
+        menuItem.setName(addItemDto.getName());
+        menuItem.setDescription(addItemDto.getDescription());
+        menuItem.setPrice(BigDecimal.valueOf(addItemDto.getPrice()));
+        menuItem.setRestaurant(restaurant); // Link the item to the restaurant
+
+
+        return menuItemRepository.save(menuItem);
     }
 }

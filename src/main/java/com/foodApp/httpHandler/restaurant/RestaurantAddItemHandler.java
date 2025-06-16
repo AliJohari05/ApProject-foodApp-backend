@@ -4,7 +4,9 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.httpHandler.BaseHandler;
 
+import com.foodApp.dto.AddItemDto;
 import com.foodApp.model.Role;
+import com.foodApp.model.MenuItem;
 import com.foodApp.security.TokenService;
 import com.foodApp.service.RestaurantService;
 import com.foodApp.service.RestaurantServiceImpl;
@@ -41,9 +43,33 @@ public class RestaurantAddItemHandler extends BaseHandler implements HttpHandler
                 sendResponse(exchange, 403, Message.FORBIDDEN.get());
                 return;
             }
+            Integer restaurantId = getRestaurantIdFromPath(exchange);
+            if (restaurantId == null) {
+                sendResponse(exchange, 400, "{\"error\":\"Invalid `restaurantId` in path\"}");
+                return;
+            }
+            AddItemDto addItemDto = objectMapper.readValue(exchange.getRequestBody(), AddItemDto.class);
 
+            String userPhone = jwt.getSubject();
+
+            MenuItem newMenuItem = restaurantService.addMenuItemToRestaurant(restaurantId, addItemDto, userPhone);
+
+            String responseJson = objectMapper.writeValueAsString(newMenuItem);
+            sendResponse(exchange, 201, responseJson);
         } catch (Exception e) {
             sendResponse(exchange,500, Message.SERVER_ERROR.get());
         }
+    }
+    private Integer getRestaurantIdFromPath(HttpExchange exchange){
+    String path = exchange.getRequestURI().getPath();
+    String[] segments = path.split("/");
+    if(segments.length == 4 && segments[1].equals("restaurants") && segments[3].equals("item")){
+        try {
+            return Integer.parseInt(segments[2]);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+        return null;
     }
 }

@@ -28,7 +28,7 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
     }
 
     @Override
-    public Restaurant findById(int id) {
+    public Restaurant findById(Integer id) {
         try(Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.get(Restaurant.class, id);
         }
