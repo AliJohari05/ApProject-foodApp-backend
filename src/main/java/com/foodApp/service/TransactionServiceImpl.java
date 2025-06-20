@@ -19,4 +19,9 @@ public class TransactionServiceImpl implements TransactionService {
     public List<TransactionModel> getByUserId(int userId) {
         return repo.findByUserId(userId);
     }
+
+    @Override
+    public List<TransactionModel> findAll() {
+        return repo.findAll();
+    }
 }

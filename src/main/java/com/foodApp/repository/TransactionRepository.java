@@ -7,4 +7,5 @@ import java.util.List;
 public interface TransactionRepository {
     void save(TransactionModel transaction);
     List<TransactionModel> findByUserId(int userId);
+    List<TransactionModel> findAll();
 }
