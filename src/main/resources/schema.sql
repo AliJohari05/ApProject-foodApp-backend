@@ -1,4 +1,3 @@
-
 -- === Users Table ===
 CREATE TABLE users (
                        id SERIAL PRIMARY KEY,
@@ -62,13 +61,13 @@ CREATE TABLE menu_items (
 );
 
 CREATE TABLE menu_item_category(
-    menu_item_id INT NOT NULL
-    REFERENCES menu_items(id)
-    ON DELETE CASCADE,
-    category_id INT NOT NULL
-    REFERENCES categories(id)
-    ON DELETE CASCADE,
-    PRIMARY KEY (menu_item_id,category_id)
+                                   menu_item_id INT NOT NULL
+                                       REFERENCES menu_items(id)
+                                           ON DELETE CASCADE,
+                                   category_id INT NOT NULL
+                                       REFERENCES categories(id)
+                                           ON DELETE CASCADE,
+                                   PRIMARY KEY (menu_item_id,category_id)
 );
 -- === Orders Table ===
 CREATE TABLE orders (
@@ -115,12 +114,27 @@ CREATE TABLE deliveries (
                                 ON DELETE SET NULL
 );
 
+-- === Coupons Table ===
+CREATE TABLE coupons (
+                         id SERIAL PRIMARY KEY,
+                         coupon_code VARCHAR(50) UNIQUE NOT NULL,
+                         type VARCHAR(20) NOT NULL, -- 'fixed', 'percent'
+                         value DECIMAL(10,2) NOT NULL,
+                         min_price DECIMAL(10,2) DEFAULT 0.00,
+                         user_count INT DEFAULT 0, -- Max usage count, 0 for unlimited
+                         start_date TIMESTAMP NOT NULL,
+                         end_date TIMESTAMP NOT NULL,
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- === Trigger Function (shared for updated_at columns) ===
 CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
+    RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
-RETURN NEW;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -147,4 +161,8 @@ CREATE TRIGGER set_updated_at_orders
 
 CREATE TRIGGER set_updated_at_deliveries
     BEFORE UPDATE ON deliveries
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER set_updated_at_coupons
+    BEFORE UPDATE ON coupons
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

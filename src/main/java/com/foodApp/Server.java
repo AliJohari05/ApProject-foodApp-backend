@@ -3,6 +3,7 @@ package com.foodApp;
 import com.foodApp.httpHandler.admin.AdminOrdersHandler;
 import com.foodApp.httpHandler.admin.AdminTransactionsHandler;
 import com.foodApp.httpHandler.admin.AdminUserHandler;
+import com.foodApp.httpHandler.buyer.CouponHandler;
 import com.foodApp.httpHandler.buyer.ItemHandler;
 import com.foodApp.httpHandler.buyer.ListOfVendorsHandler;
 import com.foodApp.httpHandler.buyer.OrderHandler;
@@ -50,6 +51,7 @@ public class Server {
             server.createContext("/orders/history", new OrderHandler()); //should be completed
             server.createContext("/items", new ItemHandler());
             server.createContext("/items/", new ItemHandler());
+            server.createContext("/coupons", new CouponHandler());
 
 
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
