@@ -1,17 +1,28 @@
 package com.foodApp.httpHandler.admin;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Role;
 import com.foodApp.security.TokenService;
 import com.foodApp.util.Message;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import org.hibernate.query.sqm.mutation.internal.Handler;
+import com.foodApp.service.OrderService;
+import com.foodApp.service.OrderServiceImpl;
+import com.foodApp.util.QueryParser;
+import com.foodApp.model.Order;
+import com.foodApp.model.OrderStatus;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Collections;
+
 
 public class AdminOrdersHandler extends BaseHandler implements HttpHandler {
+    private final OrderService orderService = new OrderServiceImpl();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -38,14 +49,32 @@ public class AdminOrdersHandler extends BaseHandler implements HttpHandler {
                 return;
             }
 
+            // Extract query parameters
+            Map<String, String> queryParams = QueryParser.parse(exchange.getRequestURI().getRawQuery());
+            String search = queryParams.get("search");
+            String vendor = queryParams.get("vendor");
+            String courier = queryParams.get("courier");
+            String customer = queryParams.get("customer");
+            String statusString = queryParams.get("status");
 
+            OrderStatus status = null;
+            if (statusString != null && !statusString.isBlank()) {
+                try {
+                    status = OrderStatus.fromString(statusString);
+                } catch (IllegalArgumentException e) {
+                    sendResponse(exchange, 400, "{\"error\":\"Invalid status value: " + statusString + "\"}");
+                    return;
+                }
+            }
 
+            List<Order> orders;
+            orders = orderService.findAllOrdersWithFilters(search, vendor, courier, customer, status);
 
-
-
-
+            String jsonResponse = objectMapper.writeValueAsString(orders);
+            sendResponse(exchange, 200, jsonResponse);
 
         } catch (Exception e) {
+            e.printStackTrace();
             sendResponse(exchange,500,Message.SERVER_ERROR.get());
         }
 
