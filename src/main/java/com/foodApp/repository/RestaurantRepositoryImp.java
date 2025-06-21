@@ -100,6 +100,15 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
     }
 
     @Override
+    public Restaurant findByIdSeller(int id) {
+        try(Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Restaurant> query = session.createQuery("From Restaurant where id = :id", Restaurant.class);
+            query.setParameter("id", id);
+            return query.uniqueResult();
+        }
+    }
+
+    @Override
     public void deleteById(int id) {
         Transaction tx = null;
         try(Session session = HibernateUtil.getSessionFactory().openSession()) {

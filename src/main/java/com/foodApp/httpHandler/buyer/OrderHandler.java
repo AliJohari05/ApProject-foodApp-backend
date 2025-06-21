@@ -12,10 +12,11 @@ import com.foodApp.service.OrderServiceImpl;
 import com.foodApp.util.Message;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import com.fasterxml.jackson.databind.JsonMappingException;
+
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +35,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
                 getHandleHistory(exchange);
                 break;
             default:
+                // Handle /orders/{id}
                 if (path.matches("/orders/\\d+")) {
                     getHandleId(exchange);
                 } else {
@@ -54,20 +56,41 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         }
 
         String token = extractToken(exchange);
-        if (!isTokenValid(token, exchange)) return;
-
-        InputStream is = exchange.getRequestBody();
-        OrderDto dto = objectMapper.readValue(is, OrderDto.class);
-
-        if (!isOrderDtoValid(dto)) {
-            sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
+        DecodedJWT jwt;
+        try {
+            jwt = TokenService.verifyToken(token);
+            Set<String> allowedRoles = Set.of(Role.CUSTOMER.name(), Role.ADMIN.name());
+            String userRole = jwt.getClaim("role").asString();
+            if (!allowedRoles.contains(userRole)) {
+                sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                return;
+            }
+        } catch (Exception e) {
+            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
             return;
         }
 
-        Order order = OrderDto.toOrder(dto);
-        orderService.save(order);
+        int customerId = Integer.parseInt(jwt.getSubject()); // Extract customer ID from JWT
 
-        sendResponse(exchange, 200, "Order submitted successfully");
+        try (InputStream is = exchange.getRequestBody()) {
+            OrderDto dto = objectMapper.readValue(is, OrderDto.class);
+
+            if (!dto.isValid()) {
+                sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
+                return;
+            }
+
+            Order submittedOrder = orderService.submitOrder(dto, customerId); // Call the new service method
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(submittedOrder)); // Send the created order as response
+
+        } catch (JsonMappingException e) {
+            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+        } catch (IllegalArgumentException e) { // Catch exceptions like insufficient stock
+            sendResponse(exchange, 400, e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+        }
     }
 
     private void getHandleId(HttpExchange exchange) throws IOException {
@@ -79,7 +102,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         String token = extractToken(exchange);
         if (!isTokenValid(token, exchange)) return;
 
-        // استخراج ID از مسیر
+        // Extract ID from path
         String idString = exchange.getRequestURI().getPath().split("/")[2];
         int id = Integer.parseInt(idString);
         Order order = orderService.findById(id);
@@ -101,7 +124,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         String token = extractToken(exchange);
         if (!isTokenValid(token, exchange)) return;
 
-        // دریافت تاریخچه سفارشات
+        // Get order history
         List<Order> orders = orderService.findAll();
         String jsonResponse = objectMapper.writeValueAsString(orders);
         sendResponse(exchange, 200, jsonResponse);

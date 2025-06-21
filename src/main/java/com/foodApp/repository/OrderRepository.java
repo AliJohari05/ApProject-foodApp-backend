@@ -13,6 +13,6 @@ public interface OrderRepository {
     List<Order> findByCustomerId(int customerId);
     List<Order> findByRestaurantId(int restaurantId);
     void deleteById(int id);
-    List<Order> findOrdersByIdsAndFilters(List<Integer> orderIds, String searchTerm, String vendorName, String customerName);
+    List<Order> findOrdersWithFilters(String searchTerm, String vendorName, String courierName, String customerName, OrderStatus status);
     List<Order> findAll();
 }

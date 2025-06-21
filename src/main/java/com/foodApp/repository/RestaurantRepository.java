@@ -10,5 +10,6 @@ public interface RestaurantRepository {
     List<Restaurant> findAllApproved();
     List<Restaurant> findApprovedByFilters(String search, List<String> keywords);
     List<Restaurant> findByOwnerId(int ownerId);
+    Restaurant findByIdSeller(int id);
     void deleteById(int id);
 }

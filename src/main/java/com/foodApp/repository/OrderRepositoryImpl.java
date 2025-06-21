@@ -95,16 +95,19 @@ public class OrderRepositoryImpl implements OrderRepository {
         }
     }
 
+    // New method for comprehensive filtering for admin
     @Override
-    public List<Order> findOrdersByIdsAndFilters(List<Integer> orderIds, String searchTerm, String vendorName, String customerName) {
-        if (orderIds == null || orderIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
+    public List<Order> findOrdersWithFilters(String searchTerm, String vendorName, String courierName, String customerName, OrderStatus status) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.restaurant r LEFT JOIN o.customer c WHERE o.id IN (:orderIdsList)");
+            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.restaurant r LEFT JOIN o.customer c LEFT JOIN o.delivery d LEFT JOIN d.deliveryPerson dp");
+            hql.append(" WHERE 1=1"); // Always true condition to easily append AND clauses
+
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("orderIdsList", orderIds);
+
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                hql.append(" AND (LOWER(r.name) LIKE :searchTermParam OR LOWER(c.name) LIKE :searchTermParam OR CAST(o.id AS string) LIKE :searchTermParam OR LOWER(o.deliveryAddress) LIKE :searchTermParam)");
+                parameters.put("searchTermParam", "%" + searchTerm.toLowerCase().trim() + "%");
+            }
 
             if (vendorName != null && !vendorName.trim().isEmpty()) {
                 hql.append(" AND LOWER(r.name) LIKE :vendorNameParam");
@@ -116,23 +119,25 @@ public class OrderRepositoryImpl implements OrderRepository {
                 parameters.put("customerNameParam", "%" + customerName.toLowerCase().trim() + "%");
             }
 
-            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
-                hql.append(" AND (LOWER(r.name) LIKE :searchTermParam OR LOWER(c.name) LIKE :searchTermParam OR CAST(o.id AS string) LIKE :searchTermParam )");
-                parameters.put("searchTermParam", "%" + searchTerm.toLowerCase().trim() + "%");
+            if (courierName != null && !courierName.trim().isEmpty()) {
+                // Assuming deliveryPerson is accessible through the 'delivery' entity in Order
+                hql.append(" AND LOWER(dp.name) LIKE :courierNameParam");
+                parameters.put("courierNameParam", "%" + courierName.toLowerCase().trim() + "%");
+            }
+
+            if (status != null) {
+                hql.append(" AND o.status = :statusParam");
+                parameters.put("statusParam", status);
             }
 
             Query<Order> query = session.createQuery(hql.toString(), Order.class);
             for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                if (entry.getValue() instanceof List) {
-                    query.setParameterList(entry.getKey(), (List<?>) entry.getValue());
-                } else {
-                    query.setParameter(entry.getKey(), entry.getValue());
-                }
+                query.setParameter(entry.getKey(), entry.getValue());
             }
             return query.list();
         } catch (Exception e) {
             e.printStackTrace();
-            return Collections.emptyList(); // یا پرتاب یک DatabaseException
+            throw new DatabaseException("Failed to find orders with filters", e);
         }
     }
 
@@ -144,4 +149,3 @@ public class OrderRepositoryImpl implements OrderRepository {
         }
     }
 }
-

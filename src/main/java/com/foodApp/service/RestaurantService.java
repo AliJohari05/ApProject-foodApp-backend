@@ -12,6 +12,7 @@ public interface RestaurantService {
     Restaurant registerRestaurantAndReturn(Restaurant restaurant);
     void approveRestaurant(int  restaurantId);
     void deleteRestaurant(int  restaurantId);
+    Restaurant findById(int  sellerId);
     Restaurant updateRestaurantAndReturn(Restaurant restaurant);
     Restaurant updateRestaurantForPut(int restaurantId, RestaurantDto restaurantDto, int ownerId) throws RestaurantNotFoundException, UnauthorizedAccessException;
     List<Restaurant> getAllApprovedRestaurants();
