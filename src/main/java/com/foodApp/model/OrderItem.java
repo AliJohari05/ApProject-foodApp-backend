@@ -1,24 +1,22 @@
 package com.foodApp.model;
 
-import java.awt.*;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "order_items")
 public class OrderItem {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "order_id",nullable = false)
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "menu_item_id",nullable = false)
+    @JoinColumn(name = "menu_item_id", nullable = false)
     private MenuItem menuItem;
 
     @Column(nullable = false)
@@ -36,7 +34,6 @@ public class OrderItem {
     public void setId(int id) {
         this.id = id;
     }
-
 
     public Order getOrder() {
         return order;
@@ -59,6 +56,9 @@ public class OrderItem {
     }
 
     public void setQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("Quantity cannot be negative");
+        }
         this.quantity = quantity;
     }
 
@@ -67,6 +67,14 @@ public class OrderItem {
     }
 
     public void setPriceAtOrder(BigDecimal priceAtOrder) {
+        if (priceAtOrder.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Price cannot be negative");
+        }
         this.priceAtOrder = priceAtOrder;
+    }
+
+    // Optional: A method to calculate the total price for this order item
+    public BigDecimal calculateTotalPrice() {
+        return priceAtOrder.multiply(BigDecimal.valueOf(quantity));
     }
 }

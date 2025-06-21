@@ -14,4 +14,5 @@ public interface OrderRepository {
     List<Order> findByRestaurantId(int restaurantId);
     void deleteById(int id);
     List<Order> findOrdersByIdsAndFilters(List<Integer> orderIds, String searchTerm, String vendorName, String customerName);
+    List<Order> findAll();
 }

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RestaurantDto {
 
-    private Integer id; // این فیلد در YAML شما در بخش schema.restaurant تعریف شده بود
+    private Integer id;
     private String name;
     private String address;
     private String phone;

@@ -135,5 +135,13 @@ public class OrderRepositoryImpl implements OrderRepository {
             return Collections.emptyList(); // یا پرتاب یک DatabaseException
         }
     }
+
+    @Override
+    public List<Order> findAll() {
+        try(Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Order> query = session.createQuery("FROM Order", Order.class);
+            return query.list();
+        }
+    }
 }
 
