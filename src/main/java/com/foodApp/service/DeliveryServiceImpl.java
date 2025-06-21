@@ -38,9 +38,9 @@ public class DeliveryServiceImpl implements DeliveryService{
         if(newInternalStatus == DeliveryStatus.COURIER_ACCEPTED) {
             if(delivery != null && delivery.getDeliveryPerson().getUserId() != courier.getUserId()&&(
                     delivery.getStatus() == DeliveryStatus.COURIER_ACCEPTED ||
-                    delivery.getStatus() == DeliveryStatus.PICKED_UP ||
-                    delivery.getStatus() == DeliveryStatus.IN_TRANSIT
-                    )) {
+                            delivery.getStatus() == DeliveryStatus.PICKED_UP ||
+                            delivery.getStatus() == DeliveryStatus.IN_TRANSIT
+            )) {
                 throw new InvalidDeliveryStatusTransitionException("Delivery already assigned to another courier.");
             }
         }
@@ -100,26 +100,14 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     }
 
-    // داخل DeliveryServiceImpl.java
-// ...
-
     @Override
     public List<Order> getDeliveryHistory(int courierId, String search, String vendorName, String customerName) {
-        List<Delivery> deliveries = deliveryRepository.findByDeliveryPersonId(courierId);
-        if (deliveries.isEmpty()) {
-            return Collections.emptyList();
+        User courier = userRepository.findById(courierId);
+        if (courier == null || courier.getRole() != Role.DELIVERY) {
+            throw new UnauthorizedAccessException("Courier not found or not authorized.");
         }
+        String courierName = courier.getName(); // Get courier's name for filtering
 
-        List<Integer> orderIds = new ArrayList<>();
-        for (Delivery delivery : deliveries) {
-            if (delivery.getOrder() != null) {
-                orderIds.add(delivery.getOrder().getId());
-            }
-        }
-
-        if (orderIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return orderRepository.findOrdersByIdsAndFilters(orderIds, search, vendorName, customerName);
+        return orderRepository.findOrdersWithFilters(search, vendorName, courierName, customerName, null);
     }
 }
