@@ -21,7 +21,9 @@ public enum Message {
     WALLET_TOPPED_UP("Wallet topped up successfully"),
     PAYMENT_SUCCESS("Payment successful"),
     Delivery_ALREDY_ASSIGNED("Delivery already assigned"),
-    CHANGED_STATUS_SUCCESS("Changed status successfully");
+    CHANGED_STATUS_SUCCESS("Changed status successfully"),
+    CONFLICT("Conflict occurred"),
+    SUCCESS("Operation successful");
 
 
 
