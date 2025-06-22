@@ -75,7 +75,12 @@ CREATE TABLE orders (
                         customer_id INT NOT NULL,
                         restaurant_id INT NOT NULL,
                         status VARCHAR(20) DEFAULT 'PENDING',
-                        total_price DECIMAL(10,2) DEFAULT 0.00,
+                        raw_price DECIMAL(10,2) NOT NULL, -- New: Price before taxes/fees/coupons
+                        tax_fee DECIMAL(10,2) NOT NULL, -- New: Tax amount
+                        additional_fee DECIMAL(10,2) NOT NULL, -- New: Additional charges from restaurant
+                        courier_fee DECIMAL(10,2) NOT NULL, -- New: Courier delivery fee
+                        total_price DECIMAL(10,2) DEFAULT 0.00, -- This is pay_price
+                        coupon_id INT, -- New: Optional foreign key to coupons table
                         delivery_address TEXT,
                         notes TEXT,
                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -83,7 +88,9 @@ CREATE TABLE orders (
                         FOREIGN KEY (customer_id) REFERENCES users(id)
                             ON DELETE CASCADE ON UPDATE CASCADE,
                         FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)
-                            ON DELETE CASCADE ON UPDATE CASCADE
+                            ON DELETE CASCADE ON UPDATE CASCADE,
+                        FOREIGN KEY (coupon_id) REFERENCES coupons(id) -- New foreign key
+                            ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 -- === Order Items Table ===
@@ -128,7 +135,15 @@ CREATE TABLE coupons (
                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
+-- === User Favorite Restaurants Join Table ===
+CREATE TABLE user_favorite_restaurants (
+                                           user_id INT NOT NULL,
+                                           restaurant_id INT NOT NULL,
+                                           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                           PRIMARY KEY (user_id, restaurant_id),
+                                           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                                           FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
 -- === Trigger Function (shared for updated_at columns) ===
 CREATE OR REPLACE FUNCTION update_updated_at_column()
     RETURNS TRIGGER AS $$

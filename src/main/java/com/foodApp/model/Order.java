@@ -26,8 +26,24 @@ public class Order {
     @Column(name = "status", length = 50, nullable = false)
     private OrderStatus status;
 
-    @Column(name = "total_price", nullable = false)
+    @Column(name = "raw_price", nullable = false) // New: Price before taxes/fees/coupons
+    private BigDecimal rawPrice;
+
+    @Column(name = "tax_fee", nullable = false) // New: Tax amount
+    private BigDecimal taxFee;
+
+    @Column(name = "additional_fee", nullable = false) // New: Additional charges from restaurant
+    private BigDecimal additionalFee;
+
+    @Column(name = "courier_fee", nullable = false) // New: Courier delivery fee
+    private BigDecimal courierFee;
+
+    @Column(name = "total_price", nullable = false) // This is pay_price in OpenAPI
     private BigDecimal totalPrice;
+
+    @ManyToOne
+    @JoinColumn(name = "coupon_id")
+    private Coupon coupon;
 
     @Column(name = "delivery_address")
     private String deliveryAddress;
@@ -78,15 +94,67 @@ public class Order {
         this.status = status;
     }
 
+    public BigDecimal getRawPrice() {
+        return rawPrice;
+    }
+
+    public void setRawPrice(BigDecimal rawPrice) {
+        if (rawPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Raw price cannot be negative");
+        }
+        this.rawPrice = rawPrice;
+    }
+
+    public BigDecimal getTaxFee() {
+        return taxFee;
+    }
+
+    public void setTaxFee(BigDecimal taxFee) {
+        if (taxFee.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Tax fee cannot be negative");
+        }
+        this.taxFee = taxFee;
+    }
+
+    public BigDecimal getAdditionalFee() {
+        return additionalFee;
+    }
+
+    public void setAdditionalFee(BigDecimal additionalFee) {
+        if (additionalFee.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Additional fee cannot be negative");
+        }
+        this.additionalFee = additionalFee;
+    }
+
+    public BigDecimal getCourierFee() {
+        return courierFee;
+    }
+
+    public void setCourierFee(BigDecimal courierFee) {
+        if (courierFee.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Courier fee cannot be negative");
+        }
+        this.courierFee = courierFee;
+    }
+
     public BigDecimal getTotalPrice() {
         return totalPrice;
     }
 
     public void setTotalPrice(BigDecimal totalPrice) {
         if (totalPrice.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Total price cannot be negative");
+            throw new IllegalArgumentException("Total (Pay) price cannot be negative");
         }
         this.totalPrice = totalPrice;
+    }
+
+    public Coupon getCoupon() {
+        return coupon;
+    }
+
+    public void setCoupon(Coupon coupon) {
+        this.coupon = coupon;
     }
 
     public String getDeliveryAddress() {
@@ -127,23 +195,5 @@ public class Order {
 
     public void setOrderItems(List<OrderItem> orderItems) {
         this.orderItems = orderItems;
-    }
-
-    public void calculateTotalPrice() {
-        totalPrice = orderItems.stream()
-                .map(item -> item.getPriceAtOrder().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    public void addOrderItem(OrderItem orderItem) {
-        orderItems.add(orderItem);
-        orderItem.setOrder(this); // Set the order for the order item
-        calculateTotalPrice(); // Recalculate total price after adding an item
-    }
-
-    public void removeOrderItem(OrderItem orderItem) {
-        orderItems.remove(orderItem);
-        orderItem.setOrder(null); // Clear the order reference in the order item
-        calculateTotalPrice(); // Recalculate total price after removing an item
     }
 }

@@ -3,10 +3,7 @@ package com.foodApp;
 import com.foodApp.httpHandler.admin.AdminOrdersHandler;
 import com.foodApp.httpHandler.admin.AdminTransactionsHandler;
 import com.foodApp.httpHandler.admin.AdminUserHandler;
-import com.foodApp.httpHandler.buyer.CouponHandler;
-import com.foodApp.httpHandler.buyer.ItemHandler;
-import com.foodApp.httpHandler.buyer.ListOfVendorsHandler;
-import com.foodApp.httpHandler.buyer.OrderHandler;
+import com.foodApp.httpHandler.buyer.*;
 import com.foodApp.httpHandler.courier.AvailableDeliveriesHandler;
 import com.foodApp.httpHandler.courier.DeliveryHistoryHandler;
 import com.foodApp.httpHandler.courier.DeliveryStatusUpdateHandler;
@@ -52,6 +49,9 @@ public class Server {
             server.createContext("/items", new ItemHandler());
             server.createContext("/items/", new ItemHandler());
             server.createContext("/coupons", new CouponHandler());
+            server.createContext("/favorites", new FavoriteHandler());
+            server.createContext("/favorites/", new FavoriteHandler());
+
 
 
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
