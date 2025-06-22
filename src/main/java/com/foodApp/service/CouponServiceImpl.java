@@ -15,26 +15,28 @@ public class CouponServiceImpl implements CouponService {
         Optional<Coupon> couponOptional = couponRepository.findByCouponCode(couponCode);
 
         if (couponOptional.isEmpty()) {
-            return Optional.empty(); // کوپن یافت نشد
+            return Optional.empty();
         }
 
         Coupon coupon = couponOptional.get();
         LocalDateTime now = LocalDateTime.now();
 
-        // 1. بررسی تاریخ
         if (now.isBefore(coupon.getStartDate()) || now.isAfter(coupon.getEndDate())) {
-            return Optional.empty(); // کوپن منقضی شده یا هنوز فعال نشده است
+            return Optional.empty();
         }
 
-        // 2. بررسی حداقل قیمت سفارش (اگر orderTotalPrice ارائه شده باشد)
         if (orderTotalPrice != null && orderTotalPrice.compareTo(coupon.getMinPrice()) < 0) {
-            return Optional.empty(); // قیمت سفارش از حداقل قیمت کوپن کمتر است
+            return Optional.empty();
         }
 
-        // 3. بررسی تعداد استفاده (برای این API فقط اعتبار اولیه را بررسی می‌کنیم)
-        // منطق کاهش تعداد استفاده یا بررسی تعداد استفاده هر کاربر باید در زمان ثبت سفارش نهایی (order submission) انجام شود، نه در این API بررسی اعتبار اولیه.
-        // پس اگر کوپن از نظر تاریخ و حداقل قیمت معتبر باشد، آن را برمی‌گردانیم.
+        return Optional.of(coupon);
+    }
 
-        return Optional.of(coupon); // کوپن معتبر است
+    @Override
+    public void applyCoupon(Coupon coupon) { // New method implementation
+        if (coupon.getUserCount() > 0) { // اگر user_count یک محدودیت سراسری باشد
+            coupon.setUserCount(coupon.getUserCount() - 1);
+        }
+        couponRepository.updateUsageCount(coupon);
     }
 }

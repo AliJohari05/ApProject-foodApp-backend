@@ -6,4 +6,5 @@ import java.util.Optional;
 
 public interface CouponService {
     Optional<Coupon> validateAndGetCoupon(String couponCode, BigDecimal orderTotalPrice, Integer userId);
+    void applyCoupon(Coupon coupon);
 }
