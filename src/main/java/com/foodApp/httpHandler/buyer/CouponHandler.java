@@ -52,7 +52,6 @@ public class CouponHandler extends BaseHandler implements HttpHandler {
             return;
         }
 
-        // استخراج coupon_code از پارامترهای کوئری
         Map<String, String> queryParams = QueryParser.parse(exchange.getRequestURI().getRawQuery());
         String couponCode = queryParams.get("coupon_code");
 
