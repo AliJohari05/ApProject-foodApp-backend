@@ -32,4 +32,26 @@ public class CouponRepositoryImpl implements CouponRepository {
             throw new DatabaseException("Failed to save coupon", e);
         }
     }
+
+    @Override
+    public void updateUsageCount(Coupon coupon) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            session.merge(coupon); // از merge برای به‌روزرسانی موجودیت موجود استفاده کنید
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new DatabaseException("Failed to update coupon usage count", e);
+        }
+    }
+
+    @Override
+    public Optional<Coupon> findById(Integer id) { // New method implementation
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return Optional.ofNullable(session.get(Coupon.class, id));
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to find coupon by ID", e);
+        }
+    }
 }
