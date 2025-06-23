@@ -40,12 +40,12 @@ public class Server {
             server.createContext("/deliveries", new DeliveryStatusUpdateHandler());
             server.createContext("/deliveries/history", new DeliveryHistoryHandler());
             server.createContext("/vendors", new ListOfVendorsHandler());
-            server.createContext("/vendors/", new DeliveryHistoryHandler());//should be completed
+            server.createContext("/vendors/", new DeliveryHistoryHandler());
             server.createContext("/admin/transactions", new AdminTransactionsHandler());
-            server.createContext("/admin/orders", new AdminOrdersHandler()); //should be completed
-            server.createContext("/orders", new OrderHandler()); //should be completed
-            server.createContext("/orders/", new OrderHandler()); //should be completed
-            server.createContext("/orders/history", new OrderHandler()); //should be completed
+            server.createContext("/admin/orders", new AdminOrdersHandler());
+            server.createContext("/orders", new OrderHandler());
+            server.createContext("/orders/", new OrderHandler());
+            server.createContext("/orders/history", new OrderHandler());
             server.createContext("/items", new ItemHandler());
             server.createContext("/items/", new ItemHandler());
             server.createContext("/coupons", new CouponHandler());
