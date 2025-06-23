@@ -181,3 +181,25 @@ CREATE TRIGGER set_updated_at_deliveries
 CREATE TRIGGER set_updated_at_coupons
     BEFORE UPDATE ON coupons
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- === Ratings Table ===
+CREATE TABLE ratings (
+                         id SERIAL PRIMARY KEY,
+                         user_id INT NOT NULL,
+                         order_id INT NOT NULL,
+                         menu_item_id INT NOT NULL,
+                         rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
+                         comment TEXT,
+                         image_url TEXT,
+                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         FOREIGN KEY (user_id) REFERENCES users(userid) ON DELETE CASCADE ON UPDATE CASCADE,
+                         FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                         FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                         UNIQUE (user_id, order_id, menu_item_id)
+);
+
+
+CREATE TRIGGER set_updated_at_ratings
+    BEFORE UPDATE ON ratings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
