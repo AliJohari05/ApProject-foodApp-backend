@@ -51,7 +51,8 @@ public class Server {
             server.createContext("/coupons", new CouponHandler());
             server.createContext("/favorites", new FavoriteHandler());
             server.createContext("/favorites/", new FavoriteHandler());
-
+            server.createContext("/ratings", new RatingHandler());
+            server.createContext("/ratings/", new RatingHandler());
 
 
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
