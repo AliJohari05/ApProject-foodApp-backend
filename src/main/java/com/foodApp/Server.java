@@ -1,5 +1,6 @@
 package com.foodApp;
 
+import com.foodApp.httpHandler.admin.AdminCouponsHandler;
 import com.foodApp.httpHandler.admin.AdminOrdersHandler;
 import com.foodApp.httpHandler.admin.AdminTransactionsHandler;
 import com.foodApp.httpHandler.admin.AdminUserHandler;
@@ -53,6 +54,8 @@ public class Server {
             server.createContext("/favorites/", new FavoriteHandler());
             server.createContext("/ratings", new RatingHandler());
             server.createContext("/ratings/", new RatingHandler());
+            server.createContext("/admin/coupons", new AdminCouponsHandler());
+            server.createContext("/admin/coupons/", new AdminCouponsHandler());
 
 
             //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
