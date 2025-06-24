@@ -6,6 +6,8 @@ import com.foodApp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+
+import java.util.List;
 import java.util.Optional;
 
 public class CouponRepositoryImpl implements CouponRepository {
@@ -38,7 +40,7 @@ public class CouponRepositoryImpl implements CouponRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.merge(coupon); // از merge برای به‌روزرسانی موجودیت موجود استفاده کنید
+            session.merge(coupon);
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
@@ -47,11 +49,37 @@ public class CouponRepositoryImpl implements CouponRepository {
     }
 
     @Override
-    public Optional<Coupon> findById(Integer id) { // New method implementation
+    public Optional<Coupon> findById(Integer id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return Optional.ofNullable(session.get(Coupon.class, id));
         } catch (Exception e) {
             throw new DatabaseException("Failed to find coupon by ID", e);
+        }
+    }
+
+    @Override
+    public List<Coupon> findAll() {
+        try(Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Coupon> query = session.createQuery("FROM Coupon", Coupon.class);
+            return query.list();
+        }catch (Exception e) {
+            throw new DatabaseException("Failed to find coupons", e);
+        }
+    }
+
+    @Override
+    public void deleteById(Integer id) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            Coupon coupon = session.get(Coupon.class, id);
+            if (coupon != null) {
+                session.remove(coupon);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new DatabaseException("Failed to delete coupon", e);
         }
     }
 }
