@@ -1,17 +1,20 @@
 package com.foodApp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.foodApp.model.User;
 
 import java.math.BigDecimal;
 
 public class UserProfileDto {
     private String id;
+    @JsonProperty("full_name")
     private String fullName;
     private String phone;
     private String email;
     private String address;
     private String role;
     private String profileImageUrl;
+    @JsonProperty("bank_info")
     private BankInfoDto bankInfo;
     private BigDecimal walletBalance;
     private String status;
