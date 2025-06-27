@@ -59,7 +59,7 @@ public class UserSignupDto {
         Role userRole = Role.valueOf(dto.role.toUpperCase());
         user.setRole(userRole);
 
-        if (userRole == Role.SELLER || userRole == Role.DELIVERY) {
+        if (userRole == Role.SELLER || userRole == Role.COURIER) {
             user.setStatus(Status.PENDING_APPROVAL);
         } else {
             user.setStatus(Status.APPROVED);

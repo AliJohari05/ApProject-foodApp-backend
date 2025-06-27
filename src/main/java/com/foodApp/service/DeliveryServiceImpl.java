@@ -8,8 +8,6 @@ import com.foodApp.model.*;
 import com.foodApp.repository.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class DeliveryServiceImpl implements DeliveryService{
@@ -25,7 +23,7 @@ public class DeliveryServiceImpl implements DeliveryService{
     @Override
     public Delivery updateDeliveryStatus(int orderId, int courierId, DeliveryStatus newInternalStatus) {
         User courier = userRepository.findById(courierId);
-        if(courier == null || courier.getRole() != Role.DELIVERY) {
+        if(courier == null || courier.getRole() != Role.COURIER) {
             throw new UnauthorizedAccessException("User is not authorized or not a courier.");
         }
 
@@ -103,7 +101,7 @@ public class DeliveryServiceImpl implements DeliveryService{
     @Override
     public List<Order> getDeliveryHistory(int courierId, String search, String vendorName, String customerName) {
         User courier = userRepository.findById(courierId);
-        if (courier == null || courier.getRole() != Role.DELIVERY) {
+        if (courier == null || courier.getRole() != Role.COURIER) {
             throw new UnauthorizedAccessException("Courier not found or not authorized.");
         }
         String courierName = courier.getName(); // Get courier's name for filtering

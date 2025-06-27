@@ -41,7 +41,7 @@ public class CouponHandler extends BaseHandler implements HttpHandler {
         try {
             jwt = TokenService.verifyToken(token);
             // فقط نقش‌های buyer و admin مجاز به بررسی کوپن هستند
-            Set<String> allowedRoles = Set.of(Role.CUSTOMER.name(), Role.ADMIN.name());
+            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
                 sendResponse(exchange, 403, Message.FORBIDDEN.get());

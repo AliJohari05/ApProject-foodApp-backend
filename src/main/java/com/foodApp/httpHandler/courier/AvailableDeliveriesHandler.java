@@ -3,7 +3,6 @@ package com.foodApp.httpHandler.courier;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.httpHandler.BaseHandler;
-import com.foodApp.model.Delivery;
 import com.foodApp.model.Order;
 import com.foodApp.model.Role;
 import com.foodApp.security.TokenService;
@@ -33,7 +32,7 @@ public class AvailableDeliveriesHandler extends BaseHandler implements HttpHandl
         DecodedJWT jwt;
         try {
             jwt = TokenService.verifyToken(token);
-            if(!Role.DELIVERY.name().equals(jwt.getClaim("role").asString())) {
+            if(!Role.COURIER.name().equals(jwt.getClaim("role").asString())) {
                 sendResponse(exchange,403,Message.FORBIDDEN.get());
             }
         }catch(Exception e) {

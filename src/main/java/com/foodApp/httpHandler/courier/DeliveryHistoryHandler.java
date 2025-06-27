@@ -35,7 +35,7 @@ public class DeliveryHistoryHandler extends BaseHandler implements HttpHandler {
         int courierId;
         try{
             jwt = TokenService.verifyToken(token);
-            if(!Role.DELIVERY.name().equals(jwt.getClaim("role").asString())) {
+            if(!Role.COURIER.name().equals(jwt.getClaim("role").asString())) {
                 sendResponse(exchange,403,Message.FORBIDDEN.get());
                 return;
             }

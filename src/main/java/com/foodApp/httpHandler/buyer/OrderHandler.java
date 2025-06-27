@@ -59,7 +59,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         DecodedJWT jwt;
         try {
             jwt = TokenService.verifyToken(token);
-            Set<String> allowedRoles = Set.of(Role.CUSTOMER.name(), Role.ADMIN.name());
+            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
                 sendResponse(exchange, 403, Message.FORBIDDEN.get());
@@ -137,7 +137,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         }
         try {
             DecodedJWT jwt = TokenService.verifyToken(token);
-            Set<String> allowedRoles = Set.of(Role.CUSTOMER.name(), Role.ADMIN.name());
+            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
                 sendResponse(exchange, 403, Message.FORBIDDEN.get());

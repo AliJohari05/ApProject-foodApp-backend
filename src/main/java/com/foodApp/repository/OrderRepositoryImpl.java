@@ -99,7 +99,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> findOrdersWithFilters(String searchTerm, String vendorName, String courierName, String customerName, OrderStatus status) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.restaurant r LEFT JOIN o.customer c LEFT JOIN o.delivery d LEFT JOIN d.deliveryPerson dp");
+            // FIX: Removed LEFT JOIN o.delivery d LEFT JOIN d.deliveryPerson dp
+            // If you later add a 'delivery' or 'courier' relationship to Order, you will need to re-add/adjust this join.
+            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.restaurant r LEFT JOIN o.customer c");
             hql.append(" WHERE 1=1"); // Always true condition to easily append AND clauses
 
             Map<String, Object> parameters = new HashMap<>();
@@ -120,9 +122,14 @@ public class OrderRepositoryImpl implements OrderRepository {
             }
 
             if (courierName != null && !courierName.trim().isEmpty()) {
-                // Assuming deliveryPerson is accessible through the 'delivery' entity in Order
-                hql.append(" AND LOWER(dp.name) LIKE :courierNameParam");
-                parameters.put("courierNameParam", "%" + courierName.toLowerCase().trim() + "%");
+                // FIX: If Order model has no direct 'delivery' or 'deliveryPerson' relationship, this part cannot be resolved.
+                // You need to either add a relationship in Order.java to a DeliveryPerson entity,
+                // or remove this filter if courierName can't be filtered via Order's attributes.
+                // For now, I'm commenting out the problematic HQL part to fix the current exception.
+                // If your Order model has a 'courier' or 'deliveryPerson' field (e.g., @ManyToOne private User courier;),
+                // then you'd use 'LEFT JOIN o.courier dp' and 'LOWER(dp.name)'.
+                // hql.append(" AND LOWER(dp.name) LIKE :courierNameParam");
+                // parameters.put("courierNameParam", "%" + courierName.toLowerCase().trim() + "%");
             }
 
             if (status != null) {

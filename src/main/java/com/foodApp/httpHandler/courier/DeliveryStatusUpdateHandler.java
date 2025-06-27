@@ -49,7 +49,7 @@ public class DeliveryStatusUpdateHandler extends BaseHandler  implements HttpHan
         int courierId;
         try {
             jwt = TokenService.verifyToken(token);
-            if(!Role.DELIVERY.name().equals(jwt.getClaim("role").asString())) {
+            if(!Role.COURIER.name().equals(jwt.getClaim("role").asString())) {
                 sendResponse(exchange,403,Message.FORBIDDEN.get());
             }
             courierId = Integer.parseInt(jwt.getSubject());

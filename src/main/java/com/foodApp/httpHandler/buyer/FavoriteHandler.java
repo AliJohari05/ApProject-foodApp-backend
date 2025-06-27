@@ -35,7 +35,7 @@ public class FavoriteHandler extends BaseHandler implements HttpHandler {
         int userId;
         try {
             DecodedJWT jwt = TokenService.verifyToken(token);
-            Set<String> allowedRoles = Set.of(Role.CUSTOMER.name(), Role.ADMIN.name()); // خریداران و ادمین ها مجاز به مدیریت favorites
+            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name()); // خریداران و ادمین ها مجاز به مدیریت favorites
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
                 sendResponse(exchange, 403, Message.FORBIDDEN.get());

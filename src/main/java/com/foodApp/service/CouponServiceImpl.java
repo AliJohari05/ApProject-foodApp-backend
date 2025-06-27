@@ -46,7 +46,8 @@ public class CouponServiceImpl implements CouponService {
         if (coupon.getUserCount() > 0) {
             coupon.setUserCount(coupon.getUserCount() - 1);
         }
-        couponRepository.updateUsageCount(coupon);
+        // FIX: couponRepository.save should now handle merge logic if it's an existing entity
+        couponRepository.save(coupon); // Rely on the updated save method in repository
     }
 
     @Override
@@ -72,7 +73,7 @@ public class CouponServiceImpl implements CouponService {
             startDate = LocalDate.parse(createDto.getStartDate()).atStartOfDay();
             endDate = LocalDate.parse(createDto.getEndDate()).atTime(23, 59, 59);
         } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(Message.INVALID_INPUT.get() + ": Invalid date format. Use YYYY-MM-DD.");
+            throw new IllegalArgumentException(Message.INVALID_INPUT.get() + ": Invalid date format. UseYYYY-MM-DD.");
         }
 
         if (startDate.isAfter(endDate)) {
@@ -81,7 +82,7 @@ public class CouponServiceImpl implements CouponService {
 
         Coupon coupon = new Coupon();
         coupon.setCouponCode(createDto.getCouponCode());
-        coupon.setType(CouponType.valueOf(createDto.getType().toUpperCase())); //   Convert String to Enum
+        coupon.setType(CouponType.valueOf(createDto.getType().toUpperCase())); // Convert String to Enum
         coupon.setValue(createDto.getValue());
         coupon.setMinPrice(createDto.getMinPrice());
         coupon.setUserCount(createDto.getUserCount());
@@ -90,7 +91,7 @@ public class CouponServiceImpl implements CouponService {
         coupon.setCreatedAt(LocalDateTime.now());
         coupon.setUpdatedAt(LocalDateTime.now());
 
-        couponRepository.save(coupon);
+        couponRepository.save(coupon); // This save will handle new entity persist
         return coupon;
     }
 
@@ -103,7 +104,7 @@ public class CouponServiceImpl implements CouponService {
     public Coupon updateCoupon(int couponId, CouponDto updateDto) {
         Coupon existingCoupon = couponRepository.findById(couponId).orElse(null);
         if (existingCoupon == null) {
-            throw new RestaurantNotFoundException(Message.ERROR_404.get()); // استفاده مجدد از RestaurantNotFound
+            throw new CouponNotFoundException(Message.ERROR_404.get()); // Using RestaurantNotFound, consider renaming exception
         }
 
         // Update fields if provided
@@ -138,7 +139,7 @@ public class CouponServiceImpl implements CouponService {
                     endDate = LocalDate.parse(updateDto.getEndDate()).atTime(23, 59, 59);
                 }
             } catch (DateTimeParseException e) {
-                throw new IllegalArgumentException(Message.INVALID_INPUT.get() + ": Invalid date format. Use YYYY-MM-DD.");
+                throw new IllegalArgumentException(Message.INVALID_INPUT.get() + ": Invalid date format. UseYYYY-MM-DD.");
             }
             if (startDate.isAfter(endDate)) {
                 throw new IllegalArgumentException(Message.INVALID_INPUT.get() + ": Start date cannot be after end date.");
@@ -148,7 +149,7 @@ public class CouponServiceImpl implements CouponService {
         }
 
         existingCoupon.setUpdatedAt(LocalDateTime.now());
-        couponRepository.save(existingCoupon);
+        couponRepository.save(existingCoupon); // FIX: This save should now handle merging the detached entity
         return existingCoupon;
 
     }
@@ -157,7 +158,7 @@ public class CouponServiceImpl implements CouponService {
     public void deleteCoupon(Integer id) {
         Optional<Coupon> couponOptional = couponRepository.findById(id);
         if (couponOptional.isEmpty()) {
-            throw new CouponNotFoundException(Message.ERROR_404.get()); // استفاده مجدد از RestaurantNotFound
+            throw new CouponNotFoundException(Message.ERROR_404.get()); // Using CouponNotFoundException
         }
         couponRepository.deleteById(id);
     }

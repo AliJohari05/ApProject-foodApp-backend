@@ -2,7 +2,7 @@ package com.foodApp.model;
 
 public enum Role {
     ADMIN,
-    CUSTOMER,
+    BUYER,
     SELLER,
-    DELIVERY
+    COURIER
 }

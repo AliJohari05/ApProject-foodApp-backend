@@ -16,8 +16,13 @@ public class UserProfileDto {
     private String profileImageUrl;
     @JsonProperty("bank_info")
     private BankInfoDto bankInfo;
+    @JsonProperty("wallet_balance")
     private BigDecimal walletBalance;
     private String status;
+
+    @JsonProperty("profileImageBase64")
+    private String profileImageBase64;
+
     public UserProfileDto() {
     }
     public UserProfileDto(User user) {
@@ -27,7 +32,7 @@ public class UserProfileDto {
         this.email = user.getEmail();
         this.address = user.getAddress();
         this.role = user.getRole().name();
-        this.profileImageUrl = user.getProfileImageUrl();
+        this.profileImageUrl = user.getProfileImageUrl(); // Populated from User model
         this.walletBalance = user.getWalletBalance();
         this.status = user.getStatus().name();
 
@@ -61,19 +66,13 @@ public class UserProfileDto {
     public BankInfoDto getBankInfo() { return bankInfo; }
     public void setBankInfo(BankInfoDto bankInfo) { this.bankInfo = bankInfo; }
 
-    public BigDecimal getWalletBalance() {
-        return walletBalance;
-    }
+    public BigDecimal getWalletBalance() { return walletBalance; }
+    public void setWalletBalance(BigDecimal walletBalance) { this.walletBalance = walletBalance; }
 
-    public void setWalletBalance(BigDecimal walletBalance) {
-        this.walletBalance = walletBalance;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    // Getter and Setter for profileImageBase64
+    public String getProfileImageBase64() { return profileImageBase64; }
+    public void setProfileImageBase64(String profileImageBase64) { this.profileImageBase64 = profileImageBase64; }
 }

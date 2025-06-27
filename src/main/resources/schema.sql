@@ -5,7 +5,7 @@ CREATE TABLE users (
                        phone VARCHAR(15) UNIQUE NOT NULL,
                        email VARCHAR(100),
                        password VARCHAR(100) NOT NULL,
-                       role VARCHAR(20) NOT NULL,  -- CUSTOMER, SELLER, DELIVERY, ADMIN
+                       role VARCHAR(20) NOT NULL,  -- CUSTOMER, SELLER, COURIER, ADMIN
                        address TEXT,
                        bank_name VARCHAR(100),
                        account_number VARCHAR(50),

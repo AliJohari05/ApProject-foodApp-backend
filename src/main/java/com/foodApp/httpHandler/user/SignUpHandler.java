@@ -1,5 +1,6 @@
 package com.foodApp.httpHandler.user;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.UserSignupDto;
 import com.foodApp.httpHandler.BaseHandler;
@@ -14,6 +15,7 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import com.foodApp.dto.UserProfileDto;
 
 public class SignUpHandler extends BaseHandler implements HttpHandler {
 
@@ -21,7 +23,7 @@ public class SignUpHandler extends BaseHandler implements HttpHandler {
     private final UserService userService = new UserServiceImpl();
 
     @Override
-    public void handle(HttpExchange exchange) {
+    public void handle(HttpExchange exchange) throws JsonProcessingException {
         try {
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
@@ -37,7 +39,7 @@ public class SignUpHandler extends BaseHandler implements HttpHandler {
             UserSignupDto dto = objectMapper.readValue(is, UserSignupDto.class);
 
             if (dto.getPhone() == null || dto.getPassword() == null || dto.getFullName() == null || dto.getRole() == null || dto.getAddress() == null) {
-                sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.MISSING_FIELDS.get())));
                 return;
             }
 
@@ -50,11 +52,12 @@ public class SignUpHandler extends BaseHandler implements HttpHandler {
                 return;
             }
             if(!dto.isValid()){
-                sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+                return; // Added return here to ensure response is sent and method exits
             }
 
             if (userService.phoneExists(dto.getPhone())) {
-                sendResponse(exchange, 409, Message.PHONE_ALREADY_EXIST.get());
+                sendResponse(exchange, 409, objectMapper.writeValueAsString(Map.of("error", Message.PHONE_ALREADY_EXIST.get())));
                 return;
             }
 
@@ -68,13 +71,14 @@ public class SignUpHandler extends BaseHandler implements HttpHandler {
             result.put("message", Message.SIGNUP_SUCCESS.get());
             result.put("user_id", savedUser.getUserId());
             result.put("token", token);
+            result.put("user", new UserProfileDto(savedUser));
 
             String responseJson = objectMapper.writeValueAsString(result);
             sendResponse(exchange, 200, responseJson);
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get())));
         }
     }
 }

@@ -27,11 +27,19 @@ public class CouponRepositoryImpl implements CouponRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.persist(coupon);
+            // FIX: Use merge for existing entities, persist for new ones.
+            // Hibernate's merge will reattach a detached entity or make a copy.
+            // persist is only for new entities.
+            // To handle both, you can check id or simply use merge which works for both new and detached
+            if (coupon.getId() == null || coupon.getId() == 0) { // Assuming 0 for default int ID
+                session.persist(coupon); // For new entities
+            } else {
+                session.merge(coupon); // For detached/existing entities
+            }
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
-            throw new DatabaseException("Failed to save coupon", e);
+            throw new DatabaseException("Failed to save or update coupon", e); // Changed message
         }
     }
 
@@ -40,7 +48,7 @@ public class CouponRepositoryImpl implements CouponRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.merge(coupon);
+            session.merge(coupon); // Ensure the detached coupon is managed
             tx.commit();
         } catch (Exception e) {
             if (tx != null) tx.rollback();
@@ -72,7 +80,7 @@ public class CouponRepositoryImpl implements CouponRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            Coupon coupon = session.get(Coupon.class, id);
+            Coupon coupon = session.get(Coupon.class, id); // Get a managed instance
             if (coupon != null) {
                 session.remove(coupon);
             }

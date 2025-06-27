@@ -9,11 +9,18 @@ import com.foodApp.security.TokenService;
 import com.foodApp.service.UserService;
 import com.foodApp.service.UserServiceImpl;
 import com.foodApp.util.Message;
+import com.foodApp.util.ImageUploader; // Import ImageUploader
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ProfileHandler extends BaseHandler implements HttpHandler {
     private final UserService userService = new UserServiceImpl();
@@ -23,13 +30,13 @@ public class ProfileHandler extends BaseHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         if (!"GET".equalsIgnoreCase(method) && !"PUT".equalsIgnoreCase(method)) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange, 405, jsonError(Message.METHOD_NOT_ALLOWED.get()));
             return;
         }
 
         String token = extractToken(exchange);
         if (token == null) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, jsonError(Message.UNAUTHORIZED.get()));
             return;
         }
 
@@ -37,14 +44,14 @@ public class ProfileHandler extends BaseHandler implements HttpHandler {
         try {
             jwt = TokenService.verifyToken(token);
         } catch (Exception e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, jsonError(Message.FORBIDDEN.get()));
             return;
         }
 
         int userId = Integer.parseInt(jwt.getSubject());
         if ("GET".equalsIgnoreCase(method)) {
             handleGet(exchange, userId);
-        } else {
+        } else { // PUT method
             handlePut(exchange, userId);
         }
     }
@@ -52,7 +59,7 @@ public class ProfileHandler extends BaseHandler implements HttpHandler {
     private void handleGet(HttpExchange exchange, int userId) throws IOException {
         User user = userService.findById(userId);
         if (user == null) {
-            sendResponse(exchange, 404, Message.USER_NOT_FOUND.get());
+            sendResponse(exchange, 404, jsonError(Message.USER_NOT_FOUND.get()));
             return;
         }
         UserProfileDto dto = new UserProfileDto(user);
@@ -76,20 +83,46 @@ public class ProfileHandler extends BaseHandler implements HttpHandler {
                 return;
             }
 
+            // --- Handle Profile Image Base64 Upload ---
+            if (dto.getProfileImageBase64() != null) { // Check if image data is provided (can be empty string to clear)
+                if (dto.getProfileImageBase64().isEmpty()) {
+                    // User wants to clear the profile image
+                    if (existingUser.getProfileImageUrl() != null) {
+                        ImageUploader.deleteProfileImage(existingUser.getProfileImageUrl()); // Delete old image
+                    }
+                    existingUser.setProfileImageUrl(null); // Set to null in DB
+                } else {
+                    // User wants to upload a new image
+                    String newImageUrl = ImageUploader.saveProfileImage(dto.getProfileImageBase64(), userId);
+                    if (newImageUrl != null) {
+                        if (existingUser.getProfileImageUrl() != null) {
+                            ImageUploader.deleteProfileImage(existingUser.getProfileImageUrl()); // Delete old image
+                        }
+                        existingUser.setProfileImageUrl(newImageUrl);
+                    } else {
+                        sendResponse(exchange, 500, jsonError("Failed to process profile image."));
+                        return;
+                    }
+                }
+            }
+            // --- End Handle Profile Image Base64 Upload ---
+
+
             boolean phoneChanged = dto.getPhone() != null && !dto.getPhone().equals(existingUser.getPhone());
 
+            // Update other fields from DTO (only if provided in DTO)
             if(dto.getFullName() != null) existingUser.setName(dto.getFullName());
             if(dto.getPhone() != null) existingUser.setPhone(dto.getPhone());
             if(dto.getEmail() != null) existingUser.setEmail(dto.getEmail());
             if(dto.getAddress() != null) existingUser.setAddress(dto.getAddress());
-            if(dto.getProfileImageUrl() != null) existingUser.setProfileImageUrl(dto.getProfileImageUrl());
+            // profileImageUrl is handled above based on base64, or if explicitly null in DTO to clear.
 
             if (dto.getBankInfo() != null) {
                 existingUser.setBankName(dto.getBankInfo().getBankName());
                 existingUser.setAccountNumber(dto.getBankInfo().getAccountNumber());
             }
 
-            userService.updateUser(existingUser);
+            userService.updateUser(existingUser); // This saves the updated user object
 
             if (phoneChanged) {
                 String newToken = TokenService.generateToken(
@@ -129,4 +162,3 @@ public class ProfileHandler extends BaseHandler implements HttpHandler {
         """.formatted(message);
     }
 }
-

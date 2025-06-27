@@ -58,12 +58,6 @@ public class Server {
             server.createContext("/admin/coupons/", new AdminCouponsHandler());
 
 
-            //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
-            //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
-            //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
-            //server.createContext("/restaurant/approved", new ApprovedRestaurantHandler());
-            //server.createContext("/restaurant/owner", new GetRestaurantsByOwnerHandler());
-            //server.createContext("/admin/restaurant/approved", new ApproveRestaurantByAdminHandler());
 
 
             server.setExecutor(null);
