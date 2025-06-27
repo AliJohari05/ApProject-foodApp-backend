@@ -7,6 +7,7 @@ import com.foodApp.dto.MenuItemDto;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.MenuItem;
 import com.foodApp.model.Role;
+import com.foodApp.model.Category;
 import com.foodApp.security.TokenService;
 import com.foodApp.service.ItemService;
 import com.foodApp.service.ItemServiceImpl;
@@ -14,12 +15,12 @@ import com.foodApp.util.Message;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.foodApp.model.Category; // برای تبدیل به MenuItemDto
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,27 +36,40 @@ public class ItemHandler extends BaseHandler implements HttpHandler {
 
         if (path.equals("/items") && "POST".equalsIgnoreCase(method)) {
             handlePostItems(exchange);
-        } else if (path.matches("/items/\\d+") && "GET".equalsIgnoreCase(method)) { // برای /items/{id}
+        } else if (path.matches("/items/\\d+") && "GET".equalsIgnoreCase(method)) {
             handleGetItemById(exchange);
         } else {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         }
     }
 
     private void handlePostItems(HttpExchange exchange) throws IOException {
-        // بررسی احراز هویت
         String token = extractToken(exchange);
-        if (!isTokenValid(token, exchange)) return;
+        if (token == null) {
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
+            return;
+        }
+        try {
+            DecodedJWT jwt = TokenService.verifyToken(token);
+            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
+            String userRole = jwt.getClaim("role").asString();
+            if (!allowedRoles.contains(userRole)) {
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+                return;
+            }
+        } catch (Exception e) {
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+            return;
+        }
 
         if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
 
         try (InputStream is = exchange.getRequestBody()) {
             ItemFilterDto filterDto = objectMapper.readValue(is, ItemFilterDto.class);
 
-            // تبدیل Integer price از DTO به BigDecimal برای سرویس
             BigDecimal maxPrice = (filterDto.getPrice() != null) ? BigDecimal.valueOf(filterDto.getPrice()) : null;
 
             List<MenuItem> items = itemService.findItemsWithFilters(
@@ -72,31 +86,45 @@ public class ItemHandler extends BaseHandler implements HttpHandler {
             sendResponse(exchange, 200, jsonResponse);
 
         } catch (JsonMappingException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
     private void handleGetItemById(HttpExchange exchange) throws IOException {
-        // بررسی احراز هویت
         String token = extractToken(exchange);
-        if (!isTokenValid(token, exchange)) return;
+        if (token == null) {
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
+            return;
+        }
+        try {
+            DecodedJWT jwt = TokenService.verifyToken(token);
+            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
+            String userRole = jwt.getClaim("role").asString();
+            if (!allowedRoles.contains(userRole)) {
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+                return;
+            }
+        } catch (Exception e) {
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+            return;
+        }
 
         String[] pathSegments = exchange.getRequestURI().getPath().split("/");
         int itemId;
         try {
-            itemId = Integer.parseInt(pathSegments[2]); // فرض بر این است که مسیر /items/{id} است
+            itemId = Integer.parseInt(pathSegments[2]);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
             return;
         }
 
         try {
             Optional<MenuItem> itemOptional = itemService.findItemById(itemId);
             if (itemOptional.isEmpty()) {
-                sendResponse(exchange, 404, Message.ERROR_404.get());
+                sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
                 return;
             }
             MenuItem item = itemOptional.get();
@@ -108,45 +136,24 @@ public class ItemHandler extends BaseHandler implements HttpHandler {
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
-    private boolean isTokenValid(String token, HttpExchange exchange) throws IOException {
-        if (token == null) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
-            return false;
-        }
-        try {
-            DecodedJWT jwt = TokenService.verifyToken(token);
-            // برای endpointهای /items، نقش‌های CUSTOMER و ADMIN مجاز هستند
-            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
-            String userRole = jwt.getClaim("role").asString();
-            if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403, Message.FORBIDDEN.get());
-                return false;
-            }
-        } catch (Exception e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
-            return false;
-        }
-        return true;
-    }
-
-    // متد کمکی برای تبدیل MenuItem مدل به MenuItemDto
     private MenuItemDto convertToMenuItemDto(MenuItem menuItem) {
         MenuItemDto dto = new MenuItemDto();
         dto.setId(menuItem.getId());
         dto.setName(menuItem.getName());
         dto.setImageBase64(menuItem.getImage());
         dto.setDescription(menuItem.getDescription());
-        dto.setPrice(menuItem.getPrice().intValue()); // فرض بر این است که قیمت به Integer قابل تبدیل است
+        dto.setPrice(menuItem.getPrice().intValue());
         dto.setSupply(menuItem.getStock());
         if (menuItem.getCategory() != null) {
             dto.setCategories(menuItem.getCategory().stream()
                     .map(Category::getTitle)
                     .collect(Collectors.toList()));
         }
+        dto.setKeywords(menuItem.getKeywords() != null ? List.of(menuItem.getKeywords().split(",")) : null); // نگاشت Keywords
         return dto;
     }
 }

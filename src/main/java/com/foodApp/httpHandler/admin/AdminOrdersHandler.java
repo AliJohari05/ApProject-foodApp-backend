@@ -28,28 +28,27 @@ public class AdminOrdersHandler extends BaseHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         try {
             if (!exchange.getRequestMethod().equals("GET")) {
-                sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
                 return;
             }
             String token = extractToken(exchange);
 
             if (token == null) {
-                sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+                sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
                 return;
             }
             DecodedJWT jwt;
             try {
                 jwt = TokenService.verifyToken(token);
             } catch (Exception e) {
-                sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
                 return;
             }
             if (!jwt.getClaim("role").asString().equals(Role.ADMIN.name())) {
-                sendResponse(exchange, 403, Message.UNAUTHORIZED.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
                 return;
             }
 
-            // Extract query parameters
             Map<String, String> queryParams = QueryParser.parse(exchange.getRequestURI().getRawQuery());
             String search = queryParams.get("search");
             String vendor = queryParams.get("vendor");
@@ -62,7 +61,7 @@ public class AdminOrdersHandler extends BaseHandler implements HttpHandler {
                 try {
                     status = OrderStatus.fromString(statusString);
                 } catch (IllegalArgumentException e) {
-                    sendResponse(exchange, 400, "{\"error\":\"Invalid status value: " + statusString + "\"}");
+                    sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", "Invalid status value: " + statusString)));
                     return;
                 }
             }
@@ -75,8 +74,7 @@ public class AdminOrdersHandler extends BaseHandler implements HttpHandler {
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange,500,Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
-
     }
 }

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class OrderHandler extends BaseHandler implements HttpHandler {
@@ -39,7 +40,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
                 if (path.matches("/orders/\\d+")) {
                     getHandleId(exchange);
                 } else {
-                    sendResponse(exchange, 404, Message.ERROR_404.get());
+                    sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
                 }
                 break;
         }
@@ -47,11 +48,11 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
 
     private void postHandle(HttpExchange exchange) throws IOException {
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             return;
         }
         if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
 
@@ -62,11 +63,11 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
                 return;
             }
         } catch (Exception e) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
             return;
         }
 
@@ -76,26 +77,26 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
             OrderDto dto = objectMapper.readValue(is, OrderDto.class);
 
             if (!dto.isValid()) {
-                sendResponse(exchange, 400, Message.MISSING_FIELDS.get());
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.MISSING_FIELDS.get())));
                 return;
             }
 
-            Order submittedOrder = orderService.submitOrder(dto, customerId); // Call the new service method
-            sendResponse(exchange, 200, objectMapper.writeValueAsString(submittedOrder)); // Send the created order as response
+            Order submittedOrder = orderService.submitOrder(dto, customerId);
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(submittedOrder));
 
         } catch (JsonMappingException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
-        } catch (IllegalArgumentException e) { // Catch exceptions like insufficient stock
-            sendResponse(exchange, 400, e.getMessage());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error",Message.INVALID_INPUT.get())));
+        } catch (IllegalArgumentException e) {
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error",e.getMessage())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error",Message.SERVER_ERROR.get())));
         }
     }
 
     private void getHandleId(HttpExchange exchange) throws IOException {
         if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error",Message.METHOD_NOT_ALLOWED.get())));
             return;
         }
 
@@ -107,7 +108,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         int id = Integer.parseInt(idString);
         Order order = orderService.findById(id);
         if (order == null) {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error",Message.ERROR_404.get())));
             return;
         }
 
@@ -117,7 +118,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
 
     private void getHandleHistory(HttpExchange exchange) throws IOException {
         if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             return;
         }
 
@@ -132,7 +133,7 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
 
     private boolean isTokenValid(String token, HttpExchange exchange) throws IOException {
         if (token == null) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error",Message.UNAUTHORIZED.get())));
             return false;
         }
         try {
@@ -140,11 +141,11 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
                 return false;
             }
         } catch (Exception e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error",Message.FORBIDDEN.get())));
             return false;
         }
         return true;

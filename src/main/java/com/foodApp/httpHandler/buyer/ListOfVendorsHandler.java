@@ -34,6 +34,7 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestaurantService restaurantService = new RestaurantServiceImpl();
     private final MenuItemRepository menuItemRepository = new MenuItemRepositoryImp();
+
     {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
@@ -44,28 +45,27 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
         String method = exchange.getRequestMethod();
 
-        // Path dispatching
         if (path.equals("/vendors") && "POST".equalsIgnoreCase(method)) {
             handlePostVendors(exchange);
-        } else if (path.matches("/vendors/\\d+") && "GET".equalsIgnoreCase(method)) { // Matches /vendors/{id}
-            handleGetVendorById(exchange);
+        } else if (path.matches("/vendors/\\d+") && "GET".equalsIgnoreCase(method)) {
+            handleViewVendorMenu(exchange);
         } else {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         }
     }
 
     private void handlePostVendors(HttpExchange exchange) throws IOException {
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             return;
         }
         if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
         String token = extractToken(exchange);
         if (token == null) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
             return;
         }
         DecodedJWT jwt;
@@ -74,11 +74,11 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403,  Message.FORBIDDEN.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
                 return;
             }
         }catch (Exception e){
-            sendResponse(exchange, 403,  Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
             return;
         }
         try(InputStream is = exchange.getRequestBody()) {
@@ -88,22 +88,17 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
             sendResponse(exchange, 200, json);
         }catch (com.fasterxml.jackson.databind.JsonMappingException e) {
             e.printStackTrace();
-            sendResponse(exchange, 400,Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400,objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, "{\"error\":\"" + Message.SERVER_ERROR.get() + ": " + e.getMessage() + "\"}");
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
-    private void handleGetVendorById(HttpExchange exchange) throws IOException {
-        if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
-            return;
-        }
-
+    private void handleViewVendorMenu(HttpExchange exchange) throws IOException {
         String token = extractToken(exchange);
         if (token == null) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
             return;
         }
         DecodedJWT jwt;
@@ -112,68 +107,65 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403,  Message.FORBIDDEN.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
                 return;
             }
         }catch (Exception e){
-            sendResponse(exchange, 403,  Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
             return;
         }
 
-        String[] pathSegments = exchange.getRequestURI().getPath().split("/");
-        int vendorId;
+        String[] parts = exchange.getRequestURI().getPath().split("/");
+        int restaurantId;
         try {
-            vendorId = Integer.parseInt(pathSegments[2]); // Assuming path is /vendors/{id}
+            restaurantId = Integer.parseInt(parts[2]);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get()))); // استفاده از INVALID_INPUT
             return;
         }
 
         try {
-            Restaurant vendor = restaurantService.findById(vendorId);
-            if (vendor == null) {
-                sendResponse(exchange, 404, Message.ERROR_404.get());
+            Restaurant restaurant = restaurantService.findById(restaurantId);
+            if (restaurant == null) {
+                sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
                 return;
             }
 
-            List<MenuItem> menuItems = menuItemRepository.findByRestaurantId(vendorId);
+            List<MenuItem> menuItems = menuItemRepository.findByRestaurantId(restaurantId);
 
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("vendor", vendor);
+            Map<String, Object> response = new HashMap<>();
+            response.put("vendor", restaurant);
 
             Map<String, List<MenuItemDto>> categorizedMenuItems = new HashMap<>();
-            List<String> menuTitles = new ArrayList<>(); // To store unique menu titles
+            List<String> menuTitles = new ArrayList<>();
 
             for (MenuItem item : menuItems) {
+                String categoryTitle = "Uncategorized"; // پیش‌فرض برای آیتم‌های بدون دسته‌بندی
                 if (item.getCategory() != null && !item.getCategory().isEmpty()) {
                     for (Category category : item.getCategory()) {
-                        String categoryTitle = category.getTitle();
-                        if (!menuTitles.contains(categoryTitle)) {
-                            menuTitles.add(categoryTitle);
-                        }
-                        categorizedMenuItems.computeIfAbsent(categoryTitle, k -> new ArrayList<>())
-                                .add(convertToMenuItemDto(item));
+                        String currentCategoryTitle = category.getTitle();
+                        categorizedMenuItems.computeIfAbsent(currentCategoryTitle, k -> {
+                            menuTitles.add(currentCategoryTitle);
+                            return new ArrayList<>();
+                        }).add(convertToMenuItemDto(item));
                     }
                 } else {
-                    // Handle items without a specific category or add to a "General" category
-                    String generalCategory = "General";
-                    if (!menuTitles.contains(generalCategory)) {
-                        menuTitles.add(generalCategory);
-                    }
-                    categorizedMenuItems.computeIfAbsent(generalCategory, k -> new ArrayList<>())
-                            .add(convertToMenuItemDto(item));
+                    categorizedMenuItems.computeIfAbsent(categoryTitle, k -> {
+                        menuTitles.add(categoryTitle);
+                        return new ArrayList<>();
+                    }).add(convertToMenuItemDto(item));
                 }
             }
 
-            responseData.put("menu_titles", menuTitles);
-            responseData.putAll(categorizedMenuItems); // Add dynamic keys for categorized items
+            response.put("menu_titles", menuTitles);
+            response.putAll(categorizedMenuItems);
 
-            String jsonResponse = objectMapper.writeValueAsString(responseData);
+            String jsonResponse = objectMapper.writeValueAsString(response);
             sendResponse(exchange, 200, jsonResponse);
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, "{\"error\":\"" + Message.SERVER_ERROR.get() + ": " + e.getMessage() + "\"}");
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 

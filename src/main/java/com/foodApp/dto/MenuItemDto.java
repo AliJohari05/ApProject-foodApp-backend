@@ -3,13 +3,14 @@ package com.foodApp.dto;
 import java.util.List;
 
 public class MenuItemDto {
-private Integer id;
-private String name;
-private String imageBase64;
-private String description;
-private Integer price;
-private Integer supply;
-private List<String> categories;
+    private Integer id;
+    private String name;
+    private String imageBase64;
+    private String description;
+    private Integer price;
+    private Integer supply;
+    private List<String> categories; // برای دسته بندی ها
+    private List<String> keywords; // جدید: برای کلمات کلیدی، مطابق با شمای food_item در OpenAPI
 
     public Integer getId() {
         return id;
@@ -58,5 +59,13 @@ private List<String> categories;
     }
     public void setCategories(List<String> categories) {
         this.categories = categories;
+    }
+
+    // جدید: Getters and Setters برای keywords
+    public List<String> getKeywords() {
+        return keywords;
+    }
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
     }
 }

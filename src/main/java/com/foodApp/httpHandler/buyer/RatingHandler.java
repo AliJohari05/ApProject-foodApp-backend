@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.foodApp.exception.OrderNotFoundException;
 import com.foodApp.exception.UserNotFoundException;
-import com.foodApp.exception.MenuItemNotFoundException; // اکسپشن جدید
+import com.foodApp.exception.MenuItemNotFoundException;
 import com.foodApp.exception.UnauthorizedAccessException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -48,12 +48,12 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
                 return;
             }
             userId = Integer.parseInt(jwt.getSubject());
         } catch (Exception e) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
             return;
         }
 
@@ -66,7 +66,7 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
             try {
                 ratingId = Integer.parseInt(path.split("/")[2]);
             } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-                sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
                 return;
             }
 
@@ -77,16 +77,16 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
             } else if ("DELETE".equalsIgnoreCase(method)) {
                 handleDeleteRating(exchange, userId, ratingId);
             } else {
-                sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             }
         } else {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         }
     }
 
     private void handleSubmitRating(HttpExchange exchange, int userId) throws IOException {
         if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
         try (InputStream is = exchange.getRequestBody()) {
@@ -94,16 +94,16 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
             RatingResponseDto responseDto = ratingService.submitRating(userId, requestDto);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(responseDto));
         } catch (JsonMappingException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
         } catch (IllegalArgumentException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", e.getMessage())));
         } catch (OrderNotFoundException | UserNotFoundException | MenuItemNotFoundException e) {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         } catch (UnauthorizedAccessException e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
@@ -111,9 +111,9 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
         int itemId;
         try {
-            itemId = Integer.parseInt(path.split("/")[3]); // مسیر: /ratings/items/{item_id}
+            itemId = Integer.parseInt(path.split("/")[3]);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
             return;
         }
 
@@ -121,10 +121,10 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
             ItemRatingsSummaryDto summary = ratingService.getItemRatings(itemId);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(summary));
         } catch (MenuItemNotFoundException e) {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
@@ -133,31 +133,33 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
             RatingResponseDto responseDto = ratingService.getRatingById(ratingId);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(responseDto));
         } catch (OrderNotFoundException e) {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
     private void handleUpdateRating(HttpExchange exchange, int userId, int ratingId) throws IOException {
         if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
         try (InputStream is = exchange.getRequestBody()) {
             RatingRequestDto requestDto = objectMapper.readValue(is, RatingRequestDto.class);
             RatingResponseDto responseDto = ratingService.updateRating(ratingId, userId, requestDto);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(responseDto));
-        } catch (JsonMappingException | IllegalArgumentException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+        } catch (JsonMappingException e) {
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+        } catch (IllegalArgumentException e) {
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", e.getMessage())));
         } catch (OrderNotFoundException e) {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         } catch (UnauthorizedAccessException e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
@@ -166,12 +168,12 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
             ratingService.deleteRating(ratingId, userId);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("message", Message.SUCCESS.get())));
         } catch (OrderNotFoundException e) {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
         } catch (UnauthorizedAccessException e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 }

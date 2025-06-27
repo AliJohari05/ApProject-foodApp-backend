@@ -37,8 +37,11 @@ CREATE TABLE categories (
                             description TEXT,
                             display_order INT DEFAULT 0,
                             icon VARCHAR(255),
+                            restaurant_id INT NOT NULL, -- جدید: دسته به یک رستوران تعلق دارد
                             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE ON UPDATE CASCADE,
+                            UNIQUE (restaurant_id, title) -- یک رستوران نمی تواند دو دسته با عنوان یکسان داشته باشد
 );
 
 -- === Menu Items Table ===
