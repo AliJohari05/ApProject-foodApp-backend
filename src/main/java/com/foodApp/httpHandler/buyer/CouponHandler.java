@@ -27,28 +27,27 @@ public class CouponHandler extends BaseHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             return;
         }
 
         String token = extractToken(exchange);
         if (token == null) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
             return;
         }
 
         DecodedJWT jwt;
         try {
             jwt = TokenService.verifyToken(token);
-            // فقط نقش‌های buyer و admin مجاز به بررسی کوپن هستند
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403, Message.FORBIDDEN.get());
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
                 return;
             }
         } catch (Exception e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
             return;
         }
 
@@ -56,17 +55,15 @@ public class CouponHandler extends BaseHandler implements HttpHandler {
         String couponCode = queryParams.get("coupon_code");
 
         if (couponCode == null || couponCode.isBlank()) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
             return;
         }
 
         try {
-            // برای این endpoint، فقط کد کوپن و تاریخ اعتبار آن بررسی می‌شود.
-            // بررسی‌های پیچیده‌تر مانند min_price و تعداد استفاده واقعی، در زمان ثبت سفارش انجام خواهد شد.
             Optional<Coupon> couponOptional = couponService.validateAndGetCoupon(couponCode, null, null);
 
             if (couponOptional.isEmpty()) {
-                sendResponse(exchange, 404, Message.ERROR_404.get()); // یافت نشد یا معتبر نیست بر اساس تاریخ
+                sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
                 return;
             }
 
@@ -76,7 +73,7 @@ public class CouponHandler extends BaseHandler implements HttpHandler {
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 }

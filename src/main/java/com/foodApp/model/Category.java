@@ -17,6 +17,10 @@ public class Category {
     private int displayOrder;
     @Column(length = 255)
     private String icon;
+    @ManyToOne
+    @JoinColumn(name = "restaurant_id", nullable = false)
+    private Restaurant restaurant;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
@@ -24,8 +28,7 @@ public class Category {
     @ManyToMany(mappedBy = "category")
     private List<MenuItem> menuItems = new ArrayList<>();
 
-    // === Getters & Setters ===
-
+    // Getters & Setters
     public Integer getId() {
         return id;
     }
@@ -55,6 +58,12 @@ public class Category {
     }
     public void setIcon(String icon) {
         this.icon = icon;
+    }
+    public Restaurant getRestaurant() { // Getter جدید
+        return restaurant;
+    }
+    public void setRestaurant(Restaurant restaurant) { // Setter جدید
+        this.restaurant = restaurant;
     }
     public LocalDateTime getCreatedAt() {
         return createdAt;
