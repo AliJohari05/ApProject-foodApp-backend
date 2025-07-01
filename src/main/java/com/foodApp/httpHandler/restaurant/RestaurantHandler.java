@@ -3,21 +3,13 @@ package com.foodApp.httpHandler.restaurant;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.foodApp.dto.CreateMenuDto;
+import com.foodApp.dto.*;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.*;
 import com.foodApp.exception.*;
-import com.foodApp.service.RestaurantService;
-import com.foodApp.service.RestaurantServiceImpl;
-import com.foodApp.service.UserService;
-import com.foodApp.service.UserServiceImpl;
+import com.foodApp.service.*;
 import com.foodApp.util.Message;
 import com.foodApp.security.TokenService;
-import com.foodApp.dto.RestaurantDto;
-import com.foodApp.dto.MenuItemCreateUpdateDto;
-import com.foodApp.dto.MenuItemDto;
-import com.foodApp.service.ItemService;
-import com.foodApp.service.ItemServiceImpl;
 
 
 import com.sun.net.httpserver.HttpExchange;
@@ -28,6 +20,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +31,8 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
     private final UserService userService = new UserServiceImpl();
     private final ItemService itemService = new ItemServiceImpl();
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final CategoryService categoryService = new CategoryServiceImpl();
+    private final OrderService orderService = new OrderServiceImpl();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -129,8 +124,184 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             }
         }
+        else if (path.matches("/restaurants/\\d+/menu/[^/]+")) { // /restaurants/{id}/menu/{title}
+            int restaurantId = -1;
+            String menuTitle = null;
+            try {
+                restaurantId = Integer.parseInt(path.split("/")[2]);
+                menuTitle = path.split("/")[4];
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+                return;
+            }
+            if ("DELETE".equalsIgnoreCase(method)) {
+                handleDeleteRestaurantMenu(exchange, userId, restaurantId, menuTitle);
+            } else if ("PUT".equalsIgnoreCase(method)) {
+                handleAddMenuItemToMenu(exchange, userId, restaurantId, menuTitle);
+            } else {
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
+            }
+        }
+        else if (path.matches("/restaurants/\\d+/orders")) { // /restaurants/{id}/orders (فقط GET)
+            int restaurantId = -1;
+            try {
+                restaurantId = Integer.parseInt(path.split("/")[2]);
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+                return;
+            }
+            if ("GET".equalsIgnoreCase(method)) {
+                handleGetRestaurantOrders(exchange, userId, restaurantId);
+            } else {
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
+            }
+        } else if (path.matches("/restaurants/orders/\\d+")) { // /restaurants/orders/{order_id} (فقط PATCH)
+            int orderId = -1;
+            try {
+                orderId = Integer.parseInt(path.split("/")[3]); // /restaurants/orders/{order_id}
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+                return;
+            }
+            if ("PATCH".equalsIgnoreCase(method)) {
+                handlePatchRestaurantOrderStatus(exchange, userId, orderId);
+            } else {
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
+            }
+        }
         else {
             sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+        }
+    }
+
+    private void handlePatchRestaurantOrderStatus(HttpExchange exchange, int userId, int orderId) throws IOException {
+        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
+            return;
+        }
+
+        try (InputStream is = exchange.getRequestBody()) {
+            // خواندن داده‌های ورودی
+            Map<String, String> requestBody = objectMapper.readValue(is, Map.class);
+            String newStatus = requestBody.get("status");
+
+            if (newStatus == null) {
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.MISSING_FIELDS.get() + ": status is required.")));
+                return;
+            }
+
+            orderService.updateOrderStatusByRestaurant(userId, orderId, newStatus);
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("message", Message.SUCCESS.get())));
+
+        } catch (JsonMappingException e) {
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+        } catch (OrderNotFoundException e) {
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+        } catch (UnauthorizedAccessException e) {
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+        } catch (InvalidDeliveryStatusTransitionException e) {
+            sendResponse(exchange, 409, objectMapper.writeValueAsString(Map.of("error", e.getMessage())));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
+        }
+    }
+
+    private void handleGetRestaurantOrders(HttpExchange exchange, int userId, int restaurantId) throws IOException {
+        String search = exchange.getRequestURI().getQuery();
+        String status = null;
+        String customerName = null;
+        String courierName = null;
+
+        if (search != null) {
+            Map<String, String> queryParams = Arrays.stream(search.split("&"))
+                    .map(param -> param.split("="))
+                    .collect(Collectors.toMap(param -> param[0], param -> param.length > 1 ? param[1] : null));
+
+            status = queryParams.get("status");
+            customerName = queryParams.get("user");
+            courierName = queryParams.get("courier");
+        }
+
+        try {
+            List<Order> orders = orderService.getRestaurantOrders(restaurantId, search, customerName, courierName, OrderStatus.valueOf(status));
+            List<OrderDto> responseDtos = orders.stream()
+                    .map(order -> new OrderDto(order.getId(), order.getCustomer().getUserId(), order.getStatus(), order.getTotalPrice()))
+                    .collect(Collectors.toList());
+
+            String jsonResponse = objectMapper.writeValueAsString(responseDtos);
+            sendResponse(exchange, 200, jsonResponse);
+        } catch (RestaurantNotFoundException e) {
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
+        }
+    }
+
+
+
+    private void handleAddMenuItemToMenu(HttpExchange exchange, int userId, int restaurantId, String menuTitle) throws JsonProcessingException {
+        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
+            return;
+        }
+        try (InputStream is = exchange.getRequestBody()) {
+            Map<String, Integer> requestBody = objectMapper.readValue(is, Map.class);
+            Integer menuItemId = requestBody.get("item_id");
+
+            if (menuItemId == null) {
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.MISSING_FIELDS.get() + ": item_id is required.")));
+                return;
+            }
+
+            Restaurant restaurant = restaurantService.findById(restaurantId);
+            if (restaurant == null) {
+                sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+                return;
+            }
+            if (restaurant.getOwner().getUserId() != userId) {
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+                return;
+            }
+
+            categoryService.addMenuItemToCategory(restaurantId, menuTitle, menuItemId);
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("message", Message.SUCCESS.get())));
+
+        } catch (JsonMappingException e) {
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+        } catch (IllegalArgumentException e) { // برای تضاد یا خطاهای "آیتم در دسته نیست" از سرویس
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", e.getMessage())));
+        } catch (RestaurantNotFoundException | MenuItemNotFoundException e) { // برای 404 از سرویس (رستوران، دسته، آیتم)
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+        } catch (UnauthorizedAccessException e) { // برای آیتمی که به رستوران تعلق ندارد
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
+        }
+    }
+
+    private void handleDeleteRestaurantMenu(HttpExchange exchange, int userId, int restaurantId, String menuTitle) throws JsonProcessingException {
+        try {
+            Restaurant restaurant = restaurantService.findById(restaurantId);
+            if (restaurant == null) {
+                sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+                return;
+            }
+            if (restaurant.getOwner().getUserId() != userId) {
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+                return;
+            }
+
+            categoryService.deleteRestaurantCategory(restaurantId, menuTitle);
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("message", Message.SUCCESS.get())));
+
+        } catch (RestaurantNotFoundException e) {
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
 
@@ -162,9 +333,8 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
             sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
             return;
         }
-
-
-        sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("title", Message.CREATED_MENU.get())));
+        Category createCategory = categoryService.createRestaurantCategory(restaurantId,createMenuDto);
+        sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("title", createCategory.getTitle())));
 
     }
 

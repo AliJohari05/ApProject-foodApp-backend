@@ -2,9 +2,7 @@ package com.foodApp.service;
 
 import com.foodApp.dto.ItemDto;
 import com.foodApp.dto.OrderDto;
-import com.foodApp.exception.OrderNotFoundException;
-import com.foodApp.exception.RestaurantNotFoundException;
-import com.foodApp.exception.UserNotFoundException;
+import com.foodApp.exception.*;
 import com.foodApp.model.*;
 import com.foodApp.repository.OrderRepository;
 import com.foodApp.repository.OrderRepositoryImpl;
@@ -16,6 +14,7 @@ import com.foodApp.repository.RestaurantRepository;
 import com.foodApp.repository.UserRepository;
 import com.foodApp.repository.CouponRepository; // Added for findById
 import com.foodApp.repository.CouponRepositoryImpl; // Added for findById
+import com.foodApp.util.Message;
 
 
 import java.math.BigDecimal;
@@ -83,9 +82,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.SUBMITTED); // Initial status
 
         List<OrderItem> orderItems = new ArrayList<>();
-        BigDecimal rawCalculatedPrice = BigDecimal.ZERO; // قیمت خام (قبل از مالیات، هزینه‌ها و کوپن)
-
-        // 3. پردازش آیتم‌های سفارش برای محاسبه قیمت خام و پر کردن آیتم‌های سفارش
+        BigDecimal rawCalculatedPrice = BigDecimal.ZERO;
         for (ItemDto itemDto : orderDto.getItems()) {
             Optional<MenuItem> menuItemOptional = menuItemRepository.findById(itemDto.getItemId());
             if (!menuItemOptional.isPresent()) {
@@ -107,33 +104,26 @@ public class OrderServiceImpl implements OrderService {
             rawCalculatedPrice = rawCalculatedPrice.add(menuItem.getPrice().multiply(BigDecimal.valueOf(itemDto.getQuantity())));
         }
         order.setOrderItems(orderItems);
-        order.setRawPrice(rawCalculatedPrice); // تنظیم قیمت خام
+        order.setRawPrice(rawCalculatedPrice);
 
-        // 4. محاسبه هزینه‌ها (مالیات، اضافی، پیک)
-        // فرض می‌کنیم taxFee درصدی و additionalFee ثابت است. courierFee یک مقدار ثابت در نظر گرفته شده است.
         BigDecimal taxRate = BigDecimal.valueOf(restaurant.getTaxFee()).divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP);
         BigDecimal taxFee = taxRate.multiply(rawCalculatedPrice);
         BigDecimal additionalFee = BigDecimal.valueOf(restaurant.getAdditionalFee());
-        BigDecimal courierFee = BigDecimal.valueOf(5000); // مبلغ ثابت برای هزینه پیک
+        BigDecimal courierFee = BigDecimal.valueOf(5000);
 
         order.setTaxFee(taxFee);
         order.setAdditionalFee(additionalFee);
         order.setCourierFee(courierFee);
 
-        // محاسبه قیمت کل قبل از اعمال کوپن
         BigDecimal preCouponTotalPrice = rawCalculatedPrice.add(taxFee).add(additionalFee).add(courierFee);
-        BigDecimal finalTotalPrice = preCouponTotalPrice; // شروع با قیمت کل قبل از کوپن
+        BigDecimal finalTotalPrice = preCouponTotalPrice;
 
-        // 5. اعمال کوپن در صورت ارائه شدن
         if (orderDto.getCouponId() != null) {
             Optional<Coupon> foundCouponOptional = couponRepository.findById(orderDto.getCouponId());
 
             if (foundCouponOptional.isPresent()) {
                 Coupon appliedCoupon = foundCouponOptional.get();
 
-                // اعتبارسنجی کامل کوپن (تاریخ، حداقل قیمت، و غیره)
-                // از متد validateAndGetCoupon در CouponService استفاده می‌کنیم که این اعتبارسنجی‌ها را انجام می‌دهد
-                // اینجا orderTotalPrice و userId پاس داده می‌شوند.
                 if (couponService.validateAndGetCoupon(appliedCoupon.getCouponCode(), preCouponTotalPrice, customerId).isPresent()) {
 
                     if (appliedCoupon.getType() == CouponType.FIXED) {
@@ -142,24 +132,21 @@ public class OrderServiceImpl implements OrderService {
                         BigDecimal discountAmount = preCouponTotalPrice.multiply(appliedCoupon.getValue().divide(BigDecimal.valueOf(100), 2, BigDecimal.ROUND_HALF_UP));
                         finalTotalPrice = finalTotalPrice.subtract(discountAmount);
                     }
-                    order.setCoupon(appliedCoupon); // تنظیم کوپن اعمال شده
-                    couponService.applyCoupon(appliedCoupon); // کاهش تعداد استفاده از کوپن
+                    order.setCoupon(appliedCoupon);
+                    couponService.applyCoupon(appliedCoupon);
                 } else {
-                    // کوپن برای این سفارش نامعتبر است (مثلاً حداقل قیمت برآورده نشده، یا منقضی شده)
                     throw new IllegalArgumentException("Invalid or inapplicable coupon for this order.");
                 }
             } else {
-                // ID کوپن ارائه شده اما کوپن یافت نشد
                 throw new IllegalArgumentException("Coupon not found with ID: " + orderDto.getCouponId());
             }
         }
 
-        // اطمینان از اینکه قیمت نهایی منفی نشود
         if (finalTotalPrice.compareTo(BigDecimal.ZERO) < 0) {
             finalTotalPrice = BigDecimal.ZERO;
         }
 
-        order.setTotalPrice(finalTotalPrice); // تنظیم قیمت نهایی برای پرداخت
+        order.setTotalPrice(finalTotalPrice);
 
         orderRepository.save(order);
         return order;
@@ -168,5 +155,76 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findAllOrdersWithFilters(String search, String vendorName, String courierName, String customerName, OrderStatus status) {
         return orderRepository.findOrdersWithFilters(search, vendorName, courierName, customerName, status);
+    }
+
+    @Override
+    public List<Order> getRestaurantOrders(Integer restaurantId, String search, String customerName, String courierName, OrderStatus status) { // پیاده‌سازی متد جدید
+        Restaurant restaurant = restaurantRepository.findById(restaurantId);
+        if (restaurant == null) {
+            throw new RestaurantNotFoundException(Message.ERROR_404.get());
+        }
+
+        OrderStatus orderStatus = null;
+        if (status != null) {
+            try {
+                orderStatus = OrderStatus.fromString(String.valueOf(status));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid status value: " + status);
+            }
+        }
+
+        return orderRepository.findOrdersByRestaurantIdWithFilters(restaurantId, search, customerName, courierName, orderStatus);
+    }
+
+    @Override
+    public void updateOrderStatusByRestaurant(Integer restaurantId, Integer orderId, String newStatusString) { // پیاده‌سازی متد جدید
+        Restaurant restaurant = restaurantRepository.findById(restaurantId);
+        if (restaurant == null) {
+            throw new RestaurantNotFoundException(Message.ERROR_404.get());
+        }
+
+        Order order = orderRepository.findById(orderId);
+        if (order == null) {
+            throw new OrderNotFoundException(Message.ERROR_404.get());
+        }
+
+        if (!order.getRestaurant().getId().equals(restaurantId)) {
+            throw new UnauthorizedAccessException("Order does not belong to this restaurant.");
+        }
+
+        OrderStatus newStatus;
+        switch (newStatusString.toLowerCase()) {
+            case "accepted": newStatus = OrderStatus.ACCEPTED_BY_VENDOR; break;
+            case "rejected": newStatus = OrderStatus.REJECTED_BY_VENDOR; break;
+            case "served": newStatus = OrderStatus.READY_FOR_PICKUP; break; // "served" -> آماده برای تحویل
+            default: throw new IllegalArgumentException("Invalid status provided for order update.");
+        }
+
+        // اطمینان از منطقی بودن انتقال (مثلاً از SUBMITTED به ACCEPTED_BY_VENDOR)
+        if (order.getStatus() == OrderStatus.DELIVERED_TO_CUSTOMER || order.getStatus() == OrderStatus.CANCELLED_BY_USER || order.getStatus() == OrderStatus.CANCELLED_BY_VENDOR) {
+            throw new InvalidDeliveryStatusTransitionException("Cannot change status of a completed or cancelled order.");
+        }
+        // PENDING -> ACCEPTED/REJECTED
+        if (order.getStatus() == OrderStatus.SUBMITTED || order.getStatus() == OrderStatus.WAITING_VENDOR_ACCEPTANCE) {
+            if (newStatus == OrderStatus.ACCEPTED_BY_VENDOR || newStatus == OrderStatus.REJECTED_BY_VENDOR) {
+                order.setStatus(newStatus);
+            } else {
+                throw new InvalidDeliveryStatusTransitionException("Invalid status transition from " + order.getStatus() + " to " + newStatus);
+            }
+        }
+        // ACCEPTED -> PREPARING -> READY_FOR_PICKUP (served)
+        else if (order.getStatus() == OrderStatus.ACCEPTED_BY_VENDOR || order.getStatus() == OrderStatus.PREPARING) {
+            if (newStatus == OrderStatus.READY_FOR_PICKUP) { // فقط "served" را پس از accepted/preparing مجاز می‌دانیم
+                order.setStatus(newStatus);
+            } else {
+                throw new InvalidDeliveryStatusTransitionException("Invalid status transition from " + order.getStatus() + " to " + newStatus);
+            }
+        }
+        else {
+            throw new InvalidDeliveryStatusTransitionException("Order status cannot be changed from " + order.getStatus());
+        }
+
+        order.setUpdatedAt(LocalDateTime.now());
+        orderRepository.save(order);
     }
 }

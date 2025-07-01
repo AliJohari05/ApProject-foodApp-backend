@@ -155,4 +155,48 @@ public class OrderRepositoryImpl implements OrderRepository {
             return query.list();
         }
     }
+
+    @Override
+    public List<Order> findOrdersByRestaurantIdWithFilters(Integer restaurantId, String searchTerm, String customerName, String courierName, OrderStatus status) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.customer c LEFT JOIN o.delivery d LEFT JOIN d.deliveryPerson dp");
+            hql.append(" WHERE o.restaurant.id = :restaurantId"); // Filter by specific restaurant ID
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("restaurantId", restaurantId); // Add restaurantId parameter
+
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                hql.append(" AND (LOWER(c.name) LIKE :searchTermParam OR CAST(o.id AS string) LIKE :searchTermParam OR LOWER(o.deliveryAddress) LIKE :searchTermParam)");
+                parameters.put("searchTermParam", "%" + searchTerm.toLowerCase().trim() + "%");
+            }
+
+            if (customerName != null && !customerName.trim().isEmpty()) {
+                hql.append(" AND LOWER(c.name) LIKE :customerNameParam");
+                parameters.put("customerNameParam", "%" + customerName.toLowerCase().trim() + "%");
+            }
+
+            if (courierName != null && !courierName.trim().isEmpty()) {
+                hql.append(" AND LOWER(dp.name) LIKE :courierNameParam");
+                parameters.put("courierNameParam", "%" + courierName.toLowerCase().trim() + "%");
+            }
+
+            if (status != null) {
+                hql.append(" AND o.status = :statusParam");
+                parameters.put("statusParam", status);
+            }
+
+            Query<Order> query = session.createQuery(hql.toString(), Order.class);
+            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                if (entry.getValue() instanceof List) {
+                    query.setParameterList(entry.getKey(), (List<?>) entry.getValue());
+                } else {
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new DatabaseException("Failed to find orders by restaurant ID with filters", e);
+        }
+    }
 }

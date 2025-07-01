@@ -1,20 +1,22 @@
 package com.foodApp.repository;
 import com.foodApp.exception.DatabaseException;
 import com.foodApp.model.Category;
-import com.foodApp.repository.CategoryRepository;
+import com.foodApp.model.MenuItem; // ایمپورت جدید
 import com.foodApp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
 import java.util.List;
+import java.util.Optional;
+
 public class CategoryRepositoryIml implements CategoryRepository {
     @Override
     public void save(Category category) {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.persist(category);
+            session.merge(category); // از merge برای ذخیره (ایجاد یا به‌روزرسانی) استفاده کنید
             tx.commit();
         }catch (Exception e) {
             if (tx != null) tx.rollback();
@@ -23,9 +25,9 @@ public class CategoryRepositoryIml implements CategoryRepository {
     }
 
     @Override
-    public Category findById(Integer id) {
+    public Optional<Category> findById(Integer id) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.get(Category.class, id);
+            return Optional.ofNullable(session.get(Category.class, id));
         }
     }
 
@@ -34,7 +36,6 @@ public class CategoryRepositoryIml implements CategoryRepository {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<Category> query = session.createQuery("from Category",Category.class);
             return query.list();
-
         }
     }
 
@@ -50,6 +51,81 @@ public class CategoryRepositoryIml implements CategoryRepository {
             if (tx != null) tx.rollback();
             throw new DatabaseException("Error deleting Category", e);
         }
+    }
 
+    @Override
+    public Optional<Category> findByRestaurantIdAndTitle(Integer restaurantId, String title) { // پیاده‌سازی متد جدید
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Category> query = session.createQuery(
+                    "FROM Category WHERE restaurant.id = :restaurantId AND title = :title", Category.class);
+            query.setParameter("restaurantId", restaurantId);
+            query.setParameter("title", title);
+            return query.uniqueResultOptional();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to find category by restaurant ID and title", e);
+        }
+    }
+
+    @Override
+    public Optional<Category> findByRestaurantIdAndMenuItemId(Integer restaurantId, Integer menuItemId) { // پیاده‌سازی متد جدید
+        // این کوئری برای بررسی وجود ارتباط یک آیتم منو با دسته‌ای خاص در یک رستوران خاص است
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Category> query = session.createQuery(
+                    "SELECT c FROM Category c JOIN c.menuItems mi WHERE c.restaurant.id = :restaurantId AND mi.id = :menuItemId", Category.class);
+            query.setParameter("restaurantId", restaurantId);
+            query.setParameter("menuItemId", menuItemId);
+            return query.uniqueResultOptional(); // یک دسته را برمی‌گرداند اگر ارتباطی پیدا شود
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to check category-menu item linkage for restaurant", e);
+        }
+    }
+
+
+    @Override
+    public void addMenuItemToCategory(Category category, MenuItem menuItem) { // پیاده‌سازی متد جدید
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            // Attach entities if they are detached
+            Category managedCategory = session.merge(category);
+            MenuItem managedMenuItem = session.merge(menuItem);
+
+            // اضافه کردن آیتم منو به مجموعه Category
+            if (!managedCategory.getMenuItems().contains(managedMenuItem)) {
+                managedCategory.getMenuItems().add(managedMenuItem);
+            }
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new DatabaseException("Failed to link menu item to category", e);
+        }
+    }
+
+    @Override
+    public void removeMenuItemFromCategory(Category category, MenuItem menuItem) { // پیاده‌سازی متد جدید
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            Category managedCategory = session.merge(category);
+            MenuItem managedMenuItem = session.merge(menuItem);
+
+            managedCategory.getMenuItems().remove(managedMenuItem);
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new DatabaseException("Failed to unlink menu item from category", e);
+        }
+    }
+
+    @Override
+    public List<Category> findCategoriesByRestaurantId(Integer restaurantId) { // پیاده‌سازی متد جدید
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Category> query = session.createQuery(
+                    "FROM Category WHERE restaurant.id = :restaurantId ORDER BY displayOrder ASC", Category.class);
+            query.setParameter("restaurantId", restaurantId);
+            return query.list();
+        } catch (Exception e) {
+            throw new DatabaseException("Failed to find categories by restaurant ID", e);
+        }
     }
 }

@@ -14,4 +14,6 @@ public interface OrderService{
     public void deleteById(int id);
     Order submitOrder(OrderDto orderDto, int customerId);
     List<Order> findAllOrdersWithFilters(String search, String vendorName, String courierName, String customerName, OrderStatus status);
+    List<Order> getRestaurantOrders(Integer restaurantId, String search, String customerName, String courierName, OrderStatus status);
+    void updateOrderStatusByRestaurant(Integer restaurantId, Integer orderId, String newStatusString);
 }
