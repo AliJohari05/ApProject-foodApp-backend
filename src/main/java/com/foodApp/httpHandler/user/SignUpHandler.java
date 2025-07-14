@@ -26,12 +26,13 @@ public class SignUpHandler extends BaseHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws JsonProcessingException {
         try {
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Message.METHOD_NOT_ALLOWED.get()));
                 return;
             }
 
-            if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-                sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+            String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+            if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
+                sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
                 return;
             }
 

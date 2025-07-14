@@ -85,7 +85,8 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
     }
 
     private void handleSubmitRating(HttpExchange exchange, int userId) throws IOException {
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
             sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
@@ -141,7 +142,8 @@ public class RatingHandler extends BaseHandler implements HttpHandler {
     }
 
     private void handleUpdateRating(HttpExchange exchange, int userId, int ratingId) throws IOException {
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
             sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }

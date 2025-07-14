@@ -23,12 +23,12 @@ public class DeliveryHistoryHandler extends BaseHandler implements HttpHandler {
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if(!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
-            sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange,405, objectMapper.writeValueAsString(Message.METHOD_NOT_ALLOWED.get()));
             return;
         }
         String token = extractToken(exchange);
         if(token == null) {
-            sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+            sendResponse(exchange,401,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
             return;
         }
         DecodedJWT jwt;
@@ -36,12 +36,12 @@ public class DeliveryHistoryHandler extends BaseHandler implements HttpHandler {
         try{
             jwt = TokenService.verifyToken(token);
             if(!Role.COURIER.name().equals(jwt.getClaim("role").asString())) {
-                sendResponse(exchange,403,Message.FORBIDDEN.get());
+                sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
                 return;
             }
             courierId = Integer.parseInt(jwt.getSubject());
         }catch(Exception e){
-            sendResponse(exchange,403,Message.FORBIDDEN.get());
+            sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
             return;
         }
         Map<String, String> queryParams = QueryParser.parse(exchange.getRequestURI().getRawQuery());
@@ -53,7 +53,7 @@ public class DeliveryHistoryHandler extends BaseHandler implements HttpHandler {
             sendResponse(exchange, 200, objectMapper.writeValueAsString(deliveryHistory));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
 
     }

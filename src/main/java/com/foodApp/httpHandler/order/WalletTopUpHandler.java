@@ -1,6 +1,7 @@
 package com.foodApp.httpHandler.order;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.WalletTopUpDto;
 import com.foodApp.httpHandler.BaseHandler;
@@ -28,16 +29,16 @@ public class WalletTopUpHandler extends BaseHandler implements HttpHandler {
     private final UserService userService = new UserServiceImpl();
 
     @Override
-    public void handle(HttpExchange exchange) {
+    public void handle(HttpExchange exchange) throws JsonProcessingException {
         try {
             if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-                sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Message.METHOD_NOT_ALLOWED.get()));
                 return;
             }
 
             String token = extractToken(exchange);
             if (token == null) {
-                sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+                sendResponse(exchange, 401,objectMapper.writeValueAsString( Message.UNAUTHORIZED.get()));
                 return;
             }
 
@@ -45,7 +46,7 @@ public class WalletTopUpHandler extends BaseHandler implements HttpHandler {
             try{
                 jwt=TokenService.verifyToken(token);
             }catch (Exception e){
-                sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+                sendResponse(exchange, 401, objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
                 return;
             }
             int userId = Integer.parseInt(jwt.getSubject());
@@ -54,7 +55,7 @@ public class WalletTopUpHandler extends BaseHandler implements HttpHandler {
             WalletTopUpDto dto = objectMapper.readValue(is, WalletTopUpDto.class);
 
             if (!dto.isValid()) {
-                sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Message.INVALID_INPUT.get()));
                 return;
             }
 
@@ -71,11 +72,11 @@ public class WalletTopUpHandler extends BaseHandler implements HttpHandler {
             user.setWalletBalance(user.getWalletBalance().add(dto.getAmount()));
             userService.updateUser(user);
 
-            sendResponse(exchange, 200, Message.WALLET_TOPPED_UP.get());
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(Message.WALLET_TOPPED_UP.get()));
 
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
 }

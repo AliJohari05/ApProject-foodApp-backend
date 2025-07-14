@@ -24,24 +24,24 @@ public class AdminTransactionsHandler extends BaseHandler implements HttpHandler
     public void handle(HttpExchange exchange) throws IOException {
         try {
             if(!exchange.getRequestMethod().equals("GET")) {
-                sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
+                sendResponse(exchange,405, objectMapper.writeValueAsString(Message.METHOD_NOT_ALLOWED.get()));
                 return;
             }
             String token = extractToken(exchange);
 
             if(token == null) {
-                sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+                sendResponse(exchange,401,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
                 return;
             }
             DecodedJWT jwt;
             try{
                 jwt = TokenService.verifyToken(token);
             }catch(Exception e){
-                sendResponse(exchange,403,Message.FORBIDDEN.get());
+                sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
                 return;
             }
             if(!jwt.getClaim("role").asString().equals(Role.ADMIN.name())) {
-                sendResponse(exchange,403,Message.UNAUTHORIZED.get());
+                sendResponse(exchange,403,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
                 return;
             }
             List<TransactionModel> transactions = transactionService.findAll();
@@ -52,7 +52,7 @@ public class AdminTransactionsHandler extends BaseHandler implements HttpHandler
             String json = objectMapper.writeValueAsString(dtoList);
             sendResponse(exchange,200, json);
         }catch (Exception e) {
-            sendResponse(exchange,500,Message.SERVER_ERROR.get());
+            sendResponse(exchange,500,objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
 }

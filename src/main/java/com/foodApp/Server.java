@@ -40,7 +40,6 @@ public class Server {
             server.createContext("/deliveries", new DeliveryStatusUpdateHandler());
             server.createContext("/deliveries/history", new DeliveryHistoryHandler());
             server.createContext("/vendors", new ListOfVendorsHandler());
-            server.createContext("/vendors/", new DeliveryHistoryHandler());
             server.createContext("/admin/transactions", new AdminTransactionsHandler());
             server.createContext("/admin/orders", new AdminOrdersHandler());
             server.createContext("/orders", new OrderHandler());

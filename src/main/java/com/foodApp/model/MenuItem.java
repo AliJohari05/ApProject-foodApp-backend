@@ -13,7 +13,7 @@ public class MenuItem {
     @ManyToOne
     @JoinColumn(name = "restaurant_id",nullable = false)
     private Restaurant restaurant;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "menu_item_category", joinColumns = @JoinColumn(name = "menu_item_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     private List<Category> category = new ArrayList<>();

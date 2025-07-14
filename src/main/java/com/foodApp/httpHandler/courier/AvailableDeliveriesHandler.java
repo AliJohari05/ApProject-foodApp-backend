@@ -21,29 +21,29 @@ public class AvailableDeliveriesHandler extends BaseHandler implements HttpHandl
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if(!exchange.getRequestMethod().equals("GET")) {
-            sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange,405, objectMapper.writeValueAsString(Message.METHOD_NOT_ALLOWED.get()));
             return;
         }
         String token = extractToken(exchange);
         if(token == null) {
-            sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+            sendResponse(exchange,401,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
             return;
         }
         DecodedJWT jwt;
         try {
             jwt = TokenService.verifyToken(token);
             if(!Role.COURIER.name().equals(jwt.getClaim("role").asString())) {
-                sendResponse(exchange,403,Message.FORBIDDEN.get());
+                sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
             }
         }catch(Exception e) {
-            sendResponse(exchange,403,Message.FORBIDDEN.get());
+            sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
             return;
         }
         try{
             List<Order> orders = deliveryService.getAvailableDeliveries();
             sendResponse(exchange,200,objectMapper.writeValueAsString(orders));
         }catch(Exception e) {
-            sendResponse(exchange,500,Message.SERVER_ERROR.get());
+            sendResponse(exchange,500,objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
 
     }

@@ -35,29 +35,29 @@ public class AdminUserHandler extends BaseHandler implements HttpHandler {
         }
 
         else{
-            sendResponse(exchange,404, Message.ERROR_404.get());
+            sendResponse(exchange,404, objectMapper.writeValueAsString(Message.ERROR_404.get()));
         }
 
     }
     private void getHandel(HttpExchange exchange) throws IOException {
         if(!exchange.getRequestMethod().equals("GET")) {
-            sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange,405, objectMapper.writeValueAsString(Message.ERROR_404.get()));
             return;
         }
         String token = extractToken(exchange);
         if(token == null) {
-            sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+            sendResponse(exchange,401,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
             return;
         }
         DecodedJWT jwt;
         try{
             jwt = TokenService.verifyToken(token);
         }catch (Exception e) {
-            sendResponse(exchange,403,Message.FORBIDDEN.get());
+            sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
             return;
         }
         if (!jwt.getClaim("role").asString().equals(Role.ADMIN.name())) {
-            sendResponse(exchange,403,Message.FORBIDDEN.get());
+            sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
             return;
         }
 
@@ -70,29 +70,29 @@ public class AdminUserHandler extends BaseHandler implements HttpHandler {
             String json = objectMapper.writeValueAsString(dtoList);
             sendResponse(exchange,200,json);
         }catch (Exception e) {
-            sendResponse(exchange,500,Message.SERVER_ERROR.get());
+            sendResponse(exchange,500,objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
 
     }
     private void patchHandel(HttpExchange exchange) throws IOException {
         if(!exchange.getRequestMethod().equals("PATCH")) {
-            sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange,405, objectMapper.writeValueAsString(Message.METHOD_NOT_ALLOWED.get()));
             return;
         }
         String token = extractToken(exchange);
         if(token == null) {
-            sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+            sendResponse(exchange,401,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
             return;
         }
         DecodedJWT jwt;
         try{
             jwt = TokenService.verifyToken(token);
         }catch (Exception e) {
-            sendResponse(exchange,403,Message.FORBIDDEN.get());
+            sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
             return;
         }
         if (!jwt.getClaim("role").asString().equals(Role.ADMIN.name())) {
-            sendResponse(exchange,403,Message.FORBIDDEN.get());
+            sendResponse(exchange,403,objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
             return;
         }
         String[] segments = exchange.getRequestURI().getPath().split("/");
@@ -103,22 +103,22 @@ public class AdminUserHandler extends BaseHandler implements HttpHandler {
             StatusDto dto = objectMapper.readValue(is, StatusDto.class);
 
             if (!dto.isValid()) {
-                sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Message.INVALID_INPUT.get()));
                 return;
             }
 
             boolean updated = userService.updateUserStatus(userId, dto.getStatus());
             if (!updated) {
-                sendResponse(exchange, 404, Message.USER_NOT_FOUND.get());
+                sendResponse(exchange, 404, objectMapper.writeValueAsString(Message.USER_NOT_FOUND.get()));
                 return;
             }
 
-            sendResponse(exchange, 200, Message.STATUS_UPDATED.get());
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(Message.STATUS_UPDATED.get()));
         } catch (NumberFormatException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Message.INVALID_INPUT.get()));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
 }

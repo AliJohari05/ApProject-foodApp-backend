@@ -68,8 +68,8 @@ public class ProfileHandler extends BaseHandler implements HttpHandler {
 
     private void handlePut(HttpExchange exchange, int userId) throws IOException {
         String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
-        if (contentType == null || !contentType.equalsIgnoreCase("application/json")) {
-            sendResponse(exchange, 415, jsonError(Message.UNSUPPORTED_MEDIA_TYPE.get()));
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
 

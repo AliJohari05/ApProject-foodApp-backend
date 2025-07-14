@@ -1,5 +1,7 @@
+// FoodApp/ListOfVendorsHandler.java
 package com.foodApp.httpHandler.buyer;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.dto.VendorFilterDto;
@@ -48,6 +50,7 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
         if (path.equals("/vendors") && "POST".equalsIgnoreCase(method)) {
             handlePostVendors(exchange);
         } else if (path.matches("/vendors/\\d+") && "GET".equalsIgnoreCase(method)) {
+            System.out.println("GET vendor list");
             handleViewVendorMenu(exchange);
         } else {
             sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
@@ -59,7 +62,8 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
             sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             return;
         }
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
             sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
@@ -74,11 +78,17 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
             String userRole = jwt.getClaim("role").asString();
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get() + ": Insufficient role")));
                 return;
             }
-        }catch (Exception e){
-            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+        }catch (JWTVerificationException e){ // Catch specific JWT validation errors first
+            e.printStackTrace(); // Print stack trace to see the exact JWT error
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get() + ": Invalid or expired token")));
+            return;
+        }
+        catch (Exception e){ // Catch other unexpected exceptions
+            e.printStackTrace(); // Print stack trace for other errors
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get() + ": Role check failed or other authorization issue")));
             return;
         }
         try(InputStream is = exchange.getRequestBody()) {
@@ -96,22 +106,41 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
     }
 
     private void handleViewVendorMenu(HttpExchange exchange) throws IOException {
+        System.out.println("GET vendor List start method");
         String token = extractToken(exchange);
         if (token == null) {
             sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
             return;
         }
+        System.out.println("hiiiiiiiiiii");
+
         DecodedJWT jwt;
         try{
-            jwt = TokenService.verifyToken(token);
+            System.out.println("start");
+            jwt = TokenService.verifyToken(token); // Likely throws exception here
+            System.out.println("fffffffff"); // This line won't be reached if exception is thrown
+
             Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
+            System.out.println("fsfsfsfsf");
+
             String userRole = jwt.getClaim("role").asString();
+
+            System.out.println("DEBUG: User Role from JWT = " + userRole);
+            System.out.println("DEBUG: Allowed Roles for endpoint = " + allowedRoles);
+            System.out.println("DEBUG: Is user role allowed? " + allowedRoles.contains(userRole));
+
             if (!allowedRoles.contains(userRole)) {
-                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get() + ": Insufficient role")));
                 return;
             }
-        }catch (Exception e){
-            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+        }catch (JWTVerificationException e){ // Catch specific JWT validation errors first
+            e.printStackTrace(); // Print stack trace to see the exact JWT error
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get() + ": Invalid or expired token")));
+            return;
+        }
+        catch (Exception e){ // Catch other unexpected exceptions
+            e.printStackTrace(); // Print stack trace for other errors
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get() + ": Role check failed or other authorization issue")));
             return;
         }
 
@@ -120,7 +149,7 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
         try {
             restaurantId = Integer.parseInt(parts[2]);
         } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get()))); // استفاده از INVALID_INPUT
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
             return;
         }
 
@@ -140,7 +169,7 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
             List<String> menuTitles = new ArrayList<>();
 
             for (MenuItem item : menuItems) {
-                String categoryTitle = "Uncategorized"; // پیش‌فرض برای آیتم‌های بدون دسته‌بندی
+                String categoryTitle = "Uncategorized";
                 if (item.getCategory() != null && !item.getCategory().isEmpty()) {
                     for (Category category : item.getCategory()) {
                         String currentCategoryTitle = category.getTitle();

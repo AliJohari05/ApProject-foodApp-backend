@@ -2,6 +2,7 @@ package com.foodApp.httpHandler.user;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.security.RedisTokenBlacklist;
 import com.foodApp.security.TokenService;
@@ -10,21 +11,24 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class LogoutHandler extends BaseHandler implements HttpHandler {
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if (!"POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            sendResponse(exchange, 405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange, 405, objectMapper.writeValueAsString(Message.METHOD_NOT_ALLOWED.get()));
             return;
         }
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
         String token = extractToken(exchange);
         if (token == null) {
-            sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
             return;
         }
 
@@ -38,12 +42,12 @@ public class LogoutHandler extends BaseHandler implements HttpHandler {
                 RedisTokenBlacklist.add(token, ttl);
             }
 
-            sendResponse(exchange, 200, Message.LOGOUT_SUCCESS.get());
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(Message.LOGOUT_SUCCESS.get()));
         } catch (SecurityException e) {
-            sendResponse(exchange, 403, Message.FORBIDDEN.get());
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
 }

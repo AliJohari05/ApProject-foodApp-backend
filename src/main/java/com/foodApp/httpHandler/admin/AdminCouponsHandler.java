@@ -102,8 +102,9 @@ public class AdminCouponsHandler extends BaseHandler implements HttpHandler {
         }
     }
     private void PostHandlerCreatCoupon(HttpExchange exchange) throws IOException {
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
         try (InputStream is = exchange.getRequestBody()) {
@@ -117,26 +118,27 @@ public class AdminCouponsHandler extends BaseHandler implements HttpHandler {
             sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", e.getMessage())));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
     private void handleGetCouponDetails(HttpExchange exchange, int couponId) throws IOException {
         try {
             Optional<Coupon> couponOptional = couponService.getCouponById(couponId);
             if (couponOptional.isEmpty()) {
-                sendResponse(exchange, 404, Message.ERROR_404.get());
+                sendResponse(exchange, 404, objectMapper.writeValueAsString(Message.ERROR_404.get()));
                 return;
             }
             CouponDto responseDto = new CouponDto(couponOptional.get());
             sendResponse(exchange, 200, objectMapper.writeValueAsString(responseDto));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
     private void handleUpdateCoupon(HttpExchange exchange, int couponId) throws IOException {
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
-            sendResponse(exchange, 415, Message.UNSUPPORTED_MEDIA_TYPE.get());
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
+            sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
         try (InputStream is = exchange.getRequestBody()) {
@@ -145,26 +147,26 @@ public class AdminCouponsHandler extends BaseHandler implements HttpHandler {
             CouponDto responseDto = new CouponDto(updatedCoupon);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(responseDto));
         } catch (JsonMappingException e) {
-            sendResponse(exchange, 400, Message.INVALID_INPUT.get());
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Message.INVALID_INPUT.get()));
         } catch (IllegalArgumentException e) {
-            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", e.getMessage()))); // ارسال پیام خطای مشخص
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", e.getMessage())));
         } catch (RestaurantNotFoundException e) {
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Message.ERROR_404.get()));
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
     private void handleDeleteCoupon(HttpExchange exchange, int couponId) throws IOException {
         try {
             couponService.deleteCoupon(couponId);
-            sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("message", Message.SUCCESS.get())));
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(Message.SUCCESS.get()));
         }catch (CouponNotFoundException e){
-            sendResponse(exchange, 404, Message.ERROR_404.get());
+            sendResponse(exchange, 404, objectMapper.writeValueAsString(Message.ERROR_404.get()));
         }
         catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, Message.SERVER_ERROR.get());
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
     }
 }

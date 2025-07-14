@@ -23,19 +23,19 @@ public class TransactionHistoryHandler extends BaseHandler implements HttpHandle
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         if(!exchange.getRequestMethod().equals("GET")) {
-            sendResponse(exchange,405, Message.METHOD_NOT_ALLOWED.get());
+            sendResponse(exchange,405,objectMapper.writeValueAsString( Message.METHOD_NOT_ALLOWED.get()));
             return;
         }
         String token = extractToken(exchange);
         if(token == null) {
-            sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+            sendResponse(exchange,401,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
             return;
         }
         DecodedJWT jwt;
         try {
             jwt = TokenService.verifyToken(token);
         }catch(Exception e) {
-            sendResponse(exchange,401,Message.UNAUTHORIZED.get());
+            sendResponse(exchange,401,objectMapper.writeValueAsString(Message.UNAUTHORIZED.get()));
             return;
         }
         int userId = Integer.parseInt(jwt.getSubject());
@@ -50,7 +50,7 @@ public class TransactionHistoryHandler extends BaseHandler implements HttpHandle
 
         }catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange,500,Message.SERVER_ERROR.get());
+            sendResponse(exchange,500,objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
 
 
