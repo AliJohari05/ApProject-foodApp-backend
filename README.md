@@ -56,7 +56,7 @@ Unlike typical enterprise frameworks, this backend is implemented using **pure J
 - Optional: Maven (for building)
 - File-based storage (JSON or text)
 - No frameworks – built entirely using **core Java libraries**
-
+-📦 All required dependencies (if any) are listed in the pom.xml file for Maven builds — no need to install libraries manually.
 ---
 
 ### ▶️ How to Run
@@ -120,7 +120,7 @@ Although implemented in plain Java, the system’s RESTful endpoints are designe
 
 ## 👨‍🏫 Course & Supervision
 
-This project is part of the **Advanced Programming** course at **Amirkabir University (Spring 1404)**.
+This project is part of the **Advanced Programming** course at **Amirkabir University**.
 
 Supervised by:
 - Dr. Amir Kalbasi
