@@ -56,6 +56,7 @@ Unlike typical enterprise frameworks, this backend is implemented using **pure J
 - Optional: Maven (for building)
 - File-based storage (JSON or text)
 - No frameworks – built entirely using **core Java libraries**
+
 -📦 All required dependencies (if any) are listed in the pom.xml file for Maven builds — no need to install libraries manually.
 ---
 
