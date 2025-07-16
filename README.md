@@ -2,49 +2,44 @@
 
 ## 📌 Introduction
 
-This is the backend of a **multi-role food ordering system** developed for the **Advanced Programming Course (Spring 1404)** at Amirkabir University of Technology (AUT). The project simulates an online food ordering platform with multiple roles, including customer, restaurant owner, delivery agent, and admin.
-
-Unlike typical enterprise frameworks, this backend is implemented using **pure Java (Java SE)** without any external libraries or frameworks such as Spring Boot.
+This is the backend of a **multi-role food ordering system** developed for the **Advanced Programming Course (Spring 1404)** at Amirkabir University of Technology (AUT). The backend supports customer, seller, delivery, and admin roles and is built entirely using **pure Java (Java SE)** with a modular, layered structure.
 
 ---
 
 ## 🧩 Features
 
 ### 🔐 Authentication & User Management
-- Register/Login with role-based access (Customer, Seller, Delivery, Admin)
-- Edit user profiles (address, banking info, etc.)
-- Dashboard per role
+- Register/login for different roles
+- Profile editing, including banking info
+- Role-based access and dashboards
 
 ### 🍽️ Restaurant & Menu Management
-- Sellers can register restaurants (admin approval required)
-- Add/edit/delete food items
-- Categorize and tag meals
-- Filter/search by name, price, rating, and category
+- Seller registration with admin approval
+- Menu creation and editing
+- Food categorization, search, and filter
 
 ### 🛍️ Ordering System
-- Customers can add food to cart and place orders
-- Track orders and view history
-- Assign delivery agent to each order
+- Cart management, order placement
+- Order status tracking
+- Assign orders to delivery agents
 
 ### 💳 Payment & Wallet
-- Simulated online payments or internal wallet system
-- Full order invoice (total, tax, delivery fee)
-- Track all financial transactions per user
+- Simulated online payment or wallet deduction
+- Full invoice generation (with tax and delivery)
+- View transaction history
 
-### 🚚 Delivery Management
-- Delivery agents can view and accept orders
-- Update delivery status
-- Track delivery history
+### 🚚 Delivery System
+- Agents receive and update delivery status
+- Track history and current assignments
 
 ### ⚙️ Admin Panel
-- Approve or reject sellers and restaurants
-- Moderate users and orders
-- View system-wide reports and stats
+- Approve users/restaurants
+- Manage system-wide stats, orders, users
 
-### 📈 Analytics & Add-ons
-- Show top-rated restaurants on homepage
-- Apply discount codes and special offers
-- Allow users to rate and comment on meals
+### 📈 Advanced Features
+- Discount codes
+- Ratings and comments on food
+- Best restaurants shown on homepage
 
 ---
 
@@ -52,92 +47,87 @@ Unlike typical enterprise frameworks, this backend is implemented using **pure J
 
 ### 🛠️ Requirements
 
-- Java SE 17+
-- Optional: Maven (for building)
-- File-based storage (JSON or text)
-- No frameworks – built entirely using **core Java libraries**
+- Java 17+
+- Maven
+- No external frameworks (pure Java SE)
+- File or Redis-based data storage
 
--📦 All required dependencies (if any) are listed in the pom.xml file for Maven builds — no need to install libraries manually.
+📦 All dependencies (if any) are declared in `pom.xml`.
+
 ---
 
 ### ▶️ How to Run
 
+1. Compile the project:
+
 ```bash
-git clone https://github.com/YOUR_USERNAME/aut-food-backend.git
-cd aut-food-backend
-javac -d out src/**/*.java
-java -cp out Main
+cd "ap project backend/Food4u"
+mvn compile
 ```
 
-> Replace `Main` with your actual entry point class (e.g., `com.aut.food.Main`)
+2. Run the main server class:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.foodApp.Server"
+```
+
+> Make sure Redis is running if your config uses it.
 
 ---
 
 ## 📚 API Documentation
 
-Although implemented in plain Java, the system’s RESTful endpoints are designed based on the **OpenAPI standard**.
+API design follows **OpenAPI** standards.
 
-- Open and view `aut_food.yaml` in [Swagger Editor](https://editor.swagger.io/)
-- Or upload it to any compatible Swagger UI tool
+- See `aut_food.yaml` in the root folder
+- You can view it via [Swagger Editor](https://editor.swagger.io)
 
 ---
 
 ## 🛠️ Technologies Used
 
-- Java SE (17+)
-- File I/O (JSON/text files)
-- Basic HTTP Server (e.g., `com.sun.net.httpserver.HttpServer`)
-- Manual routing, request/response parsing
+- Java SE 17+
+- Maven
+- File/Redis-based persistence
+- Custom HTTP server using core Java libraries
+- DTO-based request/response handling
+- Modular package design (e.g., `dto`, `config`, `controller`)
 
 ---
 
 ## 📁 Project Structure
 
 ```
-├── src/
-│   ├── controller/
-│   ├── service/
-│   ├── model/
-│   ├── storage/
-│   └── Main.java
-├── data/
-│   ├── users.json
-│   ├── orders.json
-│   └── restaurants.json
-├── aut_food.yaml
-├── AP Project Spring 2025-v2.pdf
-└── README.md
+Food4u/
+├── pom.xml
+└── src/
+    └── main/
+        └── java/
+            └── com/
+                └── foodApp/
+                    ├── Server.java
+                    ├── config/
+                    ├── dto/
+                    ├── controller/
+                    ├── model/
+                    ├── service/
+                    └── storage/
 ```
 
 ---
 
-## 🧪 Testing
+## 👨‍🏫 Supervision
 
-- Manual testing via Swagger, Postman, or browser
-- JSON-based mock data provided for local testing
-- No automated tests included (can be added with JUnit)
+Project developed for **Advanced Programming**  
+Amirkabir University of Technology 
 
----
-
-## 👨‍🏫 Course & Supervision
-
-This project is part of the **Advanced Programming** course at **Amirkabir University**.
-
-Supervised by:
-- Dr. Amir Kalbasi
-- Dr. Hossein Zeynali
-
----
-
-## 📎 License
-
-This project is for educational use only.  
-Feel free to fork and reuse the structure for learning or academic projects.
+- Dr. Amir Kalbasi  
+- Dr. Hossein Zeynali  
 
 ---
 
 ## 📣 Notes
 
-- Frontend is not included. Any client (CLI, JavaFX, web) must communicate using **RESTful HTTP**.
-- All API responses follow **JSON format**.
-- No external dependencies or frameworks used – 100% native Java implementation.
+- This backend can connect to any frontend (JavaFX, web, etc.) via RESTful HTTP endpoints
+- Responses are in JSON
+- No external frameworks are used — pure Java implementation
