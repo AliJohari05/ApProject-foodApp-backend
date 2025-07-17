@@ -19,7 +19,7 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
             tx = session.beginTransaction();
             Restaurant mergedRestaurant = (Restaurant) session.merge(restaurant);
             tx.commit();
-            return restaurant;
+            return mergedRestaurant; 
         }catch(Exception e) {
             if(tx != null) tx.rollback();
             throw new DatabaseException("Error saving restaurant", e);
