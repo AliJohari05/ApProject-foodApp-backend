@@ -9,11 +9,9 @@ public class RestaurantDto {
     private String name;
     private String address;
     private String phone;
-    private String logoBase64;
+    private String logoBase64; // این فیلد ممکن است در API الزامی نباشد
     private Integer tax_fee;
     private Integer additional_fee;
-
-
 
     public RestaurantDto() {
     }
@@ -28,61 +26,27 @@ public class RestaurantDto {
         this.additional_fee = additional_fee;
     }
 
-    // Getters and Setters
-    public Integer getId() {
-        return id;
-    }
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getLogoBase64() {
-        return logoBase64;
-    }
-    public void setLogoBase64(String logoBase64) {
-        this.logoBase64 = logoBase64;
-    }
-
-    public Integer getTax_fee() {
-        return tax_fee;
-    }
-    public void setTax_fee(Integer tax_fee) {
-        this.tax_fee = tax_fee;
-    }
-
-    public Integer getAdditional_fee() {
-        return additional_fee;
-    }
-    public void setAdditional_fee(Integer additional_fee) {
-        this.additional_fee = additional_fee;
-    }
+    // Getters and Setters (بدون تغییر)
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getLogoBase64() { return logoBase64; }
+    public void setLogoBase64(String logoBase64) { this.logoBase64 = logoBase64; }
+    public Integer getTax_fee() { return tax_fee; }
+    public void setTax_fee(Integer tax_fee) { this.tax_fee = tax_fee; }
+    public Integer getAdditional_fee() { return additional_fee; }
+    public void setAdditional_fee(Integer additional_fee) { this.additional_fee = additional_fee; }
 
     public boolean hasRequiredFields() {
         return  name != null && !name.isBlank() &&
                 address != null && !address.isBlank() &&
                 phone != null && !phone.isBlank() &&
-                logoBase64 != null && !logoBase64.isBlank() &&
+                // logoBase64 != null && !logoBase64.isBlank() && // <--- این خط حذف شد
                 tax_fee != null && additional_fee != null;
     }
 
@@ -90,9 +54,9 @@ public class RestaurantDto {
         if (name != null && (name.length() < 2 || name.length() > 100)) {
             return "invalid name: length must be between 2 and 100 characters.";
         }
-        if (phone != null && !Pattern.matches("^\\d{11}$", phone)) {
-            return "invalid phone: must be 11 digits.";
-        }
+//        if ((phone != null && !Pattern.matches("^\\d{11}$", phone))) {
+//            return "invalid phone: must be 11 digits.";
+//        }
         if (tax_fee != null && tax_fee < 0) {
             return "invalid tax_fee: cannot be negative.";
         }

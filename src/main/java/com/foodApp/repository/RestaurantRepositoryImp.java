@@ -4,7 +4,6 @@ import com.foodApp.model.Restaurant;
 
 import java.util.List;
 import com.foodApp.exception.DatabaseException;
-import com.foodApp.model.Restaurant;
 import com.foodApp.repository.RestaurantRepository;
 import com.foodApp.util.HibernateUtil;
 import org.hibernate.Session;
@@ -45,7 +44,7 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
     @Override
     public List<Restaurant> findApprovedByFilters(String search, List<String> keywords) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            StringBuilder hql = new StringBuilder("SELECT DISTINCT r FROM Restaurant r WHERE r.approved = true"); // تغییر در اینجا
+            StringBuilder hql = new StringBuilder("SELECT DISTINCT r FROM Restaurant r WHERE r.approved = true");
 
             boolean hasSearch = search != null && !search.isBlank();
             boolean hasKeywords = keywords != null && !keywords.isEmpty();
