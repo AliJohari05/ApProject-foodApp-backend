@@ -17,7 +17,7 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
         Transaction tx = null;
         try(Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.persist(restaurant);
+            Restaurant mergedRestaurant = (Restaurant) session.merge(restaurant);
             tx.commit();
             return restaurant;
         }catch(Exception e) {
