@@ -93,8 +93,8 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
     @Override
     public List<Restaurant> findByOwnerId(int ownerId) {
         try(Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Query <Restaurant> query = session.createQuery("From Restaurant where owner.userId = :ownerId", Restaurant.class); // <-- اصلاح شد: owner.userId
-            query.setParameter("ownerId", ownerId); // <-- این خط اضافه شد
+            Query <Restaurant> query = session.createQuery("From Restaurant where owner.userId = :ownerId", Restaurant.class);
+            query.setParameter("ownerId", ownerId);
             return query.list();
         }
     }
