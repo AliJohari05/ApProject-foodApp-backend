@@ -13,10 +13,14 @@ public class MenuItem {
     @ManyToOne
     @JoinColumn(name = "restaurant_id",nullable = false)
     private Restaurant restaurant;
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "menu_item_category", joinColumns = @JoinColumn(name = "menu_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JoinTable(
+            name = "menu_item_category",
+            joinColumns = @JoinColumn(name = "menu_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
     private List<Category> category = new ArrayList<>();
+
     @Column(nullable = false,length = 100)
     private String name;
     private String description;
@@ -110,4 +114,18 @@ public class MenuItem {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MenuItem menuItem = (MenuItem) o;
+        return id != null && id.equals(menuItem.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return 31;
+    }
+
 }

@@ -134,10 +134,24 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
                 return;
             }
+            if ("PUT".equalsIgnoreCase(method)) {
+                handleAddMenuItemToMenu(exchange, userId, restaurantId, menuTitle);
+            } else {
+                sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
+            }
+        }
+        else if (path.matches("/restaurants/\\d+/menu/[^/]+/\\d+")) { // /restaurants/{id}/menu/{title}/{item_id}
+            int restaurantId = -1;
+            String menuTitle = null;
+            try {
+                restaurantId = Integer.parseInt(path.split("/")[2]);
+                menuTitle = path.split("/")[4];
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+                return;
+            }
             if ("DELETE".equalsIgnoreCase(method)) {
                 handleDeleteRestaurantMenu(exchange, userId, restaurantId, menuTitle);
-            } else if ("PUT".equalsIgnoreCase(method)) {
-                handleAddMenuItemToMenu(exchange, userId, restaurantId, menuTitle);
             } else {
                 sendResponse(exchange, 405, objectMapper.writeValueAsString(Map.of("error", Message.METHOD_NOT_ALLOWED.get())));
             }
@@ -243,7 +257,8 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
 
 
     private void handleAddMenuItemToMenu(HttpExchange exchange, int userId, int restaurantId, String menuTitle) throws JsonProcessingException {
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
             sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
@@ -285,6 +300,9 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
 
     private void handleDeleteRestaurantMenu(HttpExchange exchange, int userId, int restaurantId, String menuTitle) throws JsonProcessingException {
         try {
+            String[] parts = exchange.getRequestURI().getPath().split("/");
+            int menuItemId = Integer.parseInt(parts[5]);
+
             Restaurant restaurant = restaurantService.findById(restaurantId);
             if (restaurant == null) {
                 sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
@@ -295,16 +313,24 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 return;
             }
 
-            categoryService.deleteRestaurantCategory(restaurantId, menuTitle);
+            // حذف آیتم از دسته‌بندی
+            categoryService.removeMenuItemFromCategory(restaurantId, menuTitle, menuItemId);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("message", Message.SUCCESS.get())));
 
-        } catch (RestaurantNotFoundException e) {
+        } catch (NumberFormatException e) {
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", Message.INVALID_INPUT.get())));
+        } catch (RestaurantNotFoundException | MenuItemNotFoundException e) {
             sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+        } catch (UnauthorizedAccessException e) {
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+        } catch (IllegalArgumentException e) {
+            sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", e.getMessage())));
         } catch (Exception e) {
             e.printStackTrace();
             sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get() + ": " + e.getMessage())));
         }
     }
+
 
     private void handlePostRestaurantCreateMenu(HttpExchange exchange,int userId ,int restaurantId) throws JsonProcessingException {
         InputStream body = exchange.getRequestBody();
@@ -471,7 +497,8 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
     }
 
     private void handleAddMenuItem(HttpExchange exchange, int userId, int restaurantId) throws IOException {
-        if (!"application/json".equalsIgnoreCase(exchange.getRequestHeaders().getFirst("Content-Type"))) {
+        String contentType = exchange.getRequestHeaders().getFirst("Content-Type");
+        if (contentType == null || !contentType.split(";")[0].trim().equalsIgnoreCase("application/json")) {
             sendResponse(exchange, 415, objectMapper.writeValueAsString(Map.of("error", Message.UNSUPPORTED_MEDIA_TYPE.get())));
             return;
         }
@@ -488,14 +515,15 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 return;
             }
 
-            if (!createDto.getVendorId().equals(restaurantId)) {
-                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", "Vendor ID in body does not match restaurant ID in path.")));
-                return;
-            }
+
 
             Restaurant restaurant = restaurantService.findById(restaurantId);
             if (restaurant == null) {
                 sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
+                return;
+            }
+            if (!createDto.getVendorId().equals(restaurant.getOwner().getUserId())) {
+                sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", "Vendor ID in body does not match restaurant ID in path.")));
                 return;
             }
             if (restaurant.getOwner().getUserId() != userId) {

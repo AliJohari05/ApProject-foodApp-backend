@@ -120,7 +120,7 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
             jwt = TokenService.verifyToken(token); // Likely throws exception here
             System.out.println("fffffffff"); // This line won't be reached if exception is thrown
 
-            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name());
+            Set<String> allowedRoles = Set.of(Role.BUYER.name(), Role.ADMIN.name(),Role.SELLER.name());
             System.out.println("fsfsfsfsf");
 
             String userRole = jwt.getClaim("role").asString();

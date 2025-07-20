@@ -32,7 +32,7 @@ public class AdminCouponsHandler extends BaseHandler implements HttpHandler {
         try {
             String token = extractToken(exchange);
             if(token == null) {
-                sendResponse(exchange, 401, Message.UNSUPPORTED_MEDIA_TYPE.get());
+                sendResponse(exchange, 401, Message.UNAUTHORIZED.get());
                 return;
             }
             DecodedJWT jwt;
@@ -42,7 +42,7 @@ public class AdminCouponsHandler extends BaseHandler implements HttpHandler {
                 sendResponse(exchange, 403, Message.FORBIDDEN.get());
                 return;
             }
-            if (!jwt.getClaim("role").asString().equals(Role.ADMIN.name())) {
+            if (!jwt.getClaim("role").asString().equals(Role.ADMIN.name()) && !jwt.getClaim("role").asString().equals(Role.SELLER.name())) {
                 sendResponse(exchange, 403, Message.UNAUTHORIZED.get());
                 return;
             }
