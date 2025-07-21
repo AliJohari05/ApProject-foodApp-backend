@@ -98,7 +98,7 @@ public class OrderServiceImpl implements OrderService {
             orderItem.setMenuItem(menuItem);
             orderItem.setQuantity(itemDto.getQuantity());
             orderItem.setPriceAtOrder(menuItem.getPrice());
-
+            orderItem.setOrder(order);
             orderItems.add(orderItem);
 
             rawCalculatedPrice = rawCalculatedPrice.add(menuItem.getPrice().multiply(BigDecimal.valueOf(itemDto.getQuantity())));
@@ -114,6 +114,8 @@ public class OrderServiceImpl implements OrderService {
         order.setTaxFee(taxFee);
         order.setAdditionalFee(additionalFee);
         order.setCourierFee(courierFee);
+        order.setCreatedAt(LocalDateTime.now());
+        order.setUpdatedAt(LocalDateTime.now());
 
         BigDecimal preCouponTotalPrice = rawCalculatedPrice.add(taxFee).add(additionalFee).add(courierFee);
         BigDecimal finalTotalPrice = preCouponTotalPrice;

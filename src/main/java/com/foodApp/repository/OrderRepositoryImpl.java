@@ -24,10 +24,18 @@ public class OrderRepositoryImpl implements OrderRepository {
             session.persist(order);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            // 👇 بررسی وضعیت تراکنش قبل از rollback
+            try {
+                if (tx != null && tx.getStatus().canRollback()) {
+                    tx.rollback();
+                }
+            } catch (Exception rollbackEx) {
+                rollbackEx.printStackTrace(); // یا لاگ مناسب
+            }
             throw new DatabaseException("Failed to save order", e);
         }
     }
+
 
     @Override
     public Order findById(int id) {

@@ -1,10 +1,13 @@
 package com.foodApp.model;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.foodApp.dto.BankInfoDto;
 import com.foodApp.dto.UserProfileDto;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 public class User {

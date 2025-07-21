@@ -23,6 +23,10 @@ public class OrderDto {
     private Integer couponId;
     @JsonProperty("items")
     private List<ItemDto> items;
+
+    public OrderDto() {
+    }
+
     public OrderDto(Integer id, Integer customerId, OrderStatus status, BigDecimal totalPrice) {
         this.id = id;
         this.customerId = customerId;
