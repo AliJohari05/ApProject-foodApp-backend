@@ -167,11 +167,13 @@ public class OrderRepositoryImpl implements OrderRepository {
     @Override
     public List<Order> findOrdersByRestaurantIdWithFilters(Integer restaurantId, String searchTerm, String customerName, String courierName, OrderStatus status) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.customer c LEFT JOIN o.delivery d LEFT JOIN d.deliveryPerson dp");
-            hql.append(" WHERE o.restaurant.id = :restaurantId"); // Filter by specific restaurant ID
+
+            // فقط join با customer چون delivery وجود ندارد
+            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.customer c");
+            hql.append(" WHERE o.restaurant.id = :restaurantId");
 
             Map<String, Object> parameters = new HashMap<>();
-            parameters.put("restaurantId", restaurantId); // Add restaurantId parameter
+            parameters.put("restaurantId", restaurantId);
 
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
                 hql.append(" AND (LOWER(c.name) LIKE :searchTermParam OR CAST(o.id AS string) LIKE :searchTermParam OR LOWER(o.deliveryAddress) LIKE :searchTermParam)");
@@ -183,10 +185,11 @@ public class OrderRepositoryImpl implements OrderRepository {
                 parameters.put("customerNameParam", "%" + customerName.toLowerCase().trim() + "%");
             }
 
-            if (courierName != null && !courierName.trim().isEmpty()) {
-                hql.append(" AND LOWER(dp.name) LIKE :courierNameParam");
-                parameters.put("courierNameParam", "%" + courierName.toLowerCase().trim() + "%");
-            }
+            // ⚠️ چون dp وجود ندارد، فیلتر courierName را هم باید فعلاً حذف کنی یا غیرفعال نگه داری
+            // if (courierName != null && !courierName.trim().isEmpty()) {
+            //     hql.append(" AND LOWER(dp.name) LIKE :courierNameParam");
+            //     parameters.put("courierNameParam", "%" + courierName.toLowerCase().trim() + "%");
+            // }
 
             if (status != null) {
                 hql.append(" AND o.status = :statusParam");
@@ -201,10 +204,12 @@ public class OrderRepositoryImpl implements OrderRepository {
                     query.setParameter(entry.getKey(), entry.getValue());
                 }
             }
+
             return query.list();
         } catch (Exception e) {
             e.printStackTrace();
             throw new DatabaseException("Failed to find orders by restaurant ID with filters", e);
         }
     }
+
 }

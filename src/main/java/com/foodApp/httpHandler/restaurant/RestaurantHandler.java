@@ -239,7 +239,19 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
         }
 
         try {
-            List<Order> orders = orderService.getRestaurantOrders(restaurantId, search, customerName, courierName, OrderStatus.valueOf(status));
+            List<Order> orders;
+            if (status != null && !status.isBlank()) {
+                try {
+                    OrderStatus orderStatus = OrderStatus.fromString(status);
+                    orders = orderService.getRestaurantOrders(restaurantId, search, customerName, courierName, orderStatus);
+                } catch (IllegalArgumentException e) {
+                    sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", "Invalid order status: " + status)));
+                    return;
+                }
+            } else {
+                orders = orderService.getRestaurantOrders(restaurantId, search, customerName, courierName, null);
+            }
+
             List<OrderDto> responseDtos = orders.stream()
                     .map(order -> new OrderDto(order.getId(), order.getCustomer().getUserId(), order.getStatus(), order.getTotalPrice()))
                     .collect(Collectors.toList());
