@@ -1,4 +1,5 @@
 package com.foodApp.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -22,6 +23,7 @@ public class MenuItem {
             joinColumns = @JoinColumn(name = "menu_item_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
+    @JsonBackReference
     private List<Category> category = new ArrayList<>();
 
     @Column(nullable = false,length = 100)

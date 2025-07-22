@@ -26,6 +26,9 @@ public class OrderDto {
     private List<ItemDto> items;
     @JsonProperty("created_at")
     private LocalDateTime createdAt;
+    @JsonProperty("courier_id")
+    private Integer courierId;
+
     public OrderDto() {
     }
 
@@ -117,5 +120,11 @@ public class OrderDto {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    public Integer getCourierId() {
+        return courierId;
+    }
+    public void setCourierId(Integer courierId) {
+        this.courierId = courierId;
     }
 }
