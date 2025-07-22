@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.foodApp.model.OrderStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class OrderDto {
@@ -23,7 +24,8 @@ public class OrderDto {
     private Integer couponId;
     @JsonProperty("items")
     private List<ItemDto> items;
-
+    @JsonProperty("created_at")
+    private LocalDateTime createdAt;
     public OrderDto() {
     }
 
@@ -32,6 +34,14 @@ public class OrderDto {
         this.customerId = customerId;
         this.status = String.valueOf(status);
         this.totalPrice = totalPrice;
+    }
+    public OrderDto(int id, int customerId, OrderStatus status, BigDecimal payPrice, String deliveryAddress, LocalDateTime createdAt) {
+        this.id = id;
+        this.customerId = customerId;
+        this.status = String.valueOf(status);
+        this.totalPrice = payPrice;
+        this.deliveryAddress = deliveryAddress;
+        this.createdAt = createdAt;
     }
     public String getDeliveryAddress() {
         return deliveryAddress;
@@ -99,5 +109,13 @@ public class OrderDto {
 
     public void setTotalPrice(BigDecimal totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

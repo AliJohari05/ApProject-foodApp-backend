@@ -3,6 +3,8 @@ package com.foodApp.httpHandler.restaurant;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.foodApp.dto.*;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.*;
@@ -30,7 +32,13 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
     private final RestaurantService restaurantService = new RestaurantServiceImpl();
     private final UserService userService = new UserServiceImpl();
     private final ItemService itemService = new ItemServiceImpl();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public RestaurantHandler() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
     private final CategoryService categoryService = new CategoryServiceImpl();
     private final OrderService orderService = new OrderServiceImpl();
 
@@ -257,7 +265,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
             }
 
             List<OrderDto> responseDtos = orders.stream()
-                    .map(order -> new OrderDto(order.getId(), order.getCustomer().getUserId(), order.getStatus(), order.getTotalPrice()))
+                    .map(order -> new OrderDto(order.getId(), order.getCustomer().getUserId(), order.getStatus(), order.getTotalPrice(),order.getDeliveryAddress(),order.getCreatedAt()))
                     .collect(Collectors.toList());
 
             String jsonResponse = objectMapper.writeValueAsString(responseDtos);
