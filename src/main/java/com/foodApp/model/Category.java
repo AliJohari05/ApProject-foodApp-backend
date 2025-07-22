@@ -25,7 +25,7 @@ public class Category {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-    @ManyToMany(mappedBy = "category", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToMany(mappedBy = "category", cascade = {CascadeType.MERGE, CascadeType.PERSIST},fetch = FetchType.EAGER)
     private List<MenuItem> menuItems = new ArrayList<>();
 
 

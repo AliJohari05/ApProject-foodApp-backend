@@ -1,6 +1,9 @@
 package com.foodApp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class DeliveryStatusUpdateRequestDto {
+    @JsonProperty("status")
     String deliveryStatus;
 
     public String getDeliveryStatus() {

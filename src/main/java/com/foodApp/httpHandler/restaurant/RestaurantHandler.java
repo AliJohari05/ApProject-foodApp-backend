@@ -205,7 +205,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 return;
             }
 
-            orderService.updateOrderStatusByRestaurant(userId, orderId, newStatus);
+            orderService.updateOrderStatusByRestaurant(orderId, newStatus);
             sendResponse(exchange, 200, objectMapper.writeValueAsString(Map.of("message", Message.SUCCESS.get())));
 
         } catch (JsonMappingException e) {

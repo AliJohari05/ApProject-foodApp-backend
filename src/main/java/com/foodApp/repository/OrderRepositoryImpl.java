@@ -21,7 +21,7 @@ public class OrderRepositoryImpl implements OrderRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.persist(order);
+            session.merge(order);
             tx.commit();
         } catch (Exception e) {
             // 👇 بررسی وضعیت تراکنش قبل از rollback

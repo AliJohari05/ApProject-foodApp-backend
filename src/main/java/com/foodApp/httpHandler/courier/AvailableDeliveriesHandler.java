@@ -2,6 +2,7 @@ package com.foodApp.httpHandler.courier;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foodApp.dto.AvailableDeliveryDto;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Order;
 import com.foodApp.model.Role;
@@ -14,9 +15,15 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AvailableDeliveriesHandler extends BaseHandler implements HttpHandler {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public AvailableDeliveriesHandler() {
+        this.objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+    }
     private final DeliveryService deliveryService = new DeliveryServiceImpl();
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -41,8 +48,14 @@ public class AvailableDeliveriesHandler extends BaseHandler implements HttpHandl
         }
         try{
             List<Order> orders = deliveryService.getAvailableDeliveries();
-            sendResponse(exchange,200,objectMapper.writeValueAsString(orders));
+            List<AvailableDeliveryDto> responseDtos = orders.stream()
+                    .map(AvailableDeliveryDto::new)
+                    .collect(Collectors.toList());
+
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(responseDtos));
+
         }catch(Exception e) {
+            e.printStackTrace();
             sendResponse(exchange,500,objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
 

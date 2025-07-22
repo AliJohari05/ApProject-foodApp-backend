@@ -1,6 +1,9 @@
 package com.foodApp.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class PaymentRequestDto {
+    @JsonProperty("order_id")
     private int orderId;
     private String method;
 

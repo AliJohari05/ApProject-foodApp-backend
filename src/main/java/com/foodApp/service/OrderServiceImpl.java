@@ -179,20 +179,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void updateOrderStatusByRestaurant(Integer restaurantId, Integer orderId, String newStatusString) { // پیاده‌سازی متد جدید
-        Restaurant restaurant = restaurantRepository.findById(restaurantId);
-        if (restaurant == null) {
-            throw new RestaurantNotFoundException(Message.ERROR_404.get());
-        }
+    public void updateOrderStatusByRestaurant( Integer orderId, String newStatusString) { // پیاده‌سازی متد جدید
+
 
         Order order = orderRepository.findById(orderId);
         if (order == null) {
             throw new OrderNotFoundException(Message.ERROR_404.get());
         }
 
-        if (!order.getRestaurant().getId().equals(restaurantId)) {
-            throw new UnauthorizedAccessException("Order does not belong to this restaurant.");
-        }
 
         OrderStatus newStatus;
         switch (newStatusString.toLowerCase()) {
@@ -202,7 +196,6 @@ public class OrderServiceImpl implements OrderService {
             default: throw new IllegalArgumentException("Invalid status provided for order update.");
         }
 
-        // اطمینان از منطقی بودن انتقال (مثلاً از SUBMITTED به ACCEPTED_BY_VENDOR)
         if (order.getStatus() == OrderStatus.DELIVERED_TO_CUSTOMER || order.getStatus() == OrderStatus.CANCELLED_BY_USER || order.getStatus() == OrderStatus.CANCELLED_BY_VENDOR) {
             throw new InvalidDeliveryStatusTransitionException("Cannot change status of a completed or cancelled order.");
         }

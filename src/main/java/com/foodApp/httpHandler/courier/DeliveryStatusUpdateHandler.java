@@ -29,7 +29,7 @@ public class DeliveryStatusUpdateHandler extends BaseHandler  implements HttpHan
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();
-        if(!path.matches("/delivery/\\d+")){
+        if(!path.matches("/deliveries/\\d+")){
             sendResponse(exchange,404,objectMapper.writeValueAsString(Message.ERROR_404.get()));
         }
         if(!exchange.getRequestMethod().equalsIgnoreCase("PATCH")) {
@@ -88,6 +88,7 @@ public class DeliveryStatusUpdateHandler extends BaseHandler  implements HttpHan
         } catch (InvalidDeliveryStatusTransitionException e) {
             sendResponse(exchange, 409,objectMapper.writeValueAsString(Message.Delivery_ALREDY_ASSIGNED.get()));
         } catch (Exception e) {
+            e.printStackTrace();
             sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));
         }
 
