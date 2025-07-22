@@ -160,26 +160,21 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> getRestaurantOrders(Integer restaurantId, String search, String customerName, String courierName, OrderStatus status) { // پیاده‌سازی متد جدید
+    public List<Order> getRestaurantOrders(Integer restaurantId, String search, String customerName, String courierName, OrderStatus status) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId);
         if (restaurant == null) {
             throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
 
-        OrderStatus orderStatus = null;
-        if (status != null) {
-            try {
-                orderStatus = OrderStatus.fromString(String.valueOf(status));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Invalid status value: " + status);
-            }
-        }
-
-        return orderRepository.findOrdersByRestaurantIdWithFilters(restaurantId, search, customerName, courierName, orderStatus);
+        // هیچ تبدیل اضافی انجام نده، همون status رو پاس بده به repository
+        return orderRepository.findOrdersByRestaurantIdWithFilters(restaurantId, search, customerName, courierName, status);
     }
 
+
+
+
     @Override
-    public void updateOrderStatusByRestaurant( Integer orderId, String newStatusString) { // پیاده‌سازی متد جدید
+    public void updateOrderStatusByRestaurant( Integer orderId, String newStatusString) {
 
 
         Order order = orderRepository.findById(orderId);

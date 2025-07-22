@@ -223,20 +223,24 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
     }
 
     private void handleGetRestaurantOrders(HttpExchange exchange, int userId, int restaurantId) throws IOException {
-        String search = exchange.getRequestURI().getQuery();
+        //String search = exchange.getRequestURI().getQuery();
         String status = null;
         String customerName = null;
         String courierName = null;
 
-        if (search != null) {
-            Map<String, String> queryParams = Arrays.stream(search.split("&"))
+        String search = null;
+        String query = exchange.getRequestURI().getQuery();
+        if (query != null) {
+            Map<String, String> queryParams = Arrays.stream(query.split("&"))
                     .map(param -> param.split("="))
                     .collect(Collectors.toMap(param -> param[0], param -> param.length > 1 ? param[1] : null));
 
             status = queryParams.get("status");
             customerName = queryParams.get("user");
             courierName = queryParams.get("courier");
+            search = queryParams.get("search");
         }
+
 
         try {
             List<Order> orders;
