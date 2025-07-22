@@ -21,7 +21,7 @@ public class Restaurant {
     private String phone;
 
 
-    @Column(name = "logo_url", nullable = false)
+    @Column(name = "logo_url", nullable = false, columnDefinition = "TEXT")
     private String logobase64;
 
     @Column(name = "tax_fee")

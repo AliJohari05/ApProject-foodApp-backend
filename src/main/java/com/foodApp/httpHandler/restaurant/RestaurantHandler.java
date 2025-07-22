@@ -400,6 +400,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
             restaurantModel.setLogobase64(restaurantDto.getLogoBase64());
             restaurantModel.setTaxFee(restaurantDto.getTax_fee() != null ? restaurantDto.getTax_fee() : 0);
             restaurantModel.setAdditionalFee(restaurantDto.getAdditional_fee() != null ? restaurantDto.getAdditional_fee() : 0);
+            restaurantModel.setApproved(true);
 
             User owner = userService.findById(userId);
             if (owner == null) {
@@ -407,7 +408,6 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 return;
             }
             restaurantModel.setOwner(owner);
-            restaurantModel.setApproved(true);
             restaurantModel.setCreatedAt(LocalDateTime.now());
             restaurantModel.setUpdatedAt(LocalDateTime.now());
 

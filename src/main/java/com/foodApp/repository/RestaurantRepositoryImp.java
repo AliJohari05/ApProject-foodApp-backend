@@ -14,15 +14,19 @@ public class RestaurantRepositoryImp implements RestaurantRepository {
 
     @Override
     public Restaurant save(Restaurant restaurant) {
+        Session session = null;
         Transaction tx = null;
-        try(Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
             Restaurant mergedRestaurant = (Restaurant) session.merge(restaurant);
             tx.commit();
-            return mergedRestaurant; 
-        }catch(Exception e) {
-            if(tx != null) tx.rollback();
+            return mergedRestaurant;
+        } catch(Exception e) {
+            if(tx != null && tx.isActive()) tx.rollback();
             throw new DatabaseException("Error saving restaurant", e);
+        } finally {
+            if(session != null && session.isOpen()) session.close();
         }
     }
 
