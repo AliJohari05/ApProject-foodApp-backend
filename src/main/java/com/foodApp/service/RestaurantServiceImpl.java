@@ -15,7 +15,7 @@ public class RestaurantServiceImpl implements RestaurantService {
     private final RestaurantRepository restaurantRepo = new RestaurantRepositoryImp();
     @Override
     public Restaurant registerRestaurantAndReturn(Restaurant restaurant) {
-        restaurant.setApproved(false);
+        restaurant.setApproved(true);
 
         return restaurantRepo.save(restaurant);
     }

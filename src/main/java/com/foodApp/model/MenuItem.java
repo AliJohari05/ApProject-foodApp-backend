@@ -29,7 +29,7 @@ public class MenuItem {
     private String description;
     @Column(nullable = false)
     private BigDecimal price;
-    @Column(name = "image_url",nullable = false,length = 255)
+    @Column(name = "image_url",nullable = false,columnDefinition = "TEXT")
     private String image;
     private int stock;
     private String keywords;

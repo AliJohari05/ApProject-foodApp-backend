@@ -12,8 +12,8 @@ public class MenuItemCreateUpdateDto {
     private Integer price; // طبق OpenAPI، از نوع Integer
     private Integer supply;
     private List<String> keywords;
-    @JsonProperty("vendor_id")
-    private Integer vendorId;
+//    @JsonProperty("vendor_id")
+//    private Integer vendorId;
 
     // Getters and Setters
     public String getName() { return name; }
@@ -28,16 +28,13 @@ public class MenuItemCreateUpdateDto {
     public void setSupply(Integer supply) { this.supply = supply; }
     public List<String> getKeywords() { return keywords; }
     public void setKeywords(List<String> keywords) { this.keywords = keywords; }
-    public Integer getVendorId() { return vendorId; }
-    public void setVendorId(Integer vendorId) { this.vendorId = vendorId; }
 
     public boolean hasRequiredFieldsForCreate() {
         return name != null && !name.isBlank() &&
                 description != null && !description.isBlank() &&
                 price != null &&
                 supply != null &&
-                keywords != null && !keywords.isEmpty() &&
-                vendorId != null;
+                keywords != null && !keywords.isEmpty();
     }
 
     public String validateFields() {
