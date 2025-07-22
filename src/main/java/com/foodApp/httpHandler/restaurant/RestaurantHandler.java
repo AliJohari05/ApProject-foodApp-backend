@@ -522,7 +522,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                 sendResponse(exchange, 404, objectMapper.writeValueAsString(Map.of("error", Message.ERROR_404.get())));
                 return;
             }
-            if (!createDto.getVendorId().equals(restaurant.getOwner().getUserId())) {
+            if (!createDto.getVendorId().equals(restaurant.getId())) {
                 sendResponse(exchange, 400, objectMapper.writeValueAsString(Map.of("error", "Vendor ID in body does not match restaurant ID in path.")));
                 return;
             }
