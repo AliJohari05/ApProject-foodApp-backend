@@ -1,10 +1,9 @@
 package com.foodApp.model;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -27,7 +26,7 @@ public class Category {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     @ManyToMany(mappedBy = "category", cascade = {CascadeType.MERGE, CascadeType.PERSIST},fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonManagedReference // NEW: این خط را اضافه کنید.
     private List<MenuItem> menuItems = new ArrayList<>();
 
 

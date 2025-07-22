@@ -1,5 +1,4 @@
 package com.foodApp.model;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -7,7 +6,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
-
+import com.fasterxml.jackson.annotation.JsonBackReference;
 @Entity
 @Table(name = "menu_items")
 public class MenuItem {
@@ -23,8 +22,8 @@ public class MenuItem {
             joinColumns = @JoinColumn(name = "menu_item_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    @JsonBackReference
-    private List<Category> category = new ArrayList<>();
+    @JsonBackReference // NEW: این خط را اضافه کنید.
+    private List<Category> category = new ArrayList<>(); //
 
     @Column(nullable = false,length = 100)
     private String name;
