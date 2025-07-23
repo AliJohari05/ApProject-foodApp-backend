@@ -25,20 +25,22 @@ public class PaymentServiceImpl implements PaymentService {
             return false;
         }
 
-        if (!method.equalsIgnoreCase("wallet") && !method.equalsIgnoreCase("paywall")) {
+        if (!method.equalsIgnoreCase("wallet") && !method.equalsIgnoreCase("paywall") &&!method.equalsIgnoreCase("online")) {
             return false; // یا throw new IllegalArgumentException("Invalid method");
         }
 
         if (method.equalsIgnoreCase("wallet")) {
             User user = userRepo.findById(userId);
             if (user.getWalletBalance().compareTo(order.getTotalPrice()) < 0) {
+                order.setStatus(OrderStatus.PAYMENT_FAILED);
                 throw new InsufficientBalanceException();
             }
             user.setWalletBalance(user.getWalletBalance().subtract(order.getTotalPrice()));
+            order.setStatus(OrderStatus.PAID);
             userRepo.save(user);
         }
 
-        order.setStatus(OrderStatus.DELIVERED_TO_CUSTOMER);
+        order.setStatus(OrderStatus.PAID);
         orderRepo.save(order);
 
         TransactionModel transaction = new TransactionModel(

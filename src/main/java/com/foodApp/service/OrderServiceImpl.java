@@ -195,7 +195,7 @@ public class OrderServiceImpl implements OrderService {
             throw new InvalidDeliveryStatusTransitionException("Cannot change status of a completed or cancelled order.");
         }
         // PENDING -> ACCEPTED/REJECTED
-        if (order.getStatus() == OrderStatus.SUBMITTED || order.getStatus() == OrderStatus.WAITING_VENDOR_ACCEPTANCE) {
+        if (order.getStatus() == OrderStatus.PAID || order.getStatus() == OrderStatus.WAITING_VENDOR_ACCEPTANCE) {
             if (newStatus == OrderStatus.ACCEPTED_BY_VENDOR || newStatus == OrderStatus.REJECTED_BY_VENDOR) {
                 order.setStatus(newStatus);
             } else {
