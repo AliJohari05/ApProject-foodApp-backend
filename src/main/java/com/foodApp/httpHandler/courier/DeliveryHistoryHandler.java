@@ -2,6 +2,9 @@ package com.foodApp.httpHandler.courier;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.foodApp.dto.DeliveryHistoryDto;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Order;
 import com.foodApp.model.Role;
@@ -18,7 +21,14 @@ import java.util.List;
 import java.util.Map;
 
 public class DeliveryHistoryHandler extends BaseHandler implements HttpHandler {
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public DeliveryHistoryHandler() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
     private final DeliveryService deliveryService = new DeliveryServiceImpl();
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -50,7 +60,16 @@ public class DeliveryHistoryHandler extends BaseHandler implements HttpHandler {
         String user = queryParams.get("user");
         try {
             List<Order> deliveryHistory = deliveryService.getDeliveryHistory(courierId, search, vendor, user);
-            sendResponse(exchange, 200, objectMapper.writeValueAsString(deliveryHistory));
+            List<DeliveryHistoryDto> dtos = deliveryHistory.stream().map(order -> {
+                return new DeliveryHistoryDto(
+                        order.getId(),
+                        order.getRestaurant() != null ? order.getRestaurant().getId() : null,
+                        order.getDeliveryAddress(),
+                        order.getStatus().name(),
+                        order.getUpdatedAt()
+                );
+            }).toList();
+            sendResponse(exchange, 200, objectMapper.writeValueAsString(dtos));
         } catch (Exception e) {
             e.printStackTrace();
             sendResponse(exchange, 500, objectMapper.writeValueAsString(Message.SERVER_ERROR.get()));

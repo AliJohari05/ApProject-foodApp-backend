@@ -1,4 +1,5 @@
 package com.foodApp.model;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JoinColumnOrFormula;
 
@@ -12,6 +13,7 @@ public class Delivery {
 
     @OneToOne
     @JoinColumn(name = "order_id",nullable = false)
+    @JsonBackReference
     private Order order;
 
     @ManyToOne
