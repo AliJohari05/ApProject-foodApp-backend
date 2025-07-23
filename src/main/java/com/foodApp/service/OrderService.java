@@ -16,4 +16,6 @@ public interface OrderService{
     List<Order> findAllOrdersWithFilters(String search, String vendorName, String courierName, String customerName, OrderStatus status);
     List<Order> getRestaurantOrders(Integer restaurantId, String search, String customerName, String courierName, OrderStatus status);
     void updateOrderStatusByRestaurant(Integer orderId, String newStatusString);
+
+    List<Order> getBuyerOrderHistory(int customerId, String search, String vendor);
 }

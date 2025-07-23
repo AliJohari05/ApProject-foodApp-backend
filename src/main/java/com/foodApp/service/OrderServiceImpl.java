@@ -217,4 +217,10 @@ public class OrderServiceImpl implements OrderService {
         order.setUpdatedAt(LocalDateTime.now());
         orderRepository.save(order);
     }
+
+    @Override
+    public List<Order> getBuyerOrderHistory(int customerId, String search, String vendorName) {
+        return orderRepository.findOrdersByCustomerIdWithFilters(customerId, search, vendorName);
+    }
+
 }

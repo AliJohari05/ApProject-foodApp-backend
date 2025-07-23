@@ -9,10 +9,11 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class OrderRepositoryImpl implements OrderRepository {
 
@@ -24,13 +25,12 @@ public class OrderRepositoryImpl implements OrderRepository {
             session.merge(order);
             tx.commit();
         } catch (Exception e) {
-            // 👇 بررسی وضعیت تراکنش قبل از rollback
             try {
                 if (tx != null && tx.getStatus().canRollback()) {
                     tx.rollback();
                 }
             } catch (Exception rollbackEx) {
-                rollbackEx.printStackTrace(); // یا لاگ مناسب
+                rollbackEx.printStackTrace();
             }
             throw new DatabaseException("Failed to save order", e);
         }
@@ -185,11 +185,7 @@ public class OrderRepositoryImpl implements OrderRepository {
                 parameters.put("customerNameParam", "%" + customerName.toLowerCase().trim() + "%");
             }
 
-            // ⚠️ چون dp وجود ندارد، فیلتر courierName را هم باید فعلاً حذف کنی یا غیرفعال نگه داری
-            // if (courierName != null && !courierName.trim().isEmpty()) {
-            //     hql.append(" AND LOWER(dp.name) LIKE :courierNameParam");
-            //     parameters.put("courierNameParam", "%" + courierName.toLowerCase().trim() + "%");
-            // }
+
 
             if (status != null) {
                 hql.append(" AND o.status = :statusParam");
@@ -211,5 +207,40 @@ public class OrderRepositoryImpl implements OrderRepository {
             throw new DatabaseException("Failed to find orders by restaurant ID with filters", e);
         }
     }
+
+    @Override
+    public List<Order> findOrdersByCustomerIdWithFilters(int customerId, String search, String vendorName) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.restaurant r ");
+            hql.append("WHERE o.customer.id = :customerId");
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("customerId", customerId);
+
+            if (search != null && !search.trim().isEmpty()) {
+                hql.append(" AND (LOWER(o.deliveryAddress) LIKE :searchParam OR LOWER(o.status) LIKE :searchParam)");
+                parameters.put("searchParam", "%" + search.toLowerCase().trim() + "%");
+            }
+
+            if (vendorName != null && !vendorName.trim().isEmpty()) {
+                hql.append(" AND LOWER(r.name) LIKE :vendorParam");
+                parameters.put("vendorParam", "%" + vendorName.toLowerCase().trim() + "%");
+            }
+
+            hql.append(" ORDER BY o.createdAt DESC");
+
+            Query<Order> query = session.createQuery(hql.toString(), Order.class);
+            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                query.setParameter(entry.getKey(), entry.getValue());
+            }
+
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new DatabaseException("Failed to fetch filtered order history for customer", e);
+        }
+    }
+
+
 
 }

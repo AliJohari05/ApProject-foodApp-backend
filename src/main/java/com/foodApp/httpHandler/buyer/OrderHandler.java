@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.foodApp.dto.OrderDetailsDto;
 import com.foodApp.dto.OrderDto;
+import com.foodApp.dto.OrderHistoryDto;
 import com.foodApp.httpHandler.BaseHandler;
 import com.foodApp.model.Order;
 import com.foodApp.model.Role;
@@ -19,6 +20,9 @@ import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -142,12 +146,39 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         }
 
         String token = extractToken(exchange);
-        if (!isTokenValid(token, exchange)) return;
+        DecodedJWT jwt;
+        try {
+            jwt = TokenService.verifyToken(token);
+            String userRole = jwt.getClaim("role").asString();
+            if (!Role.BUYER.name().equals(userRole)) {
+                sendResponse(exchange, 403, objectMapper.writeValueAsString(Map.of("error", Message.FORBIDDEN.get())));
+                return;
+            }
+        } catch (Exception e) {
+            sendResponse(exchange, 401, objectMapper.writeValueAsString(Map.of("error", Message.UNAUTHORIZED.get())));
+            return;
+        }
 
-        List<Order> orders = orderService.findAll();
-        String jsonResponse = objectMapper.writeValueAsString(orders);
-        sendResponse(exchange, 200, jsonResponse);
+        int customerId = Integer.parseInt(jwt.getSubject());
+
+        Map<String, String> queryParams = parseQueryParams(exchange.getRequestURI().getRawQuery());
+        String search = queryParams.getOrDefault("search", null);
+        String vendor = queryParams.getOrDefault("vendor", null);
+
+        try {
+            List<Order> orders = orderService.getBuyerOrderHistory(customerId, search, vendor);
+            List<OrderHistoryDto> response = orders.stream()
+                    .map(OrderHistoryDto::new)
+                    .toList();
+            String jsonResponse = objectMapper.writeValueAsString(response);
+
+            sendResponse(exchange, 200, jsonResponse);
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, 500, objectMapper.writeValueAsString(Map.of("error", Message.SERVER_ERROR.get())));
+        }
     }
+
 
     private boolean isTokenValid(String token, HttpExchange exchange) throws IOException {
         if (token == null) {
@@ -168,4 +199,19 @@ public class OrderHandler extends BaseHandler implements HttpHandler {
         }
         return true;
     }
+    private Map<String, String> parseQueryParams(String query) {
+        Map<String, String> params = new HashMap<>();
+        if (query != null && !query.isEmpty()) {
+            String[] pairs = query.split("&");
+            for (String pair : pairs) {
+                String[] kv = pair.split("=", 2);
+                if (kv.length == 2) {
+                    params.put(URLDecoder.decode(kv[0], StandardCharsets.UTF_8),
+                            URLDecoder.decode(kv[1], StandardCharsets.UTF_8));
+                }
+            }
+        }
+        return params;
+    }
+
 }

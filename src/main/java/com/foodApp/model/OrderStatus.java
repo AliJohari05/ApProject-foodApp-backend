@@ -2,21 +2,21 @@ package com.foodApp.model;
 
 public enum OrderStatus {
     // Initial and vendor-related statuses
-    SUBMITTED,              // Order placed by user (from YAML)
+    SUBMITTED,              // Order placed by user
     PENDING_PAYMENT,        // Awaiting payment (if separate from submission)
     PAYMENT_FAILED,         // Payment attempt was unsuccessful
     PAID,                   // Payment was successful
-    WAITING_VENDOR_ACCEPTANCE, // Waiting for restaurant to confirm (from YAML: "waiting vendor")
+    WAITING_VENDOR_ACCEPTANCE, // Waiting for restaurant to confirm
     ACCEPTED_BY_VENDOR,     // Restaurant accepted the order
     REJECTED_BY_VENDOR,     // Restaurant rejected the order
     PREPARING,              // Restaurant is preparing the order
     READY_FOR_PICKUP,       // Order is ready for courier pickup
 
     // Delivery-related statuses
-    FINDING_COURIER,        // System is looking for a courier (from YAML)
+    FINDING_COURIER,        // System is looking for a courier
     COURIER_ASSIGNED,       // Courier has been assigned to the order
-    OUT_FOR_DELIVERY,       // Courier has picked up and is en route (from YAML: "on the way")
-    DELIVERED_TO_CUSTOMER,  // Order delivered to the customer (from YAML: "completed")
+    OUT_FOR_DELIVERY,       // Courier has picked up and is en route
+    DELIVERED_TO_CUSTOMER,  // Order delivered to the customer
 
     // Final/Cancellation statuses
     CANCELLED_BY_USER,      // User cancelled the order (from YAML: "cancelled")
