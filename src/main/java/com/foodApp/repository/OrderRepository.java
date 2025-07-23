@@ -8,6 +8,7 @@ import java.util.List;
 public interface OrderRepository {
     void save(Order order);
     Order findById(int id);
+    List<Order> findOrdersByStatuses(List<OrderStatus> statuses);
     List<Order> findOrdersByStatus(OrderStatus status);
     List<Order> findAllById(List<Integer> orderIds);
     List<Order> findByCustomerId(int customerId);

@@ -45,6 +45,24 @@ public class OrderRepositoryImpl implements OrderRepository {
     }
 
     @Override
+    public List<Order> findOrdersByStatuses(List<OrderStatus> statuses) {
+        if (statuses == null || statuses.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Order> query = session.createQuery(
+                    "FROM Order WHERE status IN (:statuses)", Order.class);
+            query.setParameterList("statuses", statuses);
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new DatabaseException("Failed to find orders by statuses", e);
+        }
+    }
+
+
+    @Override
     public List<Order> findOrdersByStatus(OrderStatus status) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<Order> query = session.createQuery("from Order where status = :status");

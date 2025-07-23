@@ -18,10 +18,16 @@ public class DeliveryRepositoryImpl implements DeliveryRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            session.persist(delivery);
+            session.merge(delivery);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            try {
+                if (tx != null && tx.getStatus().canRollback()) {
+                    tx.rollback();
+                }
+            } catch (Exception rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
             throw new DatabaseException("Failed to save delivery", e);
         }
     }

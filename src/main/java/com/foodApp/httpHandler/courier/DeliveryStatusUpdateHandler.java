@@ -2,6 +2,8 @@ package com.foodApp.httpHandler.courier;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.foodApp.dto.DeliveryStatusUpdateRequestDto;
 import com.foodApp.exception.DeliveryNotFoundException;
 import com.foodApp.exception.InvalidDeliveryStatusTransitionException;
@@ -25,7 +27,13 @@ import java.util.Map;
 
 public class DeliveryStatusUpdateHandler extends BaseHandler  implements HttpHandler {
     private final DeliveryService deliveryService = new DeliveryServiceImpl();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public DeliveryStatusUpdateHandler() {
+        objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         String path = exchange.getRequestURI().getPath();

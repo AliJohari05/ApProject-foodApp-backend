@@ -17,8 +17,16 @@ public class DeliveryServiceImpl implements DeliveryService{
 
     @Override
     public List<Order> getAvailableDeliveries() {
-        return orderRepository.findOrdersByStatus(OrderStatus.READY_FOR_PICKUP);
+        List<OrderStatus> statuses = List.of(
+                OrderStatus.READY_FOR_PICKUP,
+                OrderStatus.COURIER_ASSIGNED,
+                OrderStatus.OUT_FOR_DELIVERY,
+                OrderStatus.DELIVERED_TO_CUSTOMER
+        );
+
+        return orderRepository.findOrdersByStatuses(statuses);
     }
+
 
     @Override
     public Delivery updateDeliveryStatus(int orderId, int courierId, DeliveryStatus newInternalStatus) {
