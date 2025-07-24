@@ -2,14 +2,14 @@ package com.foodApp.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import java.util.regex.Pattern; // برای اعتبارسنجی (در متد validateFields)
+import java.util.regex.Pattern;
 
 public class MenuItemCreateUpdateDto {
     private String name;
     @JsonProperty("imageBase64")
     private String imageBase64;
     private String description;
-    private Integer price; // طبق OpenAPI، از نوع Integer
+    private Integer price;
     private Integer supply;
     private List<String> keywords;
 //    @JsonProperty("vendor_id")

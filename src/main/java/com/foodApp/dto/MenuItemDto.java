@@ -9,8 +9,8 @@ public class MenuItemDto {
     private String description;
     private Integer price;
     private Integer supply;
-    private List<String> categories; // برای دسته بندی ها
-    private List<String> keywords; // جدید: برای کلمات کلیدی، مطابق با شمای food_item در OpenAPI
+    private List<String> categories;
+    private List<String> keywords;
 
     public Integer getId() {
         return id;

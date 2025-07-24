@@ -206,6 +206,7 @@ public class ListOfVendorsHandler extends BaseHandler implements HttpHandler {
         dto.setDescription(menuItem.getDescription());
         dto.setPrice(menuItem.getPrice().intValue());
         dto.setSupply(menuItem.getStock());
+        dto.setKeywords(List.of(menuItem.getKeywords().split(" ")));
         if (menuItem.getCategory() != null) {
             dto.setCategories(menuItem.getCategory().stream()
                     .map(Category::getTitle)
