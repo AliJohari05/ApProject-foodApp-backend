@@ -146,4 +146,6 @@ public class CategoryServiceImpl implements CategoryService {
     public Optional<Category> findRestaurantCategoryByTitle(Integer restaurantId, String categoryTitle) { // پیاده‌سازی متد جدید
         return categoryRepository.findByRestaurantIdAndTitle(restaurantId, categoryTitle);
     }
+
+
 }

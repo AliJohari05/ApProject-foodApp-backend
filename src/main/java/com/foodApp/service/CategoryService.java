@@ -18,4 +18,5 @@ public interface CategoryService {
     void removeMenuItemFromCategory(Integer restaurantId, String categoryTitle, Integer menuItemId);
     List<Category> getRestaurantCategories(Integer restaurantId); // جدید: دریافت تمام دسته‌های یک رستوران
     Optional<Category> findRestaurantCategoryByTitle(Integer restaurantId, String categoryTitle); // جدید: یافتن دسته خاص با عنوان برای یک رستوران
+
 }
