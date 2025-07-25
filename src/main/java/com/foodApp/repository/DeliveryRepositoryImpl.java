@@ -3,13 +3,17 @@ package com.foodApp.repository;
 import com.foodApp.exception.DatabaseException;
 import com.foodApp.model.Delivery;
 import com.foodApp.model.DeliveryStatus;
+import com.foodApp.model.Order;
 import com.foodApp.repository.DeliveryRepository;
 import com.foodApp.util.HibernateUtil;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DeliveryRepositoryImpl implements DeliveryRepository {
 
@@ -75,4 +79,20 @@ public class DeliveryRepositoryImpl implements DeliveryRepository {
             throw new DatabaseException("Failed to update delivery status", e);
         }
     }
+
+
+
+    @Override
+    public List<Delivery> findByCourierId(int courierId) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            Query<Delivery> query = session.createQuery("FROM Delivery d WHERE d.deliveryPerson.userId = :courierId", Delivery.class);
+            query.setParameter("courierId", courierId);
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new DatabaseException("Failed to fetch deliveries by courier ID", e);
+        }
+    }
+
+
 }

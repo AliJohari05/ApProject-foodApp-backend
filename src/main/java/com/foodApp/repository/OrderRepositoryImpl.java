@@ -186,7 +186,6 @@ public class OrderRepositoryImpl implements OrderRepository {
     public List<Order> findOrdersByRestaurantIdWithFilters(Integer restaurantId, String searchTerm, String customerName, String courierName, OrderStatus status) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
 
-            // فقط join با customer چون delivery وجود ندارد
             StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.customer c");
             hql.append(" WHERE o.restaurant.id = :restaurantId");
 
@@ -259,6 +258,48 @@ public class OrderRepositoryImpl implements OrderRepository {
         }
     }
 
+    @Override
+    public List<Order> findOrdersByIdsWithFilters(List<Integer> orderIds, String searchTerm, String vendorName, String customerName) {
+        if (orderIds == null || orderIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            StringBuilder hql = new StringBuilder("SELECT o FROM Order o LEFT JOIN o.restaurant r LEFT JOIN o.customer c WHERE o.id IN (:orderIds)");
+
+            Map<String, Object> parameters = new HashMap<>();
+            parameters.put("orderIds", orderIds);
+
+            if (searchTerm != null && !searchTerm.trim().isEmpty()) {
+                hql.append(" AND (LOWER(o.deliveryAddress) LIKE :searchParam OR CAST(o.id AS string) LIKE :searchParam)");
+                parameters.put("searchParam", "%" + searchTerm.toLowerCase().trim() + "%");
+            }
+
+            if (vendorName != null && !vendorName.trim().isEmpty()) {
+                hql.append(" AND LOWER(r.name) LIKE :vendorParam");
+                parameters.put("vendorParam", "%" + vendorName.toLowerCase().trim() + "%");
+            }
+
+            if (customerName != null && !customerName.trim().isEmpty()) {
+                hql.append(" AND LOWER(c.name) LIKE :customerParam");
+                parameters.put("customerParam", "%" + customerName.toLowerCase().trim() + "%");
+            }
+
+            Query<Order> query = session.createQuery(hql.toString(), Order.class);
+            for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+                if (entry.getValue() instanceof List) {
+                    query.setParameterList(entry.getKey(), (List<?>) entry.getValue());
+                } else {
+                    query.setParameter(entry.getKey(), entry.getValue());
+                }
+            }
+
+            return query.list();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new DatabaseException("Failed to fetch filtered order history by courier", e);
+        }
+    }
 
 
 }

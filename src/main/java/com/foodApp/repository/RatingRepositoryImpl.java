@@ -13,17 +13,30 @@ public class RatingRepositoryImpl implements RatingRepository {
 
     @Override
     public Rating save(Rating rating) {
+        Session session = null;
         Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+        try {
+            session = HibernateUtil.getSessionFactory().openSession();
             tx = session.beginTransaction();
             session.persist(rating);
             tx.commit();
             return rating;
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null && tx.getStatus().canRollback()) {
+                try {
+                    tx.rollback();
+                } catch (Exception rollbackEx) {
+                    System.err.println("Rollback failed: " + rollbackEx.getMessage());
+                }
+            }
             throw new DatabaseException("Failed to save rating", e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
+
 
     @Override
     public Optional<Rating> findById(Integer id) {
@@ -58,15 +71,16 @@ public class RatingRepositoryImpl implements RatingRepository {
         }
     }
 
+
+
     @Override
-    public Optional<Rating> findByUserIdAndOrderIdAndMenuItemId(int userId, int orderId, int menuItemId) {
+    public Optional<Rating> findByUserIdAndOrderIdAndMenuItemId(int userId, int orderId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             Query<Rating> query = session.createQuery(
-                    "FROM Rating WHERE user.userId = :userId AND order.id = :orderId AND menuItem.id = :menuItemId", Rating.class);
+                    "FROM Rating WHERE user.userId = :userId AND order.id = :orderId", Rating.class);
             query.setParameter("userId", userId);
             query.setParameter("orderId", orderId);
-            query.setParameter("menuItemId", menuItemId);
-            return query.uniqueResultOptional(); // مستقیماً Optional را برمی‌گرداند
+            return query.uniqueResultOptional();
         } catch (Exception e) {
             throw new DatabaseException("Failed to check existing rating", e);
         }

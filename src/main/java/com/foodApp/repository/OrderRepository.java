@@ -18,4 +18,6 @@ public interface OrderRepository {
     List<Order> findAll();
     List<Order> findOrdersByRestaurantIdWithFilters(Integer restaurantId, String searchTerm, String customerName, String courierName, OrderStatus status);
     List<Order> findOrdersByCustomerIdWithFilters(int customerId, String search, String vendorName);
+    List<Order> findOrdersByIdsWithFilters(List<Integer> orderIds, String searchTerm, String vendorName, String customerName);
+
 }

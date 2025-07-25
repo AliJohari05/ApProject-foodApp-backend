@@ -9,6 +9,7 @@ public interface RatingRepository {
     Optional<Rating> findById(Integer id);
     List<Rating> findByMenuItemId(Integer menuItemId);
     void delete(Rating rating);
-    Optional<Rating> findByUserIdAndOrderIdAndMenuItemId(int userId, int orderId, int menuItemId);
+//    Optional<Rating> findByUserIdAndOrderIdAndMenuItemId(int userId, int orderId, int menuItemId);
+    Optional<Rating> findByUserIdAndOrderIdAndMenuItemId(int userId, int orderId);
     Double findAverageRatingByMenuItemId(Integer menuItemId);
 }

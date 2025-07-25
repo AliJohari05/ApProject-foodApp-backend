@@ -20,6 +20,8 @@ import com.foodApp.repository.OrderRepositoryImpl;
 import com.foodApp.repository.MenuItemRepository;
 import com.foodApp.repository.MenuItemRepositoryImp;
 import com.foodApp.util.Message;
+
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,9 +34,8 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponseDto submitRating(Integer userId, RatingRequestDto requestDto) {
-        // اعتبارسنجی ورودی ها
-        if (requestDto.getOrderId() == null || requestDto.getItemId() == null || requestDto.getRating() == null || requestDto.getComment() == null) {
-            throw new IllegalArgumentException(Message.MISSING_FIELDS.get()); //
+        if (requestDto.getOrderId() == null ||  requestDto.getRating() == null || requestDto.getComment() == null) {
+            throw new IllegalArgumentException(Message.MISSING_FIELDS.get()); //requestDto.getItemId() == null ||
         }
         if (requestDto.getRating() < 1 || requestDto.getRating() > 5) {
             throw new IllegalArgumentException("Rating must be between 1 and 5.");
@@ -53,13 +54,13 @@ public class RatingServiceImpl implements RatingService {
             throw new UnauthorizedAccessException("User is not authorized to rate this order."); //
         }
 
-        MenuItem menuItem = menuItemRepository.findById(requestDto.getItemId()).orElse(null);
-        if (menuItem == null) {
-            throw new MenuItemNotFoundException(Message.ERROR_404.get());
-        }
+//        MenuItem menuItem = menuItemRepository.findById(requestDto.getItemId()).orElse(null);
+//        if (menuItem == null) {
+//            throw new MenuItemNotFoundException(Message.ERROR_404.get());
+//        }
 
         // Check if the user has already rated this item in this particular order
-        Optional<Rating> existingRating = ratingRepository.findByUserIdAndOrderIdAndMenuItemId(userId, requestDto.getOrderId(), requestDto.getItemId());
+        Optional<Rating> existingRating = ratingRepository.findByUserIdAndOrderIdAndMenuItemId(userId, requestDto.getOrderId());
         if (existingRating.isPresent()) {
             throw new IllegalArgumentException(Message.CONFLICT.get() + ": User has already rated this item in this order."); //
         }
@@ -67,10 +68,11 @@ public class RatingServiceImpl implements RatingService {
         Rating rating = new Rating();
         rating.setUser(user);
         rating.setOrder(order);
-        rating.setMenuItem(menuItem);
+        //rating.setMenuItem(menuItem);
         rating.setRating(requestDto.getRating());
         rating.setComment(requestDto.getComment());
-
+        rating.setCreatedAt(LocalDateTime.now());
+        rating.setUpdatedAt(LocalDateTime.now());
         if (requestDto.getImageBase64() != null && !requestDto.getImageBase64().isEmpty()) {
             rating.setImageUrl(requestDto.getImageBase64().get(0));
         }

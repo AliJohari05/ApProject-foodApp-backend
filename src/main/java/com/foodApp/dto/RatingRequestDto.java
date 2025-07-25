@@ -4,8 +4,8 @@ import java.util.List;
 public class RatingRequestDto {
     @JsonProperty("order_id")
     private Integer orderId;
-    @JsonProperty("item_id")
-    private Integer itemId;
+//    @JsonProperty("item_id")
+//    private Integer itemId;
     private Integer rating;
     private String comment;
     @JsonProperty("imageBase64")
@@ -21,13 +21,13 @@ public class RatingRequestDto {
         this.orderId = orderId;
     }
 
-    public Integer getItemId() {
-        return itemId;
-    }
-
-    public void setItemId(Integer itemId) {
-        this.itemId = itemId;
-    }
+//    public Integer getItemId() {
+//        return itemId;
+//    }
+//
+//    public void setItemId(Integer itemId) {
+//        this.itemId = itemId;
+//    }
 
     public Integer getRating() {
         return rating;
@@ -50,6 +50,7 @@ public class RatingRequestDto {
     }
 
     public void setImageBase64(List<String> imageBase64) {
-        this.imageBase64 = imageBase64;
+        this.imageBase64 = (imageBase64 != null) ? imageBase64 : List.of();
     }
+
 }

@@ -20,7 +20,7 @@ public class Rating {
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "menu_item_id", nullable = false)
+    @JoinColumn(name = "menu_item_id", nullable = true)
     private MenuItem menuItem;
 
     @Column(nullable = false)

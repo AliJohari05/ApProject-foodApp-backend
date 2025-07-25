@@ -2,6 +2,8 @@ package com.foodApp.repository;
 import com.foodApp.model.DeliveryStatus;
 
 import com.foodApp.model.Delivery;
+import com.foodApp.model.Order;
+
 import java.util.List;
 
 public interface DeliveryRepository {
@@ -10,5 +12,7 @@ public interface DeliveryRepository {
     List<Delivery> findByDeliveryPersonId(int deliveryPersonId);
     Delivery findByOrderId(int orderId);
     void updateStatus(int deliveryId, DeliveryStatus status);
+
+    List<Delivery> findByCourierId(int courierId);
 
 }

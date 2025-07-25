@@ -112,8 +112,18 @@ public class DeliveryServiceImpl implements DeliveryService{
         if (courier == null || courier.getRole() != Role.COURIER) {
             throw new UnauthorizedAccessException("Courier not found or not authorized.");
         }
-        String courierName = courier.getName(); // Get courier's name for filtering
 
-        return orderRepository.findOrdersWithFilters(search, vendorName, courierName, customerName, null);
+        List<Delivery> deliveries = deliveryRepository.findByCourierId(courierId);
+
+        List<Integer> orderIds = deliveries.stream()
+                .map(delivery -> delivery.getOrder().getId())
+                .toList();
+
+        if (orderIds.isEmpty()) {
+            return List.of();
+        }
+
+        return orderRepository.findOrdersByIdsWithFilters(orderIds, search, vendorName, customerName);
     }
+
 }

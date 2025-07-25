@@ -93,6 +93,8 @@ public class OrderServiceImpl implements OrderService {
             if (menuItem.getStock() < itemDto.getQuantity()) {
                 throw new IllegalArgumentException("Insufficient stock for item: " + menuItem.getName());
             }
+            menuItem.setStock(menuItem.getStock() - itemDto.getQuantity());
+            menuItemRepository.save(menuItem);
 
             OrderItem orderItem = new OrderItem();
             orderItem.setMenuItem(menuItem);
