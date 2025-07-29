@@ -46,6 +46,20 @@ public class RatingRepositoryImpl implements RatingRepository {
             throw new DatabaseException("Failed to find rating by ID", e);
         }
     }
+    @Override
+    public Optional<Rating> findByOrderId(Integer orderId) { // NEW: پیاده‌سازی متد findByOrderId
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            // کوئری HQL برای یافتن ریتینگ بر اساس ID سفارش
+            Query<Rating> query = session.createQuery(
+                    "FROM Rating WHERE order.id = :orderId", Rating.class); //
+            query.setParameter("orderId", orderId);
+            return query.uniqueResultOptional(); // از uniqueResultOptional استفاده کنید که برای 0 یا 1 نتیجه امن‌تر است
+        } catch (Exception e) {
+            // گزارش خطا برای اشکال‌زدایی
+            System.err.println("ERROR (Repo): Failed to find rating by order ID " + orderId + ": " + e.getMessage());
+            throw new DatabaseException("Failed to find rating by order ID", e);
+        }
+    }
 
     @Override
     public List<Rating> findByMenuItemId(Integer menuItemId) {

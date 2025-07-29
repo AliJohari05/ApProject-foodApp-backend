@@ -100,7 +100,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public RatingResponseDto getRatingById(Integer ratingId) {
-        Rating rating = ratingRepository.findById(ratingId).orElse(null);
+        Rating rating = ratingRepository.findByOrderId(ratingId).orElse(null);
         if (rating == null) {
             throw new OrderNotFoundException(Message.ERROR_404.get());
         }

@@ -12,4 +12,5 @@ public interface RatingRepository {
 //    Optional<Rating> findByUserIdAndOrderIdAndMenuItemId(int userId, int orderId, int menuItemId);
     Optional<Rating> findByUserIdAndOrderIdAndMenuItemId(int userId, int orderId);
     Double findAverageRatingByMenuItemId(Integer menuItemId);
+    Optional<Rating> findByOrderId(Integer orderId);
 }
