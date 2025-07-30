@@ -22,8 +22,9 @@ public class Restaurant {
     private String phone;
 
 
-    @Column(name = "logo_url", nullable = false, columnDefinition = "TEXT")
-    private String logobase64;
+    @Column(name = "logo_url", columnDefinition = "TEXT")
+    private String logoUrl;
+
 
     @Column(name = "tax_fee")
     private Integer taxFee;
@@ -74,11 +75,12 @@ public class Restaurant {
         this.phone = phone;
     }
 
-    public String getLogobase64() {
-        return logobase64;
+    public String getLogoUrl() {
+        return logoUrl;
     }
-    public void setLogobase64(String logobase64) {
-        this.logobase64 = logobase64;
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 
     public Integer getTaxFee() {
