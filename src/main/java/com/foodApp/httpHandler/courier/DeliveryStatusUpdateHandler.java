@@ -92,7 +92,7 @@ public class DeliveryStatusUpdateHandler extends BaseHandler  implements HttpHan
         }catch (OrderNotFoundException | DeliveryNotFoundException e) {
             sendResponse(exchange, 404, objectMapper.writeValueAsString(Message.ERROR_404.get()));
         } catch (UnauthorizedAccessException e) {
-            sendResponse(exchange, 403, objectMapper.writeValueAsString(Message.FORBIDDEN.get()));
+            sendResponse(exchange, 403, objectMapper.writeValueAsString(Message.COURIER_NOT_ASSIGNED.get()));
         } catch (InvalidDeliveryStatusTransitionException e) {
             sendResponse(exchange, 409,objectMapper.writeValueAsString(Message.Delivery_ALREDY_ASSIGNED.get()));
         } catch (Exception e) {

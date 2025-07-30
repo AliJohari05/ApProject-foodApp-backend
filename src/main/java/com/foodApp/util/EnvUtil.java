@@ -4,7 +4,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 
 public class EnvUtil {
     private static final Dotenv dotenv = Dotenv.configure()
-            .directory(System.getProperty("user.dir")) // ریشه پروژه
+            .directory(System.getProperty("user.dir"))
             .ignoreIfMalformed()
             .ignoreIfMissing()
             .load();

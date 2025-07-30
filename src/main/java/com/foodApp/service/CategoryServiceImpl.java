@@ -21,8 +21,8 @@ import java.util.Optional;
 
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository = new CategoryRepositoryIml();
-    private final RestaurantRepository restaurantRepository = new RestaurantRepositoryImp(); // تزریق
-    private final MenuItemRepository menuItemRepository = new MenuItemRepositoryImp(); // تزریق
+    private final RestaurantRepository restaurantRepository = new RestaurantRepositoryImp();
+    private final MenuItemRepository menuItemRepository = new MenuItemRepositoryImp();
 
     @Override
     public void save(Category category) {
@@ -47,20 +47,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Category createRestaurantCategory(Integer restaurantId, CreateMenuDto createDto) { // پیاده‌سازی متد جدید
-        // اعتبارسنجی وجود رستوران
+    public Category createRestaurantCategory(Integer restaurantId, CreateMenuDto createDto) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId);
         if (restaurant == null) {
             throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
-        // بررسی اینکه عنوان دسته قبلاً برای این رستوران وجود نداشته باشد
         if (categoryRepository.findByRestaurantIdAndTitle(restaurantId, createDto.getTitle()).isPresent()) {
-            throw new IllegalArgumentException(Message.CONFLICT.get()); // Conflict اگر عنوان تکراری باشد
+            throw new IllegalArgumentException(Message.CONFLICT.get());
         }
 
         Category category = new Category();
         category.setTitle(createDto.getTitle());
-        category.setRestaurant(restaurant); // لینک به رستوران
+        category.setRestaurant(restaurant);
         category.setCreatedAt(LocalDateTime.now());
         category.setUpdatedAt(LocalDateTime.now());
 
@@ -69,16 +67,15 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public void deleteRestaurantCategory(Integer restaurantId, String categoryTitle) { // پیاده‌سازی متد جدید
+    public void deleteRestaurantCategory(Integer restaurantId, String categoryTitle) {
         Restaurant restaurant = restaurantRepository.findById(restaurantId);
         if (restaurant == null) {
             throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
         Category category = categoryRepository.findByRestaurantIdAndTitle(restaurantId, categoryTitle).orElse(null);
         if (category == null) {
-            throw new RestaurantNotFoundException(Message.ERROR_404.get()); // دسته برای این رستوران یافت نشد
+            throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
-        // اعتبارسنجی مالکیت از طریق findByRestaurantIdAndTitle انجام می‌شود
         categoryRepository.delete(category.getId());
     }
 
@@ -90,17 +87,15 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Category category = categoryRepository.findByRestaurantIdAndTitle(restaurantId, categoryTitle).orElse(null);
         if (category == null) {
-            throw new RestaurantNotFoundException(Message.ERROR_404.get()); // دسته برای این رستوران یافت نشد
+            throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
         MenuItem menuItem = menuItemRepository.findById(menuItemId).orElse(null);
         if (menuItem == null) {
-            throw new MenuItemNotFoundException(Message.ERROR_404.get()); // آیتم منو یافت نشد
+            throw new MenuItemNotFoundException(Message.ERROR_404.get());
         }
-        // بررسی حیاتی: اطمینان از اینکه MenuItem به همان رستورانی تعلق دارد که Category به آن تعلق دارد
         if (!menuItem.getRestaurant().getId().equals(restaurantId)) {
             throw new UnauthorizedAccessException("Menu item does not belong to this restaurant.");
         }
-        // بررسی اینکه آیتم از قبل در این دسته بندی نباشد
         if (category.getMenuItems().contains(menuItem)) {
             throw new IllegalArgumentException(Message.CONFLICT.get() + ": Menu item already exists in this category.");
         }
@@ -116,13 +111,12 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Category category = categoryRepository.findByRestaurantIdAndTitle(restaurantId, categoryTitle).orElse(null);
         if (category == null) {
-            throw new RestaurantNotFoundException(Message.ERROR_404.get()); // دسته برای این رستوران یافت نشد
+            throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
         MenuItem menuItem = menuItemRepository.findById(menuItemId).orElse(null);
         if (menuItem == null) {
-            throw new MenuItemNotFoundException(Message.ERROR_404.get()); // آیتم منو یافت نشد
+            throw new MenuItemNotFoundException(Message.ERROR_404.get());
         }
-        // بررسی حیاتی: اطمینان از اینکه MenuItem به همان رستورانی تعلق دارد که Category به آن تعلق دارد
         if (!menuItem.getRestaurant().getId().equals(restaurantId)) {
             throw new UnauthorizedAccessException("Menu item does not belong to this restaurant.");
         }

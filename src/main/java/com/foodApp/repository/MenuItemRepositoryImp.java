@@ -52,7 +52,7 @@ public class MenuItemRepositoryImp implements MenuItemRepository {
             );
             query.setParameter("categoryId", categoryId);
             List<MenuItem> items = query.list();
-            return items; // اصلاح: قبلا دوبار query.list() برگردانده می‌شد
+            return items;
         }
     }
     @Override
@@ -94,7 +94,7 @@ public class MenuItemRepositoryImp implements MenuItemRepository {
                         hql.append(" OR ");
                     }
                     hql.append("LOWER(mi.keywords) LIKE :keyword").append(i);
-                    hql.append(" OR LOWER(c.title) LIKE :keyword").append(i); // جستجو در عنوان دسته‌بندی
+                    hql.append(" OR LOWER(c.title) LIKE :keyword").append(i);
                     parameters.put("keyword" + i, "%" + keywords.get(i).toLowerCase().trim() + "%");
                 }
                 hql.append(")");
@@ -102,7 +102,6 @@ public class MenuItemRepositoryImp implements MenuItemRepository {
 
             Query<MenuItem> query = session.createQuery(hql.toString(), MenuItem.class);
             for (Map.Entry<String, Object> entry : parameters.entrySet()) {
-                // برای پارامترهای لیست (مانند keywords) از setParameterList استفاده کنید
                 if (entry.getValue() instanceof List) {
                     query.setParameterList(entry.getKey(), (List<?>) entry.getValue());
                 } else {

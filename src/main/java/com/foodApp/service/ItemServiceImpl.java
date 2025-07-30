@@ -38,7 +38,6 @@ public class ItemServiceImpl implements ItemService {
         if (restaurant == null) {
             throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
-        // اعتبارسنجی مالکیت رستوران در هندلر انجام شده است.
 
         String keywordsString = (createDto.getKeywords() != null) ?
                 String.join(",", createDto.getKeywords()) : null;
@@ -106,7 +105,6 @@ public class ItemServiceImpl implements ItemService {
         if (existingMenuItem == null) {
             throw new MenuItemNotFoundException(Message.ERROR_404.get());
         }
-        // اعتبارسنجی مالکیت
         if (!existingMenuItem.getRestaurant().getId().equals(restaurantId)) {
             throw new UnauthorizedAccessException("Menu item does not belong to this restaurant.");
         }

@@ -16,9 +16,8 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
-            // استفاده از Native SQL Query برای درج مستقیم در جدول join
             String sql = "INSERT INTO user_favorite_restaurants (user_id, restaurant_id) VALUES (:userId, :restaurantId)";
-            session.createNativeQuery(sql, Void.class) // Void.class نشان می دهد که کوئری خروجی ندارد
+            session.createNativeQuery(sql, Void.class)
                     .setParameter("userId", userId)
                     .setParameter("restaurantId", restaurantId)
                     .executeUpdate();
@@ -35,7 +34,7 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             tx = session.beginTransaction();
             String sql = "DELETE FROM user_favorite_restaurants WHERE user_id = :userId AND restaurant_id = :restaurantId";
-            session.createNativeQuery(sql, Void.class) // Void.class برای کوئری های DELETE
+            session.createNativeQuery(sql, Void.class)
                     .setParameter("userId", userId)
                     .setParameter("restaurantId", restaurantId)
                     .executeUpdate();
@@ -50,7 +49,7 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     public boolean isFavorite(int userId, int restaurantId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             String sql = "SELECT COUNT(*) FROM user_favorite_restaurants WHERE user_id = :userId AND restaurant_id = :restaurantId";
-            Long count = (Long) session.createNativeQuery(sql) // Native query برای COUNT(*)
+            Long count = (Long) session.createNativeQuery(sql) // Native query for COUNT(*)
                     .setParameter("userId", userId)
                     .setParameter("restaurantId", restaurantId)
                     .uniqueResult();
@@ -64,9 +63,9 @@ public class FavoriteRepositoryImpl implements FavoriteRepository {
     public List<Restaurant> findFavoriteRestaurantsByUserId(int userId) {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             String sql = "SELECT r.* FROM restaurants r JOIN user_favorite_restaurants ufr ON r.id = ufr.restaurant_id WHERE ufr.user_id = :userId";
-            Query<Restaurant> query = session.createNativeQuery(sql, Restaurant.class); //
-            query.setParameter("userId", userId); //
-            return query.list(); //
+            Query<Restaurant> query = session.createNativeQuery(sql, Restaurant.class);
+            query.setParameter("userId", userId);
+            return query.list();
         } catch (Exception e) {
             throw new DatabaseException("Failed to retrieve favorite restaurants", e);
         }

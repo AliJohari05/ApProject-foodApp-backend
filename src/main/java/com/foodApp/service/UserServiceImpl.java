@@ -54,7 +54,9 @@ public class UserServiceImpl implements UserService {
             existingUser.setName(user.getName());
             existingUser.setEmail(user.getEmail());
             existingUser.setAddress(user.getAddress());
-            existingUser.setProfileImageUrl(user.getProfileImageUrl());
+            if (user.getProfileImageUrl() != null) {
+                existingUser.setProfileImageUrl(user.getProfileImageUrl());
+            }
             existingUser.setBankName(user.getBankName());
             existingUser.setAccountNumber(user.getAccountNumber());
             if (user.getWalletBalance() != null) {

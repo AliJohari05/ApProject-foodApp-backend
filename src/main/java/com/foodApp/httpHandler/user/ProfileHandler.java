@@ -63,6 +63,9 @@ public class ProfileHandler extends BaseHandler implements HttpHandler {
             return;
         }
         UserProfileDto dto = new UserProfileDto(user);
+        if (dto.getProfileImageUrl() != null) {
+            dto.setProfileImageUrl(dto.getProfileImageUrl());
+        }
         sendResponse(exchange, 200, objectMapper.writeValueAsString(dto));
     }
 

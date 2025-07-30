@@ -29,7 +29,7 @@ public class TokenService {
                     .withExpiresAt(expiresAt)
                     .sign(ALGORITHM);
         } catch (Exception e) {
-            System.err.println("❌ Token generation failed: " + e.getMessage());
+            System.err.println("Token generation failed: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Token generation failed", e);
         }

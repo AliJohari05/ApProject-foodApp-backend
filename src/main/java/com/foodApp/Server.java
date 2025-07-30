@@ -17,7 +17,11 @@ import com.foodApp.httpHandler.user.ProfileHandler;
 import com.foodApp.httpHandler.user.SignUpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.foodApp.httpHandler.order.WalletTopUpHandler;
+
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 public class Server {
@@ -57,6 +61,24 @@ public class Server {
 
 
 
+// Static file serving for profile images
+            server.createContext("/uploads", exchange -> {
+                String requestedPath = exchange.getRequestURI().getPath().replaceFirst("/uploads", "");
+                File file = new File("uploads", requestedPath);
+
+                if (file.exists() && file.isFile()) {
+                    String contentType = guessContentType(file.getName());
+                    exchange.getResponseHeaders().add("Content-Type", contentType);
+                    exchange.sendResponseHeaders(200, file.length());
+                    try (OutputStream os = exchange.getResponseBody();
+                         FileInputStream fis = new FileInputStream(file)) {
+                        fis.transferTo(os);
+                    }
+                } else {
+                    exchange.sendResponseHeaders(404, -1);
+                }
+            });
+
 
             server.setExecutor(null);
             server.start();
@@ -68,5 +90,13 @@ public class Server {
             e.printStackTrace();
         }
     }
+    private static String guessContentType(String fileName) {
+        String lower = fileName.toLowerCase();
+        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+        if (lower.endsWith(".gif")) return "image/gif";
+        return "application/octet-stream";
+    }
+
 }
 

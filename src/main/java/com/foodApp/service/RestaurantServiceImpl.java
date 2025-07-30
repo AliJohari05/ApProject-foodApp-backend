@@ -80,7 +80,7 @@ public class RestaurantServiceImpl implements RestaurantService {
         if (restaurantDto.getAddress() != null && !restaurantDto.getAddress().isBlank()) {
             existingRestaurant.setAddress(restaurantDto.getAddress()); //
         }
-        String validationError = restaurantDto.validateFields(); // از متد موجود در DTO استفاده می‌کنیم
+        String validationError = restaurantDto.validateFields();
         if (restaurantDto.getPhone() != null && !restaurantDto.getPhone().isBlank()) {
             if (validationError != null && validationError.contains("invalid phone")) {
                 throw new IllegalArgumentException(Message.INVALID_INPUT.get());
@@ -94,7 +94,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             if (restaurantDto.getTax_fee() < 0) {
                 // throw new IllegalArgumentException("Tax fee cannot be negative.");
             }
-            existingRestaurant.setTaxFee(restaurantDto.getTax_fee()); //
+            existingRestaurant.setTaxFee(restaurantDto.getTax_fee());
         }
         if (restaurantDto.getAdditional_fee() != null) {
             if (restaurantDto.getAdditional_fee() < 0) {

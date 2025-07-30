@@ -168,7 +168,6 @@ public class OrderServiceImpl implements OrderService {
             throw new RestaurantNotFoundException(Message.ERROR_404.get());
         }
 
-        // هیچ تبدیل اضافی انجام نده، همون status رو پاس بده به repository
         return orderRepository.findOrdersByRestaurantIdWithFilters(restaurantId, search, customerName, courierName, status);
     }
 
@@ -189,7 +188,7 @@ public class OrderServiceImpl implements OrderService {
         switch (newStatusString.toLowerCase()) {
             case "accepted": newStatus = OrderStatus.ACCEPTED_BY_VENDOR; break;
             case "rejected": newStatus = OrderStatus.REJECTED_BY_VENDOR; break;
-            case "served": newStatus = OrderStatus.READY_FOR_PICKUP; break; // "served" -> آماده برای تحویل
+            case "served": newStatus = OrderStatus.READY_FOR_PICKUP; break;
             default: throw new IllegalArgumentException("Invalid status provided for order update.");
         }
 

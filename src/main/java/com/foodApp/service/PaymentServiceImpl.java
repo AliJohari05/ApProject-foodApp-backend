@@ -26,7 +26,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         if (!method.equalsIgnoreCase("wallet") && !method.equalsIgnoreCase("paywall") &&!method.equalsIgnoreCase("online")) {
-            return false; // یا throw new IllegalArgumentException("Invalid method");
+            return false; //  throw new IllegalArgumentException("Invalid method");
         }
 
         if (method.equalsIgnoreCase("wallet")) {

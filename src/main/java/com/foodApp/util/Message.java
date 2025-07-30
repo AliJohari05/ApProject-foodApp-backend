@@ -24,7 +24,8 @@ public enum Message {
     CHANGED_STATUS_SUCCESS("Changed status successfully"),
     CONFLICT("Conflict occurred"),
     SUCCESS("Operation successful"),
-    CREATED_MENU("Food menu created and added to restaurant successfully");
+    CREATED_MENU("Food menu created and added to restaurant successfully"),
+    COURIER_NOT_ASSIGNED("This order belongs to another courier.");
 
 
 

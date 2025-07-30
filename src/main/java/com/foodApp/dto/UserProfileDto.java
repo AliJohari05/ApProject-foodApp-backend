@@ -32,7 +32,11 @@ public class UserProfileDto {
         this.email = user.getEmail();
         this.address = user.getAddress();
         this.role = user.getRole().name();
-        this.profileImageUrl = user.getProfileImageUrl(); // Populated from User model
+        if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+            this.profileImageUrl = user.getProfileImageUrl();
+        } else {
+            this.profileImageUrl = null;
+        }
         this.walletBalance = user.getWalletBalance();
         this.status = user.getStatus().name();
 
