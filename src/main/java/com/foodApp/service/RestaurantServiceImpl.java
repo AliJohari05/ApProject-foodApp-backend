@@ -53,8 +53,8 @@ public class RestaurantServiceImpl implements RestaurantService {
             if (restaurantToUpdate.getPhone() != null) {
                 existingRestaurant.setPhone(restaurantToUpdate.getPhone());
             }
-            if (restaurantToUpdate.getLogobase64() != null) {
-                existingRestaurant.setLogobase64(restaurantToUpdate.getLogobase64());
+            if (restaurantToUpdate.getLogoUrl() != null) {
+                existingRestaurant.setLogoUrl(restaurantToUpdate.getLogoUrl());
             }
             if (restaurantToUpdate.getTaxFee() != null) {
                 existingRestaurant.setTaxFee(restaurantToUpdate.getTaxFee());
@@ -88,7 +88,7 @@ public class RestaurantServiceImpl implements RestaurantService {
             existingRestaurant.setPhone(restaurantDto.getPhone()); //
         }
         if (restaurantDto.getLogoBase64() != null) {
-            existingRestaurant.setLogobase64(restaurantDto.getLogoBase64()); //
+            existingRestaurant.setLogoUrl(restaurantDto.getLogoBase64());
         }
         if (restaurantDto.getTax_fee() != null) {
             if (restaurantDto.getTax_fee() < 0) {
@@ -100,9 +100,9 @@ public class RestaurantServiceImpl implements RestaurantService {
             if (restaurantDto.getAdditional_fee() < 0) {
                 throw new IllegalArgumentException(Message.INVALID_INPUT.get());
             }
-            existingRestaurant.setAdditionalFee(restaurantDto.getAdditional_fee()); //
+            existingRestaurant.setAdditionalFee(restaurantDto.getAdditional_fee());
         }
-        existingRestaurant.setUpdatedAt(java.time.LocalDateTime.now()); //
+        existingRestaurant.setUpdatedAt(java.time.LocalDateTime.now());
         return restaurantRepo.save(existingRestaurant);
     }
     @Override

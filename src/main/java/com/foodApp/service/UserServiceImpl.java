@@ -50,15 +50,22 @@ public class UserServiceImpl implements UserService {
     }
     public void updateUser(User user) {
         User existingUser = userRepo.findById(user.getUserId());
-        if(existingUser != null) {
+        if (existingUser != null) {
             existingUser.setName(user.getName());
+
+            if (user.getPhone() != null && !user.getPhone().equals(existingUser.getPhone())) {
+                if (userRepo.findByPhone(user.getPhone()) != null) {
+                    throw new DuplicatePhoneException("Phone number already in use");
+                }
+                existingUser.setPhone(user.getPhone());
+            }
+
             existingUser.setEmail(user.getEmail());
             existingUser.setAddress(user.getAddress());
-            if (user.getProfileImageUrl() != null) {
-                existingUser.setProfileImageUrl(user.getProfileImageUrl());
-            }
+            existingUser.setProfileImageUrl(user.getProfileImageUrl());
             existingUser.setBankName(user.getBankName());
             existingUser.setAccountNumber(user.getAccountNumber());
+
             if (user.getWalletBalance() != null) {
                 existingUser.setWalletBalance(user.getWalletBalance());
             }
@@ -68,6 +75,7 @@ public class UserServiceImpl implements UserService {
             throw new UserNotFoundException("User not found");
         }
     }
+
     @Override
     public List<User> findAllByRole(Role role) {
         return userRepo.findByRole(role);

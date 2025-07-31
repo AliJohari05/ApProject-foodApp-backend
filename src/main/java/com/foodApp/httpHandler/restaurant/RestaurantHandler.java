@@ -14,6 +14,7 @@ import com.foodApp.util.Message;
 import com.foodApp.security.TokenService;
 
 
+import com.foodApp.util.RestaurantLogoUploader;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -424,7 +425,10 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
             restaurantModel.setName(restaurantDto.getName());
             restaurantModel.setAddress(restaurantDto.getAddress());
             restaurantModel.setPhone(restaurantDto.getPhone());
-            restaurantModel.setLogobase64(restaurantDto.getLogoBase64());
+            String logoUrl = RestaurantLogoUploader.saveLogo(restaurantDto.getLogoBase64(), restaurantModel.getId());
+            if (logoUrl != null) {
+                restaurantModel.setLogoUrl(logoUrl);
+            }
             restaurantModel.setTaxFee(restaurantDto.getTax_fee() != null ? restaurantDto.getTax_fee() : 0);
             restaurantModel.setAdditionalFee(restaurantDto.getAdditional_fee() != null ? restaurantDto.getAdditional_fee() : 0);
             restaurantModel.setApproved(true);
@@ -445,7 +449,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                     savedRestaurant.getName(),
                     savedRestaurant.getAddress(),
                     savedRestaurant.getPhone(),
-                    savedRestaurant.getLogobase64(),
+                    savedRestaurant.getLogoUrl(),
                     savedRestaurant.getTaxFee(),
                     savedRestaurant.getAdditionalFee()
             );
@@ -467,7 +471,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                             r.getName(),
                             r.getAddress(),
                             r.getPhone(),
-                            r.getLogobase64(),
+                            r.getLogoUrl(),
                             r.getTaxFee(),
                             r.getAdditionalFee()))
                     .collect(Collectors.toList());
@@ -506,7 +510,7 @@ public class RestaurantHandler extends BaseHandler implements HttpHandler {
                     updatedRestaurant.getName(),
                     updatedRestaurant.getAddress(),
                     updatedRestaurant.getPhone(),
-                    updatedRestaurant.getLogobase64(),
+                    updatedRestaurant.getLogoUrl(),
                     updatedRestaurant.getTaxFee(),
                     updatedRestaurant.getAdditionalFee()
             );
